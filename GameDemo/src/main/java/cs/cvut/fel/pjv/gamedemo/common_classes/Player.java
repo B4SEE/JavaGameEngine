@@ -5,8 +5,8 @@ public class Player extends Entity {
     private Item handItem;
     private Inventory playerInventory;
 
-    public Player() {
-        super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE);
+    public Player(Wagon currentWagon) {
+        super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.handItem = null;
@@ -68,6 +68,9 @@ public class Player extends Entity {
             eat((Food) item);
         } else if (item instanceof Firearm) {
             shoot((Firearm) item);
+        } else if (item instanceof MeleeWeapon) {
+            super.setDamage(super.getDamage() + ((MeleeWeapon) item).getDamage());
+            super.attack(super.closestEntity(super.currentWagon.getEntitiesArray()));
         }
     }
 }
