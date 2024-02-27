@@ -89,13 +89,6 @@ public class Entity {
         health -= damage;
     }
 
-    public void heal(int amount) {
-        health += amount;
-        if (health > maxHealth) {
-            health = maxHealth;
-        }
-    }
-
     public void attack(Entity target) {
         target.takeDamage(damage);
     }
