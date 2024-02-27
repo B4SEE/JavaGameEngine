@@ -4,12 +4,12 @@ public class Player extends Entity {
     private Item handItem;
     private Inventory playerInventory;
 
-    public Player(int x, int y, int health, int hunger, int maxHunger, Item handItem, Inventory playerInventory) {
-        super(0, "PLAYER_NAME", "texturePath", "PLAYER", x, y, 1, health, 10);
-        this.hunger = hunger;
-        this.maxHunger = maxHunger;
-        this.handItem = handItem;
-        this.playerInventory = playerInventory;
+    public Player() {
+        super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE);
+        this.hunger = Constants.PLAYER_MAX_HUNGER;
+        this.maxHunger = Constants.PLAYER_MAX_HUNGER;
+        this.handItem = null;
+        this.playerInventory = new Inventory(Constants.PLAYER_INVENTORY_SIZE)
     }
 
     public void setHunger(int hunger) {
@@ -36,6 +36,14 @@ public class Player extends Entity {
         return playerInventory;
     }
 
+    public void heal() {
+        while (hunger >= health) {
+            setHealth(health + 1);
+            starve();
+        }
+        return;
+    }
+
     public void eat(Item item) {
         if (item.getType().equals("FOOD")) {
             if (hunger + item.nourishment > maxHunger) {
@@ -47,7 +55,7 @@ public class Player extends Entity {
     }
 
     public void starve() {
-        hunger--;
+        setHunger(hunger - 1);
     }
 
     public void useItem(Item item) {
