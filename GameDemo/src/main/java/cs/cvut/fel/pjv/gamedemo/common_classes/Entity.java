@@ -11,6 +11,8 @@ public class Entity {
     private final int maxHealth;
     private int damage;
 
+    protected Wagon currentWagon;
+
     public Entity(int id, String name, String texturePath, int maxHealth) {
         this.id = id;
         this.name = name;
@@ -18,7 +20,7 @@ public class Entity {
         this.maxHealth = maxHealth;
     }
 
-    public Entity(int id, String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage) {
+    public Entity(int id, String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage, Wagon currentWagon) {
         this.id = id;
         this.name = name;
         this.texturePath = texturePath;
@@ -29,6 +31,7 @@ public class Entity {
         this.health = health;
         this.maxHealth = health;
         this.damage = damage;
+        this.currentWagon = currentWagon;
     }
 
     public void setType(String type) {
@@ -98,5 +101,11 @@ public class Entity {
 
     public boolean isAlive() {
         return health > 0;
+    }
+
+    public Entity closestEntity(Entity[] entities) {
+        Entity closest = null;
+        //find closest Entity
+        return closest;
     }
 }
