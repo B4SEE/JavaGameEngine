@@ -1,12 +1,14 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class MeleeWeapon extends Item {
     private int damage;
-    public final attackSpeed;
+    public final int attackSpeed;
 
-    public Firearm(int id, String name, String texturePath) {
+    public MeleeWeapon(int id, String name, String texturePath, int attackSpeed) {
         super(id, name, texturePath, "WEAPON");
+        this.attackSpeed = attackSpeed;
     }
 
-    public Firearm(int id, String name, String texturePath, int damage, int attackSpeed) {
+    public MeleeWeapon(int id, String name, String texturePath, int damage, int attackSpeed) {
         super(id, name, texturePath, "WEAPON");
         this.damage = damage;
         this.attackSpeed = attackSpeed;

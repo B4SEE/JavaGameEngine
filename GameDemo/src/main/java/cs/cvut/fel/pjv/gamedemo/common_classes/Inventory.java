@@ -1,5 +1,6 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Inventory {
-    public final inventorySize;
+    public final int inventorySize;
     private Item[] itemsArray;
 
     public Inventory(int size) {

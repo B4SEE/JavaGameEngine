@@ -1,3 +1,4 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Entity {
     public final int id;
     public final String name;
@@ -10,10 +11,11 @@ public class Entity {
     private final int maxHealth;
     private int damage;
 
-    public Entity(int id, String name, String texturePath) {
+    public Entity(int id, String name, String texturePath, int maxHealth) {
         this.id = id;
         this.name = name;
         this.texturePath = texturePath;
+        this.maxHealth = maxHealth;
     }
 
     public Entity(int id, String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage) {
@@ -67,10 +69,6 @@ public class Entity {
 
     public int getHealth() {
         return health;
-    }
-
-    public void setMaxHealth(int maxHealth) {
-        this.maxHealth = maxHealth;
     }
 
     public int getMaxHealth() {

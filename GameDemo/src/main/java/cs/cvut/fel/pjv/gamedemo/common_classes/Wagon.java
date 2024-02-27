@@ -1,3 +1,4 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Wagon {
     public final int id;
     public final String type;
@@ -35,7 +36,7 @@ public class Wagon {
         this.entitiesArray = entitiesArray;
     }
 
-    public void getEntitiesArray() {
+    public Entity[] getEntitiesArray() {
         return entitiesArray;
     }
 
@@ -43,10 +44,11 @@ public class Wagon {
         this.objectsArray = objectsArray;
     }
 
-    public void getObjectsArray() {
+    public Object[] getObjectsArray() {
         return objectsArray;
     }
 
     public void generateWagon(String seed) {
         // Generate the wagon
     }
+}

@@ -1,3 +1,4 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Constants {
     public static final int PLAYER_START_POS_X = 0;
     public static final int PLAYER_START_POS_Y = 0;

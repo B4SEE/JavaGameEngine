@@ -1,5 +1,11 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
+
 public class Train {
-    public final Wagon[] wagonsArray[Constants.TRAIN_WAGONS];
+    public final Wagon[] wagonsArray;
+
+    public Train() {
+        wagonsArray = new Wagon[Constants.TRAIN_WAGONS];
+    }
 
     public Train(Wagon[] wagonsArray) {
         this.wagonsArray = wagonsArray;

@@ -1,3 +1,4 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Door {
     private int gridPositionX;
     private int gridPositionY;

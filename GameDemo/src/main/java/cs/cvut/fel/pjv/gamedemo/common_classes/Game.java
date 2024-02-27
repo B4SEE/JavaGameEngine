@@ -1,3 +1,7 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+import java.io.*;
+
 public class Game {
     private Player player;
     private Wagon currentWagon;

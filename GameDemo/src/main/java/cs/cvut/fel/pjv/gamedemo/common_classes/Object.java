@@ -1,3 +1,4 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Object {
     public final int id;
     public final String name;
@@ -27,7 +28,7 @@ public class Object {
         this.gridPositionX = gridPositionX;
     }
 
-    public void getGridPositionX() {
+    public int getGridPositionX() {
         return gridPositionX;
     }
 
@@ -35,7 +36,7 @@ public class Object {
         this.gridPositionY = gridPositionY;
     }
 
-    public void getGridPositionY() {
+    public int getGridPositionY() {
         return gridPositionY;
     }
 
@@ -43,7 +44,7 @@ public class Object {
         this.isSolid = isSolid;
     }
 
-    public void isSolid() {
+    public boolean isSolid() {
         return isSolid;
     }
 
@@ -51,7 +52,7 @@ public class Object {
         this.objectInventory = objectInventory;
     }
 
-    public void getObjectInventory() {
+    public Inventory getObjectInventory() {
         return objectInventory;
     }
 }

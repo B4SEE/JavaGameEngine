@@ -1,6 +1,7 @@
+package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Player extends Entity {
     private int hunger;
-    private final maxHunger;
+    private final int maxHunger;
     private Item handItem;
     private Inventory playerInventory;
 
@@ -9,7 +10,7 @@ public class Player extends Entity {
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.handItem = null;
-        this.playerInventory = new Inventory(Constants.PLAYER_INVENTORY_SIZE)
+        this.playerInventory = new Inventory(Constants.PLAYER_INVENTORY_SIZE);
     }
 
     public void setHunger(int hunger) {
@@ -37,20 +38,18 @@ public class Player extends Entity {
     }
 
     public void heal() {
-        while (hunger >= health) {
-            setHealth(health + 1);
+        while (hunger >= super.getHealth()) {
+            setHealth(super.getHealth() + 1);
             starve();
         }
         return;
     }
 
-    public void eat(Item item) {
-        if (item.getType().equals("FOOD")) {
-            if (hunger + item.nourishment > maxHunger) {
-                hunger = maxHunger;
-            } else {
-                hunger += item.nourishment;
-            }
+    public void eat(Food food) {
+        if ((hunger + food.nourishment) > maxHunger) {
+            hunger = maxHunger;
+        } else {
+            hunger += food.nourishment;
         }
     }
 
@@ -58,11 +57,17 @@ public class Player extends Entity {
         setHunger(hunger - 1);
     }
 
-    public void useItem(Item item) {
-        if (item.getType().equals("WEAPON")) {
-            // Attack
-        } else if (item.getType().equals("FOOD")) {
-            eat(item);
+    public void shoot(Firearm firearm) {
+        if (firearm.getAmmo() > 0) {
+            firearm.setAmmo(firearm.getAmmo() - 1);
+        }
+    }
+
+    public void useHandItem(Item item) {
+        if (item instanceof Food) {
+            eat((Food) item);
+        } else if (item instanceof Firearm) {
+            shoot((Firearm) item);
         }
     }
 }
