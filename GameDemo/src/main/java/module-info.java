@@ -5,4 +5,5 @@ module cs.cvut.fel.pjv.gamedemo {
 
     opens cs.cvut.fel.pjv.gamedemo to javafx.fxml;
     exports cs.cvut.fel.pjv.gamedemo;
+    exports cs.cvut.fel.pjv.gamedemo.IsometricEngine;
 }
