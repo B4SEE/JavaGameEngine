@@ -17,7 +17,7 @@ However, beware, for not all passengers are welcoming. In this unforgiving realm
 ## About
 This repository hosts the development of "GAMENAME". Here, you can find all the game files and the wiki documentation.
 
-For detailed information about the game mechanics, classes, and development progress, please refer to the [wiki](virycele/-/wikis/home).
+For detailed information about the game mechanics, classes, and development progress, please refer to the [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
 <a name="features"></a>
 ## Features
 - **Endless Train:** Wagons are automatically generated, providing an endless gameplay experience.
