@@ -5,6 +5,11 @@ public class Player extends Entity {
     private Item handItem;
     private Inventory playerInventory;
 
+    public Player(int id, String name, String texturePath, int positionX, int positionY) {
+        super(id, name, texturePath, "PLAYER", positionX, positionY, 0, 0, 0, null);
+        this.maxHunger = 0;
+    }
+
     public Player(Wagon currentWagon) {
         super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
         this.hunger = Constants.PLAYER_MAX_HUNGER;

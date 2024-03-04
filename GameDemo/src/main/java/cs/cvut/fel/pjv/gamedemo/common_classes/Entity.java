@@ -2,7 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Entity {
     public final int id;
     public final String name;
-    public final String texturePath;
+    private String texturePath;
     private String type;
     private int positionX;
     private int positionY;
@@ -32,6 +32,14 @@ public class Entity {
         this.maxHealth = health;
         this.damage = damage;
         this.currentWagon = currentWagon;
+    }
+
+    public void setTexturePath(String texturePath) {
+        this.texturePath = texturePath;
+    }
+
+    public String getTexturePath() {
+        return texturePath;
     }
 
     public void setType(String type) {

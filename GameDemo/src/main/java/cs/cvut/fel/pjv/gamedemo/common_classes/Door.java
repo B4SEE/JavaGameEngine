@@ -1,18 +1,44 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Door {
+    public final String name;
+    private String twoLetterId;
+    public String texturePath;
     private int gridPositionX;
     private int gridPositionY;
     private int targetId;
     private boolean isLocked;
 
-    public Door() {
+    public Door(String name) {
+        this.name = name;
     }
-
-    public Door(int gridPositionX, int gridPositionY, int targetId, boolean isLocked) {
+    public Door(String name, String twoLetterId, String texturePath, int gridPositionX, int gridPositionY, int targetId, boolean isLocked) {
+        this.name = name;
+        this.twoLetterId = twoLetterId;
+        this.texturePath = texturePath;
         this.gridPositionX = gridPositionX;
         this.gridPositionY = gridPositionY;
         this.targetId = targetId;
         this.isLocked = isLocked;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTwoLetterId() {
+        return twoLetterId;
+    }
+
+    public void setTwoLetterId(String twoLetterId) {
+        this.twoLetterId = twoLetterId;
+    }
+
+    public String getTexturePath() {
+        return texturePath;
+    }
+
+    public void setTexturePath(String texturePath) {
+        this.texturePath = texturePath;
     }
 
     public void setGridPositionX(int gridPositionX) {
