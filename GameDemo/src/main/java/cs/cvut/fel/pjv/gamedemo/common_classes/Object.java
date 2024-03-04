@@ -1,4 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+import javafx.scene.shape.Polygon;
+
 public class Object {
     public final int id;
 
@@ -12,6 +15,8 @@ public class Object {
     private int gridPositionY;
     private boolean isSolid;
     private Inventory objectInventory;
+
+    private Polygon objectHitbox;
 
     public Object(int id, String name, String texturePath) {
         this.id = id;
@@ -108,5 +113,13 @@ public class Object {
 
     public Inventory getObjectInventory() {
         return objectInventory;
+    }
+
+    public void setObjectHitbox(Polygon objectHitbox) {
+        this.objectHitbox = objectHitbox;
+    }
+
+    public Polygon getObjectHitbox() {
+        return objectHitbox;
     }
 }
