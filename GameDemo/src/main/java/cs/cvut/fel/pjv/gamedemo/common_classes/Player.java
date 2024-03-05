@@ -5,6 +5,8 @@ public class Player extends Entity {
     private Item handItem;
     private Inventory playerInventory;
 
+    private int money = 0;
+
     public Player(int id, String name, String texturePath, int positionX, int positionY) {
         super(id, name, texturePath, "PLAYER", positionX, positionY, 0, 0, 0, null);
         this.maxHunger = 0;
@@ -77,5 +79,13 @@ public class Player extends Entity {
             super.setDamage(super.getDamage() + ((MeleeWeapon) item).getDamage());
             super.attack(super.closestEntity(super.currentWagon.getEntitiesArray()));
         }
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
+    }
+
+    public int getMoney() {
+        return money;
     }
 }
