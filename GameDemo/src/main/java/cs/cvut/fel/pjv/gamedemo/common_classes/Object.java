@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import javafx.scene.image.ImageView;
 import javafx.scene.shape.Polygon;
 
 public class Object {
@@ -7,6 +8,7 @@ public class Object {
 
     public final String name;
     public String texturePath;
+    private ImageView texture;
     private String twoLetterId;
     private int height;
     private int cartX;
@@ -49,6 +51,14 @@ public class Object {
     }
     public String getTexturePath() {
         return texturePath;
+    }
+
+    public void setTexture(ImageView texture) {
+        this.texture = texture;
+    }
+
+    public ImageView getTexture() {
+        return texture;
     }
 
     public void setTwoLetterId(String twoLetterId) {
