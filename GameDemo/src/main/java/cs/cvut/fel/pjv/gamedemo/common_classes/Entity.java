@@ -1,4 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+import javafx.scene.image.ImageView;
+
 public class Entity {
     public final int id;
     public final String name;
@@ -10,6 +13,7 @@ public class Entity {
     private int health;
     private final int maxHealth;
     private int damage;
+    private ImageView entityView;
 
     protected Wagon currentWagon;
 
@@ -92,6 +96,14 @@ public class Entity {
 
     public int getDamage() {
         return damage;
+    }
+
+    public void setEntityView(ImageView entityView) {
+        this.entityView = entityView;
+    }
+
+    public ImageView getEntityView() {
+        return entityView;
     }
 
     public void takeDamage(int damage) {
