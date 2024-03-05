@@ -5,20 +5,16 @@ import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Isometric extends Application {
@@ -61,12 +57,6 @@ public class Isometric extends Application {
     String row5 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row6 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row7 = "11SW_11SW_00TF_11SW_11SW_11SW_11SW_00TF_00TF_11SW_11SW_11SW_00TF_00TF_00TF_11SW_11SW_11SW_11SW_11SW_11SW_11SW";
-
-//    String row1 = "11SW_11SW_00TF_00TF_00TF";
-//    String row2 = "11SW_00TF_00TF_00TF_00TF";
-//    String row3 = "00TF_00TF_00TF_00TF_00TF";
-//    String row4 = "00TF_00TF_00TF_00TF_00TF";
-//    String row5 = "00TF_00TF_00TF_00TF_00TF";
     String map2 = row1 + "-" + row2 + "-" + row3 + "-" + row4 + "-" + row5 + "-" + row6 + "-" + row7;
     Pane grid = new Pane();
 
@@ -190,10 +180,7 @@ public class Isometric extends Application {
         double[] isoXY2 = cartesianToIsometric(cartX + objectWidth, cartY);
         double[] isoXY3 = cartesianToIsometric(cartX + objectWidth, cartY + 32 + deltaHeight);
         double[] isoXY4 = cartesianToIsometric(cartX, cartY + 32 + deltaHeight);
-//        System.out.println(Arrays.toString(isoXY1));
-//        System.out.println(Arrays.toString(isoXY2));
-//        System.out.println(Arrays.toString(isoXY3));
-//        System.out.println(Arrays.toString(isoXY4));
+
         parallelogram.getPoints().addAll(new Double[]{
                 isoXY1[0] + 32, isoXY1[1],
                 isoXY2[0] + 32, isoXY2[1],
@@ -201,8 +188,7 @@ public class Isometric extends Application {
                 isoXY4[0] + 32, isoXY4[1]
         });
         parallelogram.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
-//        grid.getChildren().add(parallelogram);
-//        System.out.println(parallelogram.getBoundsInParent());
+
         return parallelogram;
     }
 
@@ -278,9 +264,6 @@ public class Isometric extends Application {
         }
     }
     public void updateIsoGrid() {
-//        grid.getChildren().clear();
-//        drawIsometricGrid(mainStage);
-        //clear only grid walls
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
                 if (objectsToDraw[i][j].isSolid()) {
@@ -362,31 +345,6 @@ public class Isometric extends Application {
         int gridY = (int) (Math.ceil(ty) - 1);
         return new int[]{gridX, gridY};
     }
-
-//    public int[] getTileIsoPositionFromGrid(int gridX, int gridY) {
-//        int isoX = (gridX - gridY) * TILE_WIDTH;
-//        int isoY = (gridX + gridY) * (TILE_HEIGHT / 2);
-//        isoX += -TILE_WIDTH;
-//        isoY += 0;
-//        return new int[]{isoX, isoY};
-//    }
-//    public void placeSmallTile(int x, int y) {
-//        Rectangle rect = new Rectangle(10, 10);
-//        rect.setStyle("-fx-stroke: #0046ab; -fx-stroke-width: 2; -fx-fill: #00ffe8;");
-//        int[] cartXY = new int[]{x, y};
-//
-//        cartXY[0] = cartXY[0] + 64 / 2 - 5;
-//        cartXY[1] = cartXY[1] + 32 / 2 - 5;
-//        rect.setX(cartXY[0]);
-//        rect.setY(cartXY[1]);
-//        grid.getChildren().add(rect);
-//    }
-//    public double[] isometricToCartesian(int isoX, int isoY) {
-//        double[] cartXY = new double[2];
-//        cartXY[0] = (double) (2 * isoY + isoX) / 2;
-//        cartXY[1] = (double) (2 * isoY - isoX) / 2;
-//        return cartXY;
-//    }
 
     public double[] cartesianToIsometric(int cartX, int cartY) {
         double[] isoXY = new double[2];
