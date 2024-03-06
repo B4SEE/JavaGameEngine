@@ -9,11 +9,13 @@ public class Player extends Entity {
 
     public Player(int id, String name, String texturePath, int positionX, int positionY) {
         super(id, name, texturePath, "PLAYER", positionX, positionY, 0, 0, 0, null);
+        super.setHeight(2);
         this.maxHunger = 0;
     }
 
     public Player(Wagon currentWagon) {
         super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
+        super.setHeight(2);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.handItem = null;
