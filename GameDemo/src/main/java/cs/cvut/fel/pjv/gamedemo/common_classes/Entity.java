@@ -9,6 +9,7 @@ public class Entity {
     private String type;
     private int positionX;
     private int positionY;
+    private int height;
     private int hitBoxSize;
     private int health;
     private final int maxHealth;
@@ -68,6 +69,14 @@ public class Entity {
 
     public int getPositionY() {
         return positionY;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public void setHitBoxSize(int hitBoxSize) {
