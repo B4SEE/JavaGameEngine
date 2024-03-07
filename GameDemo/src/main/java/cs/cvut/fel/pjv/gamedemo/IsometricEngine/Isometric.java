@@ -37,7 +37,7 @@ public class Isometric extends Application {
                 lastTime = l;
                 return;
             } else if (l - lastTime < INTERVAL) {
-                updateIsoGrid();
+                updateWalls();
                 showCoordinatesOnCursor();
                 updatePlayerPosition(player, playerDeltaX, playerDeltaY);
             }
@@ -52,7 +52,7 @@ public class Isometric extends Application {
     String row1 = "13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_00TF_00TF_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW";
     String row2 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row3 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row4 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
+    String row4 = "23SW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row5 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row6 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row7 = "11SW_11SW_00TF_11SW_11SW_11SW_11SW_00TF_00TF_13WW_12HW_13WW_00TF_00TF_00TF_11SW_11SW_11SW_11SW_11SW_11SW_11SW";
@@ -109,6 +109,22 @@ public class Isometric extends Application {
                         player.setTexturePath("player_right.png");
                         updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X / 2);
                         break;
+                    case UP:
+                        moveGrid(0, -1);
+                        updateAll();
+                        break;
+                    case DOWN:
+                        moveGrid(0, 1);
+                        updateAll();
+                        break;
+                    case LEFT:
+                        moveGrid(-1, 0);
+                        updateAll();
+                        break;
+                    case RIGHT:
+                        moveGrid(1, 0);
+                        updateAll();
+                        break;
                 }
         });
     }
@@ -129,13 +145,6 @@ public class Isometric extends Application {
                      objectsToDraw[i][j].setTexture(object);
 
                      placeIsometricTileWithTexture(object, (int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()), (int) (y + TILE_HEIGHT - objectTexture.getHeight()));
-                 }
-                 if (j > 0) {
-                     if (objectsToDraw[i][j - 1].getHeight() == 0 && !Objects.equals(objectsToDraw[i][j - 1].getTwoLetterId(), "BB")) {
-                         Image gapTexture = new Image("file:src/main/resources/" + objectsToDraw[i][j - 1].getTexturePath());
-                         ImageView gap = new ImageView(gapTexture);
-                         placeIsometricTileWithTexture(gap, (int) (x + 2 * TILE_WIDTH - gapTexture.getHeight()), (int) (y + TILE_HEIGHT - gapTexture.getHeight()));
-                     }
                  }
              }
          }
@@ -193,7 +202,7 @@ public class Isometric extends Application {
         playerHitbox.translateYProperty().set(player.getPositionY() + deltaY * 1.5);
         for (Object[] objects : objectsToDraw) {
             for (Object object : objects) {
-                if (object.isSolid()) {
+                if (object.isSolid() && !Objects.equals(object.getTwoLetterId(), "DD")) {
                     if (checkCollision(playerHitbox, object.getObjectHitbox())) {
                         return;
                     }
@@ -241,9 +250,10 @@ public class Isometric extends Application {
         for (int i = 0; i < rows.length; i++) {
             subRows = rows[i].split("_");
             for (int j = 0; j < subRows.length; j++) {
-                if (subRows[j].charAt(0) == '0' || subRows[j].charAt(0) == '2') {
+                if (subRows[j].charAt(0) == '0') {
                     String letterID = subRows[j].substring(2, 4);
                     Object object = new Object(subRows[j].charAt(0), Constants.OBJECT_NAMES.get(letterID), Constants.OBJECT_IDS.get(letterID), letterID, 0, 0, 0, false);
+
                     objectsToDraw[i][j] = object;
                     continue;
                 }
@@ -253,7 +263,7 @@ public class Isometric extends Application {
             }
         }
     }
-    public void updateIsoGrid() {
+    public void updateWalls() {
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
                 if (objectsToDraw[i][j].isSolid()) {
@@ -267,7 +277,31 @@ public class Isometric extends Application {
         drawWalls();
     }
 
+    private void updateAll() {
+        for (int i = 0; i < objectsToDraw.length; i++) {
+            for (int j = 0; j < objectsToDraw[i].length; j++) {
+                if (objectsToDraw[i][j].getHeight() == 0) {
+                    grid.getChildren().remove(objectsToDraw[i][j].getTexture());
+                }
+            }
+        }
+        drawFloor();
+        placePolygons();
+        updateWalls();
+    }
+
     public void moveGrid(int deltaX, int deltaY) {
+        for (int i = 0; i < objectsToDraw.length; i++) {
+            for (int j = 0; j < objectsToDraw[i].length; j++) {
+                if (objectsToDraw[i][j].isSolid()) {
+                    if (checkCollision(playerHitbox, objectsToDraw[i][j].getObjectHitbox())) {
+                        this.deltaX -= deltaX;
+                        this.deltaY -= deltaY;
+                        return;
+                    }
+                }
+            }
+        }
         this.deltaX += deltaX;
         this.deltaY += deltaY;
     }
