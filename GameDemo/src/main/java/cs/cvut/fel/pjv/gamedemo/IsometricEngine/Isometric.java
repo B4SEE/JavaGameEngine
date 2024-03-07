@@ -6,6 +6,7 @@ import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -26,6 +27,7 @@ public class Isometric extends Application {
     private Stage mainStage;
     private int playerDeltaX = 0;
     private int playerDeltaY = 0;
+    Label label = new Label();
     public Player player = new Player(0, "PLAYER_NAME", "player_front.png", 0, 0);
 
     AnimationTimer timer = new AnimationTimer() {
@@ -149,6 +151,12 @@ public class Isometric extends Application {
              }
          }
      }
+     private void updateLabel(String text) {
+        grid.getChildren().remove(label);
+            label.setText(text);
+            label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+            grid.getChildren().add(label);
+     }
     public void updatePlayerDeltaX(int deltaX) {
         this.playerDeltaX = deltaX;
     }
@@ -204,6 +212,8 @@ public class Isometric extends Application {
             for (Object object : objects) {
                 if (object.isSolid() && !Objects.equals(object.getTwoLetterId(), "DD")) {
                     if (checkCollision(playerHitbox, object.getObjectHitbox())) {
+//                        System.out.println("Collision with " + object.getName() + " at " + object.getCartX() + " " + object.getCartY());
+                        updateLabel("Collision with " + object.getName() + " at " + player.getPositionX() + " " + player.getPositionY());
                         return;
                     }
                 }
