@@ -69,9 +69,9 @@ public class Isometric extends Application {
         mainStage = stage;
         loadMap(map2);
 //        drawIsometricGrid(mainStage);
-        drawFloor();
+        placeFloor();
         placePolygons();
-        drawWalls();
+        placeWalls();
         Scene scene = new Scene(grid, 1600, 500);
         stage.setTitle("My JavaFX Application");
         stage.setScene(scene);
@@ -131,7 +131,7 @@ public class Isometric extends Application {
         });
     }
 
-     public void drawFloor() {
+     public void placeFloor() {
          for (int i = 0; i < objectsToDraw.length; i++) {
              for (int j = 0; j < objectsToDraw[i].length; j++) {
                  int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
@@ -284,7 +284,7 @@ public class Isometric extends Application {
         }
         grid.getChildren().remove(playerHitbox);
         grid.getChildren().remove(player.getEntityView());
-        drawWalls();
+        placeWalls();
     }
 
     private void updateAll() {
@@ -295,7 +295,7 @@ public class Isometric extends Application {
                 }
             }
         }
-        drawFloor();
+        placeFloor();
         placePolygons();
         updateWalls();
     }
@@ -334,7 +334,7 @@ public class Isometric extends Application {
     private boolean checkPlayer(double[] objectIsoXY, Image objectTexture) {
         return (player.getPositionY() + (double) TILE_HEIGHT / 2 + player.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight())) && (objectIsoXY[0] > player.getPositionX() - TILE_WIDTH && objectIsoXY[0] < player.getPositionX() + 3 * TILE_WIDTH);
     }
-    public void drawWalls() {
+    public void placeWalls() {
         boolean playerDrawn = false;
 
         for (int i = 0; i < objectsToDraw.length; i++) {
