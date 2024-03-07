@@ -4,10 +4,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Polygon;
 
 public class Object {
-    public final int id;
+    private final int id;
 
-    public final String name;
-    public String texturePath;
+    private final String name;
+    private String texturePath;
     private ImageView texture;
     private String twoLetterId;
     private int height;
@@ -46,6 +46,15 @@ public class Object {
         this.isSolid = isSolid;
         this.objectInventory = objectInventory;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public void setTexturePath(String texturePath) {
         this.texturePath = texturePath;
     }
