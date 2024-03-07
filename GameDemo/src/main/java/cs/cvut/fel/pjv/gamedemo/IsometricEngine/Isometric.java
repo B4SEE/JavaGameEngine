@@ -53,9 +53,9 @@ public class Isometric extends Application {
 ////'_' separates tiles, '-' separates rows
     String row1 = "13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_00TF_00TF_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW";
     String row2 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row3 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
+    String row3 = "13WW_00TF_00TF_00TF_13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row4 = "23SW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row5 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
+    String row5 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row6 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
     String row7 = "11SW_11SW_00TF_11SW_11SW_11SW_11SW_00TF_00TF_13WW_12HW_13WW_00TF_00TF_00TF_11SW_11SW_11SW_11SW_11SW_11SW_11SW";
     String map2 = row1 + "-" + row2 + "-" + row3 + "-" + row4 + "-" + row5 + "-" + row6 + "-" + row7;
@@ -68,11 +68,10 @@ public class Isometric extends Application {
         grid.setStyle("-fx-background-color: #000000;");
         mainStage = stage;
         loadMap(map2);
-//        drawIsometricGrid(mainStage);
         placeFloor();
         placePolygons();
         placeWalls();
-        Scene scene = new Scene(grid, 1600, 500);
+        Scene scene = new Scene(grid, 1600, 800);
         stage.setTitle("My JavaFX Application");
         stage.setScene(scene);
         stage.show();
@@ -138,7 +137,7 @@ public class Isometric extends Application {
                  int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
                  if (objectsToDraw[i][j].getHeight() == 0) {
 
-                     Image objectTexture = new Image("file:src/main/resources/" + objectsToDraw[i][j].getTexturePath());
+                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
                      objectsToDraw[i][j].setCartX(x);
                      objectsToDraw[i][j].setCartY(y);
@@ -212,7 +211,6 @@ public class Isometric extends Application {
             for (Object object : objects) {
                 if (object.isSolid() && !Objects.equals(object.getTwoLetterId(), "DD")) {
                     if (checkCollision(playerHitbox, object.getObjectHitbox())) {
-//                        System.out.println("Collision with " + object.getName() + " at " + object.getCartX() + " " + object.getCartY());
                         updateLabel("Collision with " + object.getName() + " at " + player.getPositionX() + " " + player.getPositionY());
                         return;
                     }
@@ -343,7 +341,7 @@ public class Isometric extends Application {
                     int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
                     int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
 
-                    Image objectTexture = new Image("file:src/main/resources/" + objectsToDraw[i][j].getTexturePath());
+                    Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
                     objectsToDraw[i][j].setCartX((int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()));
                     objectsToDraw[i][j].setCartY((int) (y + TILE_HEIGHT - objectTexture.getHeight()));
@@ -367,7 +365,7 @@ public class Isometric extends Application {
         }
     }
     public void drawPlayer() {
-        player.setEntityView(new ImageView("file:src/main/resources/" + this.player.getTexturePath()));
+        player.setEntityView(new ImageView(this.player.getTexturePath()));
         grid.getChildren().add(playerHitbox);
         player.getEntityView().setX(this.player.getPositionX());
         player.getEntityView().setY(this.player.getPositionY());
