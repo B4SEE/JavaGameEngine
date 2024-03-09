@@ -1,4 +1,4 @@
-# [Game Name]
+# Infinity Express - Destination Abyss
 Welcome to the "Infinity Express - Destination Abyss"
 
 "Infinity Express - Destination Abyss" represents both a game engine and a complete game, developed as a semester project for the PJV course.
