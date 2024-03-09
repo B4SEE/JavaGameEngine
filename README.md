@@ -7,6 +7,8 @@ Welcome to the "Infinity Express - Destination Abyss"
 
 ## Status: In Development :construction:
 
+&nbsp;
+
 ## Table of Contents
 - [About](./README.md#about)
 - [Features](./README.md#features)
@@ -14,6 +16,8 @@ Welcome to the "Infinity Express - Destination Abyss"
 - [Requirements for project](./README.md#requirements-for-project)
 - [Game details](./README.md#game-details)
 - [Development process](./README.md#Development-process)
+
+&nbsp;
 
 <a name="about"></a>
 ## 🔎 About
@@ -24,6 +28,8 @@ Adding a personal touch, players can import custom wagon maps in TXT format, sea
 Developed in Java, the game leverages the power of the JavaFX library to deliver stunning graphics and smooth gameplay.
 The game engine is crafted with flexibility in mind, offering easy modifiability for adding new game objects and mechanics.
 
+&nbsp;
+
 <a name="features"></a>
 ## ⚙️ Features
 - **Endless Train:** Wagons are automatically generated, providing an endless gameplay experience.
@@ -31,6 +37,8 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 - **Custom wagons:** Players have the ability to create and import their own wagons, which can then be found within the game.
 
 - **Isometric View:** The game employs an isometric view, enhancing the visual experience with pixel textures for a unique and immersive gameplay perspective.
+
+&nbsp;
 
 <a name="checkpoints"></a>
 ## 🚩 Development checkpoints
@@ -56,6 +64,8 @@ source files in the project repository - skeletons of the main classes and inter
 Presentation of the whole work and the architecture of the application to the teacher.
 Completed documentation from the user's perspective.
 </details>
+
+&nbsp;
 
 <a name="technical-requirements"></a>
 ## 📋 Requirements for project
@@ -83,9 +93,13 @@ Completed documentation from the user's perspective.
 - :construction: The game engine must be equipped with a GUI.
 </details>
 
+&nbsp;
+
 <a name="game-details"></a>
 ## :information_source: Game details
 For information about the game mechanics, storyline, and technical specifications, please refer to [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
+
+&nbsp;
 
 <a name="development-process"></a>
 ## 🏗️ Development process
