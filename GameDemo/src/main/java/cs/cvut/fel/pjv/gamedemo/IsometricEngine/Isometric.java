@@ -1,22 +1,29 @@
 package cs.cvut.fel.pjv.gamedemo.IsometricEngine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
+import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.animation.AnimationTimer;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Isometric {
@@ -34,7 +41,8 @@ public class Isometric {
     private Object[][] objectsToDraw;
     private Shape walls;
     private Player player;
-    private Circle playerHitbox;
+    private Entity[] entities;
+    private Entity[] drawnEntities;
     private int playerDeltaX = 0;
     private int playerDeltaY = 0;
     private Stage mainStage;
@@ -66,7 +74,8 @@ public class Isometric {
             } else if (l - lastTime < INTERVAL) {
                 updateWalls();
                 showCoordinatesOnCursor();
-                updatePlayerPosition(playerDeltaX, playerDeltaY);
+                updateEntityPosition(player, playerDeltaX, playerDeltaY, 0, 0);
+                moveEntities();
             }
         }
     };
@@ -149,9 +158,22 @@ public class Isometric {
      */
     public void setPlayer(Player player) {
         this.player = player;
-        playerHitbox = getPlayerHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight());
+        player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), player.getHitBoxSize()));
+        player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), 1));
         updatePlayerDeltaX(0);
         updatePlayerDeltaY(0);
+    }
+    /**
+     * Sets the entities.
+     * @param entities the entities
+     */
+    public void setEntities(Entity[] entities) {
+        this.entities = entities;
+        drawnEntities = new Entity[this.entities.length];
+        for (Entity entity : this.entities) {
+            entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
+            entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
+        }
     }
     /**
      * Gets the player.
@@ -230,22 +252,62 @@ public class Isometric {
         });
     }
     /**
-     * Updates the player's position.
-     * @param deltaX the player's delta x
-     * @param deltaY the player's delta y
+     * Updates the position of the entity.
+     * @param entity the entity
+     * @param deltaX the delta x
+     * @param deltaY the delta y
+     * @param deltaSpeedX the delta speed x
+     * @param deltaSpeedY the delta speed y
+     * if the entity's hitbox collides with the walls, the entity's position is not updated
+     * @return the updated entity position
      */
-    public void updatePlayerPosition(int deltaX, int deltaY) {
-        playerHitbox.translateXProperty().set(player.getPositionX() + deltaX);
-        playerHitbox.translateYProperty().set(player.getPositionY() + deltaY);
-        if (checkCollision(playerHitbox, walls)) {
-            updateLabel("Collision with walls" + " at " + player.getPositionX() + " " + player.getPositionY());
+    public void updateEntityPosition(Entity entity, int deltaX, int deltaY, int deltaSpeedX, int deltaSpeedY) {
+        System.out.println(entity.getHitbox().getTranslateX());
+        entity.getHitbox().translateXProperty().set(entity.getPositionX() + deltaX);
+        entity.getHitbox().translateYProperty().set(entity.getPositionY() + deltaY);
+        entity.getAttackRange().translateXProperty().set(entity.getPositionX() + deltaX);
+        entity.getAttackRange().translateYProperty().set(entity.getPositionY() + deltaY);
+        if (checkCollision(entity.getHitbox(), walls)) {
+            System.out.println("Collision with walls" + " at " + entity.getPositionX() + " " + entity.getPositionY());
             return;
         }
         double mag = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-        deltaX = (int) (deltaX / mag * Constants.PLAYER_BASIC_SPEED_X);
-        deltaY = (int) (deltaY / mag * Constants.PLAYER_BASIC_SPEED_Y);
-        player.setPositionX(player.getPositionX() + deltaX);
-        player.setPositionY(player.getPositionY() + deltaY);
+        int speedX = Constants.ENTITY_BASIC_SPEED_X + deltaSpeedX;
+        int speedY = Constants.ENTITY_BASIC_SPEED_Y + deltaSpeedY;
+        if (entity instanceof Player) {
+            speedX = Constants.PLAYER_BASIC_SPEED_X;
+            speedY = Constants.PLAYER_BASIC_SPEED_Y;
+        }
+        deltaX = (int) (deltaX / mag * speedX / 2);
+        deltaY = (int) (deltaY / mag * speedY / 2);
+        entity.setPositionX(entity.getPositionX() + deltaX);
+        entity.setPositionY(entity.getPositionY() + deltaY);
+    }
+    /**
+     * Moves the entities towards the player.
+     */
+    public void moveEntities() {
+        //find deltaX and deltaY for each entity to move towards the player
+        if (entities != null) {
+            for (Entity entity : entities) {
+                if (entity != null && entity.isAlive()) {
+//                    if (entity.inAttackRange(new Entity[]{player})[0] != null) {
+//                        entity.attack(player);
+//                    } else {
+//                        int deltaX = player.getPositionX() - entity.getPositionX();
+//                        int deltaY = player.getPositionY() - entity.getPositionY();
+//                        updateEntityPosition(entity, deltaX, deltaY);
+//                    }
+                    int x = player.getPositionX() - entity.getPositionX();
+                    int y = player.getPositionY() - entity.getPositionY();
+
+                    int deltaX = x > 0 ? 1 : -1;
+                    int deltaY = y > 0 ? 1 : -1;
+
+                    updateEntityPosition(entity, deltaX, deltaY,0,0);
+                }
+            }
+        }
     }
     /**
      * Updates all the objects in the game.
@@ -264,7 +326,7 @@ public class Isometric {
      * @param deltaY the delta y
      */
     public void moveGrid(int deltaX, int deltaY) {
-        if (checkCollision(playerHitbox, walls)) {
+        if (checkCollision(player.getHitbox(), walls)) {
             this.deltaX -= deltaX;
             this.deltaY -= deltaY;
             return;
@@ -278,24 +340,56 @@ public class Isometric {
      */
     private void updateWalls() {
         grid.getChildren().remove(player.getEntityView());
-        grid.getChildren().remove(playerHitbox);
+        grid.getChildren().remove(player.getHitbox());
+        grid.getChildren().remove(player.getAttackRange());
+        if (entities != null) {
+            drawnEntities = new Entity[entities.length];
+            for (Entity entity : entities) {
+                if (entity != null) {
+                    grid.getChildren().remove(entity.getEntityView());
+                    grid.getChildren().remove(entity.getHitbox());
+                    grid.getChildren().remove(entity.getAttackRange());
+                }
+            }
+        }
         boolean playerDrawn = false;
+        int count = 0;
         for (Object[] objects : objectsToDraw) {
             for (Object object : objects) {
                 if (object.isSolid()) {
                     Image objectTexture = new Image(object.getTexturePath());
                     double[] objectIsoXY = cartesianToIsometric(object.getCartX(), object.getCartY());
                     grid.getChildren().remove(object.getTexture());
-                    if (checkX(objectIsoXY) && checkY(objectIsoXY, objectTexture) && !playerDrawn) {
-                        drawPlayer();
+                    if (checkX(player, objectIsoXY) && checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
+                        drawEntity(player);
                         playerDrawn = true;
+                    }
+                    if (entities != null) {
+                        for (Entity entity : entities) {
+                            if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                                if (checkX(entity, objectIsoXY) && checkY(entity, objectIsoXY, objectTexture)) {
+                                    drawEntity(entity);
+                                    drawnEntities[count] = entity;
+                                    count++;
+                                }
+                            }
+                        }
                     }
                     placeIsometricTileWithTexture(object.getTexture(), object.getCartX(), object.getCartY());
                 }
             }
         }
         if (!playerDrawn) {
-            drawPlayer();
+            drawEntity(player);
+        }
+        if (entities != null) {
+            for (Entity entity : entities) {
+                if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                    drawEntity(entity);
+                    drawnEntities[count] = entity;
+                    count++;
+                }
+            }
         }
     }
     /**
@@ -416,6 +510,7 @@ public class Isometric {
      */
     private void placeWalls() {
         boolean playerDrawn = false;
+        int count = 0;
 
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
@@ -432,9 +527,20 @@ public class Isometric {
                     objectsToDraw[i][j].setTexture(object);
                     double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
 
-                    if (checkX(objectIsoXY) && checkY(objectIsoXY, objectTexture) && !playerDrawn) {
-                        drawPlayer();
+                    if (checkX(player, objectIsoXY) && checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
+                        drawEntity(player);
                         playerDrawn = true;
+                    }
+                    if (entities != null) {
+                        for (Entity entity : entities) {
+                            if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                                if (checkX(entity, objectIsoXY) && checkY(entity, objectIsoXY, objectTexture)) {
+                                    drawEntity(entity);
+                                    drawnEntities[count] = entity;
+                                    count++;
+                                }
+                            }
+                        }
                     }
 
                     placeIsometricTileWithTexture(objectsToDraw[i][j].getTexture(), objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
@@ -443,18 +549,28 @@ public class Isometric {
             }
         }
         if (!playerDrawn) {
-            drawPlayer();
+            drawEntity(player);
+        }
+        if (entities != null) {
+            for (Entity entity : entities) {
+                if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                    drawEntity(entity);
+                    drawnEntities[count] = entity;
+                    count++;
+                }
+            }
         }
     }
     /**
-     * Draws the player.
+     * Draws the entity.
      */
-    private void drawPlayer() {
-        player.setEntityView(new ImageView(this.player.getTexturePath()));
-        grid.getChildren().add(playerHitbox);
-        player.getEntityView().setX(this.player.getPositionX());
-        player.getEntityView().setY(this.player.getPositionY());
-        grid.getChildren().add(player.getEntityView());
+    private void drawEntity(Entity entity) {
+        entity.setEntityView(new ImageView(entity.getTexturePath()));
+        grid.getChildren().add(entity.getHitbox());
+        grid.getChildren().add(entity.getAttackRange());
+        entity.getEntityView().setX(entity.getPositionX());
+        entity.getEntityView().setY(entity.getPositionY());
+        grid.getChildren().add(entity.getEntityView());
     }
     /**
      * Places the polygons for object hitboxes.
@@ -492,21 +608,40 @@ public class Isometric {
         grid.getChildren().add(shape);
     }
     /**
-     * Gets the player hitbox.
-     * @param cartX the player's x position
-     * @param cartY the player's y position
-     * @param objectWidth the player's width
-     * @param height the player's height
-     * @return the player hitbox
+     * Gets the entity hitbox.
+     * @param cartX the entity's x position
+     * @param cartY the entity's y position
+     * @param objectWidth the entity's width
+     * @param height the entity's height
+     * @return the entity hitbox
      */
-    private Circle getPlayerHitBox(int cartX, int cartY, int objectWidth, int height) {
+    private Circle getEntityHitBox(int cartX, int cartY, int objectWidth, int height, int hitBoxSize) {
         Circle circle = new Circle();
         cartX += objectWidth / 2;
         cartY += TILE_HEIGHT / 2 + height * TILE_HEIGHT;
         circle.setCenterX(cartX);
         circle.setCenterY(cartY);
-        circle.setRadius(8);
+        circle.setRadius((double) (hitBoxSize * TILE_WIDTH) / 4);
         circle.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
+        return circle;
+    }
+    /**
+     * Gets the entity attack range.
+     * @param cartX the entity's x position
+     * @param cartY the entity's y position
+     * @param objectWidth the entity's width
+     * @param height the entity's height
+     * @param attackRange the entity's attack range
+     * @return the entity attack range
+     */
+    private Circle getEntityAttackRange(int cartX, int cartY, int objectWidth, int height, int attackRange) {
+        Circle circle = new Circle();
+        cartX += objectWidth / 2;
+        cartY += TILE_HEIGHT / 2 + height * TILE_HEIGHT;
+        circle.setCenterX(cartX);
+        circle.setCenterY(cartY);
+        circle.setRadius(attackRange * TILE_WIDTH);
+        circle.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 2; -fx-fill: #ff0000; -fx-opacity: 0.5;");
         return circle;
     }
     /**
@@ -549,8 +684,8 @@ public class Isometric {
      * @param objectIsoXY the object's isometric x and y position
      * @return true if the x position of the object is within the player's range, false otherwise
      */
-    private boolean checkX(double[] objectIsoXY) {
-        return (objectIsoXY[0] > player.getPositionX() - TILE_WIDTH && objectIsoXY[0] < player.getPositionX() + 3 * TILE_WIDTH);
+    private boolean checkX(Entity entity, double[] objectIsoXY) {
+        return (objectIsoXY[0] > entity.getPositionX() - TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * TILE_WIDTH);
     }
     /**
      * Checks if the y position of the object is lower than the player's y position.
@@ -558,8 +693,8 @@ public class Isometric {
      * @param objectTexture the object's texture
      * @return true if the y position of the object is lower than the player's y position, false otherwise
      */
-    private boolean checkY(double[] objectIsoXY, Image objectTexture) {
-        return (player.getPositionY() + (double) TILE_HEIGHT / 2 + player.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight()));
+    private boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
+        return (entity.getPositionY() + (double) TILE_HEIGHT / 2 + entity.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight()));
     }
     /**
      * Converts the cartesian x and y position to isometric x and y position.
