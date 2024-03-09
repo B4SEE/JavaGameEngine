@@ -4,35 +4,60 @@ import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-public class Isometric extends Application {
+public class Isometric {
     private final int TILE_WIDTH = 32;
     private final int TILE_HEIGHT = 32;
     private int deltaX = 10;
     private int deltaY = 0;
-    Object[][] objectsToDraw;
-    private Stage mainStage;
+
+    ////    map example: 11AA_12BB_13CC-11AA_00AA_00BB
+////first number tile type: 0 - floor (not Solid), 1 - wall (Solid), 2 - door (Solid)
+////second number tile height (only for walls) min 1, max 3
+////third number tile letter id (for example: AA, BB, CC)
+////'_' separates tiles, '-' separates rows
+    private String map = "";
+    private Object[][] objectsToDraw;
+    private Shape walls;
+    private Player player;
+    private Circle playerHitbox;
     private int playerDeltaX = 0;
     private int playerDeltaY = 0;
-    Label label = new Label();
-    public Player player = new Player(0, "PLAYER_NAME", "player_front.png", 0, 0);
+    private Stage mainStage;
+    private Pane grid = new Pane();
+    private Label label = new Label();
+    public Isometric() {
+    }
+    public Isometric(Stage stage) {
+        initialiseStage(stage);
+    }
 
-    AnimationTimer timer = new AnimationTimer() {
-        final long INTERVAL = 10000000000000L;
+    private AnimationTimer timer = new AnimationTimer() {
+        final long INTERVAL = 100000000000L;
         long lastTime = -1;
+
+        /**
+         * Updates the game state every INTERVAL nanoseconds.
+         * Updates the walls and player position.
+         * If the last time is not set, sets it to the current time.
+         * If the time difference between the last time and the current time is less than INTERVAL,
+         * updates the walls, shows the cursor coordinates, and updates the player position.
+         * @param l current time in nanoseconds
+         */
         @Override
         public void handle(long l) {
             if (lastTime < 0) {
@@ -41,181 +66,180 @@ public class Isometric extends Application {
             } else if (l - lastTime < INTERVAL) {
                 updateWalls();
                 showCoordinatesOnCursor();
-                updatePlayerPosition(player, playerDeltaX, playerDeltaY);
+                updatePlayerPosition(playerDeltaX, playerDeltaY);
             }
         }
     };
 
-////    map example: 11AA_12BB_13CC-11AA_00AA_00BB
-////first number tile type: 0 - floor (not Solid), 1 - wall (Solid), 2 - door (not Solid)
-////second number tile height (only for walls) min 1, max 3
-////third number tile letter id (for example: AA, BB, CC)
-////'_' separates tiles, '-' separates rows
-    String row1 = "13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_00TF_00TF_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW_13WW";
-    String row2 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row3 = "13WW_00TF_00TF_00TF_13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row4 = "23SW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row5 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row6 = "13WW_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_00TF_11SW";
-    String row7 = "11SW_11SW_00TF_11SW_11SW_11SW_11SW_00TF_00TF_13WW_12HW_13WW_00TF_00TF_00TF_11SW_11SW_11SW_11SW_11SW_11SW_11SW";
-    String map2 = row1 + "-" + row2 + "-" + row3 + "-" + row4 + "-" + row5 + "-" + row6 + "-" + row7;
-    Pane grid = new Pane();
-
-    Circle playerHitbox = getPlayerHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight());
-    @Override
-    public void start(Stage stage) throws IOException {
+    /**
+     * Initializes and starts the game.
+     * If the main stage, player, or map is not initialized properly,
+     * the program exits with an error message.
+     * Sets up the game grid, loads the map, and sets the scene.
+     * Registers key event handlers for player movement.
+     * Note: Player movement may experience lag, requires further investigation.
+     */
+    public void start() {
+        if (mainStage == null) {
+            System.out.println("Stage is not initialised");
+            System.out.println("Exiting the program");
+            System.exit(1);
+        }
+        if (player == null) {
+            System.out.println("Player is not initialised");
+            System.out.println("Exiting the program");
+            System.exit(1);
+        }
+        if (!loadMap(map)) {
+            System.out.println("Map string is not valid");
+            System.out.println("Exiting the program");
+            System.exit(1);
+        }
         grid.setPrefSize(1000, 1000);
         grid.setStyle("-fx-background-color: #000000;");
-        mainStage = stage;
-        loadMap(map2);
-        placeFloor();
-        placePolygons();
-        placeWalls();
+        placeMap();
         Scene scene = new Scene(grid, 1600, 800);
-        stage.setTitle("My JavaFX Application");
-        stage.setScene(scene);
-        stage.show();
+        mainStage.setTitle("My JavaFX Application");
+        mainStage.setScene(scene);
+        mainStage.show();
         timer.start();
         scene.setOnKeyReleased(keyEvent -> {
-                switch (keyEvent.getCode()) {
-                    case W:
-                        updatePlayerDeltaY(0);
-                        break;
-                    case S:
-                        updatePlayerDeltaY(0);
-                        break;
-                    case A:
-                        updatePlayerDeltaX(0);
-                        break;
-                    case D:
-                        updatePlayerDeltaX(0);
-                        break;
-                }
+            switch (keyEvent.getCode()) {
+                case W, S:
+                    updatePlayerDeltaY(0);
+                    break;
+                case A, D:
+                    updatePlayerDeltaX(0);
+                    break;
+            }
         });
+        //player movement is laggy, don't know why, need to fix
         scene.setOnKeyPressed(keyEvent -> {
-                switch (keyEvent.getCode()) {
-                    case W:
-                        player.setTexturePath("player_back.png");
-                        updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y / 2);
-                        break;
-                    case S:
-                        player.setTexturePath("player_front.png");
-                        updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y / 2);
-                        break;
-                    case A:
-                        player.setTexturePath("player_left.png");
-                        updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X / 2);
-                        break;
-                    case D:
-                        player.setTexturePath("player_right.png");
-                        updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X / 2);
-                        break;
-                    case UP:
-                        moveGrid(0, -1);
-                        updateAll();
-                        break;
-                    case DOWN:
-                        moveGrid(0, 1);
-                        updateAll();
-                        break;
-                    case LEFT:
-                        moveGrid(-1, 0);
-                        updateAll();
-                        break;
-                    case RIGHT:
-                        moveGrid(1, 0);
-                        updateAll();
-                        break;
-                }
+            switch (keyEvent.getCode()) {
+                case W:
+                    player.setTexturePath("player_back.png");
+                    updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
+                    break;
+                case S:
+                    player.setTexturePath("player_front.png");
+                    updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
+                    break;
+                case A:
+                    player.setTexturePath("player_left.png");
+                    updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
+                    break;
+                case D:
+                    player.setTexturePath("player_right.png");
+                    updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
+                    break;
+            }
+            updateWalls();
         });
     }
-
-     public void placeFloor() {
-         for (int i = 0; i < objectsToDraw.length; i++) {
-             for (int j = 0; j < objectsToDraw[i].length; j++) {
-                 int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
-                 int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
-                 if (objectsToDraw[i][j].getHeight() == 0) {
-
-                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
-
-                     objectsToDraw[i][j].setCartX(x);
-                     objectsToDraw[i][j].setCartY(y);
-
-                     ImageView object = new ImageView(objectTexture);
-                     objectsToDraw[i][j].setTexture(object);
-
-                     placeIsometricTileWithTexture(object, (int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()), (int) (y + TILE_HEIGHT - objectTexture.getHeight()));
-                 }
-             }
-         }
-     }
-     private void updateLabel(String text) {
+    /**
+     * Initializes the main stage.
+     * @param stage the main stage
+     */
+    public void initialiseStage(Stage stage) {
+        mainStage = stage;
+    }
+    /**
+     * Sets the player.
+     * @param player the player
+     */
+    public void setPlayer(Player player) {
+        this.player = player;
+        playerHitbox = getPlayerHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight());
+        updatePlayerDeltaX(0);
+        updatePlayerDeltaY(0);
+    }
+    /**
+     * Gets the player.
+     * @return the player
+     */
+    public Player getPlayer() {
+        return player;
+    }
+    /**
+     * Sets the map.
+     * @param filePath the file path of the map
+     */
+    public void setMap(String filePath) {
+        this.map = loadMapFromFile(filePath);
+    }
+    /**
+     * Displays a preview of the map using the specified map data.
+     * If the map data is invalid, an error message is printed and the function returns.
+     * Otherwise, the map is loaded and displayed in a GridPane with objects represented by images.
+     * The size of each grid cell is determined by TILE_WIDTH and TILE_HEIGHT constants.
+     */
+    public void previewMap() {
+        if (!checkStringMapValidity(map)) {
+            System.out.println("Map is not valid");
+            return;
+        }
+        loadMap(map);
+        GridPane grid = new GridPane();
+        for (int i = 0; i < objectsToDraw.length; i++) {
+            for (int j = 0; j < objectsToDraw[i].length; j++) {
+                int x = TILE_WIDTH + j * TILE_WIDTH;
+                int y = i * TILE_HEIGHT;
+                Image objectTexture = new Image(Objects.requireNonNull(getClass().getClassLoader().getResource(objectsToDraw[i][j].getTexturePath())).toExternalForm());
+                ImageView object = new ImageView(objectTexture);
+                object.setFitWidth(TILE_WIDTH);
+                object.setFitHeight(TILE_HEIGHT);
+                grid.add(object, j, i);
+            }
+        }
+        grid.setPrefSize(1000, 1000);
+        mainStage.setTitle("Map preview");
+        grid.setStyle("-fx-background-color: #000000;");
+        mainStage.setScene(new Scene(grid, 1600, 800));
+        mainStage.show();
+    }
+    /**
+     * Updates the label with the specified text.
+     * @param text the text to display
+     */
+    public void updateLabel(String text) {
         grid.getChildren().remove(label);
-            label.setText(text);
-            label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-            grid.getChildren().add(label);
-     }
+        label.setText(text);
+        label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+        grid.getChildren().add(label);
+    }
+    /**
+     * Updates the player's delta x.
+     * @param deltaX the player's delta x
+     */
     public void updatePlayerDeltaX(int deltaX) {
         this.playerDeltaX = deltaX;
     }
-
+    /**
+     * Updates the player's delta y.
+     * @param deltaY the player's delta y
+     */
     public void updatePlayerDeltaY(int deltaY) {
         this.playerDeltaY = deltaY;
     }
-
-    public static void main(String[] args) {
-        launch();
-    }
+    /**
+     * Shows the coordinates of the cursor on the main stage.
+     */
     public void showCoordinatesOnCursor() {
         mainStage.getScene().setOnMouseMoved(e -> {
             mainStage.setTitle("X: " + (int) e.getX() + " Y: " + (int) e.getY());
         });
     }
-    public Circle getPlayerHitBox(int cartX, int cartY, int objectWidth, int height) {
-        Circle circle = new Circle();
-        cartX += objectWidth / 2;
-        cartY += TILE_HEIGHT / 2 + height * TILE_HEIGHT;
-        circle.setCenterX(cartX);
-        circle.setCenterY(cartY);
-        circle.setRadius(8);
-        circle.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
-        return circle;
-    }
-    public Polygon getObjectHitBox(int cartX, int cartY, int objectWidth, int deltaHeight) {
-        Polygon parallelogram = new Polygon();
-        double[] isoXY1 = cartesianToIsometric(cartX, cartY);
-        double[] isoXY2 = cartesianToIsometric(cartX + objectWidth, cartY);
-        double[] isoXY3 = cartesianToIsometric(cartX + objectWidth, cartY + 32 + deltaHeight);
-        double[] isoXY4 = cartesianToIsometric(cartX, cartY + TILE_WIDTH + deltaHeight);
-
-        parallelogram.getPoints().addAll(new Double[]{
-                isoXY1[0] + TILE_WIDTH, isoXY1[1],
-                isoXY2[0] + TILE_WIDTH, isoXY2[1],
-                isoXY3[0] + TILE_WIDTH, isoXY3[1],
-                isoXY4[0] + TILE_WIDTH, isoXY4[1]
-        });
-        parallelogram.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
-
-        return parallelogram;
-    }
-
-    public boolean checkCollision(Circle hitbox1, Polygon hitbox2) {
-        Shape intersect = Shape.intersect(hitbox1, hitbox2);
-        return !intersect.getBoundsInParent().isEmpty();
-    }
-    private void updatePlayerPosition(Player player, int deltaX, int deltaY) {
-        playerHitbox.translateXProperty().set(player.getPositionX() + deltaX * 1.5);
-        playerHitbox.translateYProperty().set(player.getPositionY() + deltaY * 1.5);
-        for (Object[] objects : objectsToDraw) {
-            for (Object object : objects) {
-                if (object.isSolid() && !Objects.equals(object.getTwoLetterId(), "DD")) {
-                    if (checkCollision(playerHitbox, object.getObjectHitbox())) {
-                        updateLabel("Collision with " + object.getName() + " at " + player.getPositionX() + " " + player.getPositionY());
-                        return;
-                    }
-                }
-            }
+    /**
+     * Updates the player's position.
+     * @param deltaX the player's delta x
+     * @param deltaY the player's delta y
+     */
+    public void updatePlayerPosition(int deltaX, int deltaY) {
+        playerHitbox.translateXProperty().set(player.getPositionX() + deltaX);
+        playerHitbox.translateYProperty().set(player.getPositionY() + deltaY);
+        if (checkCollision(playerHitbox, walls)) {
+            updateLabel("Collision with walls" + " at " + player.getPositionX() + " " + player.getPositionY());
+            return;
         }
         double mag = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
         deltaX = (int) (deltaX / mag * Constants.PLAYER_BASIC_SPEED_X);
@@ -223,34 +247,84 @@ public class Isometric extends Application {
         player.setPositionX(player.getPositionX() + deltaX);
         player.setPositionY(player.getPositionY() + deltaY);
     }
-    private boolean checkStringMapValidity(String map) {
-        String[] rows = map.split("-");
-        String[] subRows = rows[0].split("_");
-
-        for (String subRow : subRows) {
-            if (subRow.length() != subRows[0].length()) {
-                return false;
-            }
-            if (subRow.charAt(0) != '0' && subRow.charAt(0) != '1' && subRow.charAt(0) != '2') {
-                return false;
-            }
-            if (subRow.charAt(1) != '0' && subRow.charAt(1) != '1' && subRow.charAt(1) != '2' && subRow.charAt(1) != '3') {
-                return false;
-            }
-            if (!Character.isLetter(subRow.charAt(2))) {
-                return false;
-            }
-            if (!Character.isLetter(subRow.charAt(3))) {
-                return false;
+    /**
+     * Updates all the objects in the game.
+     */
+    public void updateAll() {
+        grid.getChildren().clear();
+        placeFloor();
+        placePolygons();
+        mergeObjectHitboxes();
+        placeWalls();
+    }
+    /**
+     * Moves the grid by the specified delta x and delta y.
+     * If there is a collision with the player hitbox and the walls, the delta x and delta y are adjusted.
+     * @param deltaX the delta x
+     * @param deltaY the delta y
+     */
+    public void moveGrid(int deltaX, int deltaY) {
+        if (checkCollision(playerHitbox, walls)) {
+            this.deltaX -= deltaX;
+            this.deltaY -= deltaY;
+            return;
+        }
+        this.deltaX += deltaX;
+        this.deltaY += deltaY;
+        updateAll();
+    }
+    /**
+     * Updates the walls.
+     */
+    private void updateWalls() {
+        grid.getChildren().remove(player.getEntityView());
+        grid.getChildren().remove(playerHitbox);
+        boolean playerDrawn = false;
+        for (Object[] objects : objectsToDraw) {
+            for (Object object : objects) {
+                if (object.isSolid()) {
+                    Image objectTexture = new Image(object.getTexturePath());
+                    double[] objectIsoXY = cartesianToIsometric(object.getCartX(), object.getCartY());
+                    grid.getChildren().remove(object.getTexture());
+                    if (checkX(objectIsoXY) && checkY(objectIsoXY, objectTexture) && !playerDrawn) {
+                        drawPlayer();
+                        playerDrawn = true;
+                    }
+                    placeIsometricTileWithTexture(object.getTexture(), object.getCartX(), object.getCartY());
+                }
             }
         }
-        System.out.println("Map string is valid");
-        return true;
+        if (!playerDrawn) {
+            drawPlayer();
+        }
     }
-    public void loadMap(String map) {
+    /**
+     * Loads the map from the specified file path.
+     * @param path the file path of the map
+     * @return the map as a string
+     */
+    private String loadMapFromFile(String path) {
+        File file = new File(path);
+        StringBuilder map = new StringBuilder();
+        try {
+            java.util.Scanner scanner = new java.util.Scanner(file);
+            while (scanner.hasNextLine()) {
+                map.append(scanner.nextLine());
+                map.append("-");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return map.toString();
+    }
+    /**
+     * Loads the map from the specified string.
+     * @param map the map as a string
+     * @return true if the map was loaded successfully, false otherwise
+     */
+    private boolean loadMap(String map) {
         if (!checkStringMapValidity(map)) {
-            System.out.println("Map string is not valid");
-            return;
+            return false;
         }
         String[] rows = map.split("-");
         String[] subRows = rows[0].split("_");
@@ -270,69 +344,77 @@ public class Isometric extends Application {
                 objectsToDraw[i][j] = object;
             }
         }
+        return true;
     }
-    public void updateWalls() {
-        for (int i = 0; i < objectsToDraw.length; i++) {
-            for (int j = 0; j < objectsToDraw[i].length; j++) {
-                if (objectsToDraw[i][j].isSolid()) {
-                    grid.getChildren().remove(objectsToDraw[i][j].getObjectHitbox());
-                    grid.getChildren().remove(objectsToDraw[i][j].getTexture());
-                }
-            }
-        }
-        grid.getChildren().remove(playerHitbox);
-        grid.getChildren().remove(player.getEntityView());
-        placeWalls();
-    }
+    /**
+     * Checks if the map is valid.
+     * @param map the map as a string
+     * @return true if the map is valid, false otherwise
+     */
+    private boolean checkStringMapValidity(String map) {
+        try {
+            String[] rows = map.split("-");
+            String[] subRows = rows[0].split("_");
 
-    private void updateAll() {
-        for (int i = 0; i < objectsToDraw.length; i++) {
-            for (int j = 0; j < objectsToDraw[i].length; j++) {
-                if (objectsToDraw[i][j].getHeight() == 0) {
-                    grid.getChildren().remove(objectsToDraw[i][j].getTexture());
+            for (String subRow : subRows) {
+                if (subRow.length() != subRows[0].length()) {
+                    return false;
+                }
+                if (subRow.charAt(0) != '0' && subRow.charAt(0) != '1' && subRow.charAt(0) != '2') {
+                    return false;
+                }
+                if (subRow.charAt(1) != '0' && subRow.charAt(1) != '1' && subRow.charAt(1) != '2' && subRow.charAt(1) != '3') {
+                    return false;
+                }
+                if (!Character.isLetter(subRow.charAt(2))) {
+                    return false;
+                }
+                if (!Character.isLetter(subRow.charAt(3))) {
+                    return false;
                 }
             }
+            return true;
+        } catch (Exception e) {
+            return false;
         }
+    }
+    /**
+     * Draws the map and the player.
+     */
+    private void placeMap() {
         placeFloor();
         placePolygons();
-        updateWalls();
+        mergeObjectHitboxes();
+        placeWalls();
     }
-
-    public void moveGrid(int deltaX, int deltaY) {
+    /**
+     * Places the floor.
+     */
+    private void placeFloor() {
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
-                if (objectsToDraw[i][j].isSolid()) {
-                    if (checkCollision(playerHitbox, objectsToDraw[i][j].getObjectHitbox())) {
-                        this.deltaX -= deltaX;
-                        this.deltaY -= deltaY;
-                        return;
-                    }
-                }
-            }
-        }
-        this.deltaX += deltaX;
-        this.deltaY += deltaY;
-    }
 
-    public void placePolygons() {
-        for (int i = 0; i < objectsToDraw.length; i++) {
-            for (int j = 0; j < objectsToDraw[i].length; j++) {
-                if (objectsToDraw[i][j].getHeight() > 0) {
-                    if (objectsToDraw[i][j].isSolid()) {
-                        int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
-                        int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
-                        Polygon parallelogram = getObjectHitBox(x, y, 32, 0);
-                        objectsToDraw[i][j].setObjectHitbox(parallelogram);
-                        grid.getChildren().add(objectsToDraw[i][j].getObjectHitbox());
-                    }
+                int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
+                int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
+
+                if (objectsToDraw[i][j].getHeight() == 0) {
+                    Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
+
+                    objectsToDraw[i][j].setCartX(x);
+                    objectsToDraw[i][j].setCartY(y);
+
+                    ImageView object = new ImageView(objectTexture);
+                    objectsToDraw[i][j].setTexture(object);
+
+                    placeIsometricTileWithTexture(object, (int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()), (int) (y + TILE_HEIGHT - objectTexture.getHeight()));
                 }
             }
         }
     }
-    private boolean checkPlayer(double[] objectIsoXY, Image objectTexture) {
-        return (player.getPositionY() + (double) TILE_HEIGHT / 2 + player.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight())) && (objectIsoXY[0] > player.getPositionX() - TILE_WIDTH && objectIsoXY[0] < player.getPositionX() + 3 * TILE_WIDTH);
-    }
-    public void placeWalls() {
+    /**
+     * Places the walls.
+     */
+    private void placeWalls() {
         boolean playerDrawn = false;
 
         for (int i = 0; i < objectsToDraw.length; i++) {
@@ -350,7 +432,7 @@ public class Isometric extends Application {
                     objectsToDraw[i][j].setTexture(object);
                     double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
 
-                    if (checkPlayer(objectIsoXY, objectTexture) && !playerDrawn) {
+                    if (checkX(objectIsoXY) && checkY(objectIsoXY, objectTexture) && !playerDrawn) {
                         drawPlayer();
                         playerDrawn = true;
                     }
@@ -364,20 +446,140 @@ public class Isometric extends Application {
             drawPlayer();
         }
     }
-    public void drawPlayer() {
+    /**
+     * Draws the player.
+     */
+    private void drawPlayer() {
         player.setEntityView(new ImageView(this.player.getTexturePath()));
         grid.getChildren().add(playerHitbox);
         player.getEntityView().setX(this.player.getPositionX());
         player.getEntityView().setY(this.player.getPositionY());
         grid.getChildren().add(player.getEntityView());
     }
-    public double[] cartesianToIsometric(int cartX, int cartY) {
+    /**
+     * Places the polygons for object hitboxes.
+     */
+    private void placePolygons() {
+        for (int i = 0; i < objectsToDraw.length; i++) {
+            for (int j = 0; j < objectsToDraw[i].length; j++) {
+                if (objectsToDraw[i][j].getHeight() > 0) {
+                    if (objectsToDraw[i][j].isSolid()) {
+                        int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
+                        int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
+                        Polygon parallelogram = getObjectHitBox(x, y, TILE_WIDTH, 0);
+                        objectsToDraw[i][j].setObjectHitbox(parallelogram);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Merges the object hitboxes to create one solid shape.
+     */
+    private void mergeObjectHitboxes() {
+        Shape shape = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
+        grid.getChildren().remove(objectsToDraw[0][0].getObjectHitbox());
+        grid.getChildren().remove(objectsToDraw[0][1].getObjectHitbox());
+        for (Object[] objects : objectsToDraw) {
+            for (Object object : objects) {
+                if (object.isSolid()) {
+                    shape = Shape.union(shape, object.getObjectHitbox());
+                }
+            }
+        }
+        shape.setStyle("-fx-fill: #ff00af; -fx-opacity: 0;");
+        walls = shape;
+        grid.getChildren().add(shape);
+    }
+    /**
+     * Gets the player hitbox.
+     * @param cartX the player's x position
+     * @param cartY the player's y position
+     * @param objectWidth the player's width
+     * @param height the player's height
+     * @return the player hitbox
+     */
+    private Circle getPlayerHitBox(int cartX, int cartY, int objectWidth, int height) {
+        Circle circle = new Circle();
+        cartX += objectWidth / 2;
+        cartY += TILE_HEIGHT / 2 + height * TILE_HEIGHT;
+        circle.setCenterX(cartX);
+        circle.setCenterY(cartY);
+        circle.setRadius(8);
+        circle.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
+        return circle;
+    }
+    /**
+     * Gets the object hitbox.
+     * @param cartX the object's x position
+     * @param cartY the object's y position
+     * @param objectWidth the object's width
+     * @param deltaHeight the object's height
+     * @return the object hitbox
+     */
+    private Polygon getObjectHitBox(int cartX, int cartY, int objectWidth, int deltaHeight) {
+        Polygon parallelogram = new Polygon();
+        double[] isoXY1 = cartesianToIsometric(cartX, cartY);
+        double[] isoXY2 = cartesianToIsometric(cartX + objectWidth, cartY);
+        double[] isoXY3 = cartesianToIsometric(cartX + objectWidth, cartY + 32 + deltaHeight);
+        double[] isoXY4 = cartesianToIsometric(cartX, cartY + TILE_WIDTH + deltaHeight);
+
+        parallelogram.getPoints().addAll(new Double[]{
+                isoXY1[0] + TILE_WIDTH, isoXY1[1],
+                isoXY2[0] + TILE_WIDTH, isoXY2[1],
+                isoXY3[0] + TILE_WIDTH, isoXY3[1],
+                isoXY4[0] + TILE_WIDTH, isoXY4[1]
+        });
+        parallelogram.setStyle("-fx-opacity: 0");
+
+        return parallelogram;
+    }
+    /**
+     * Checks if there is a collision between two shapes.
+     * @param hitbox1 the first hitbox
+     * @param hitbox2 the second hitbox
+     * @return true if there is a collision, false otherwise
+     */
+    private boolean checkCollision(Shape hitbox1, Shape hitbox2) {
+        Shape intersect = Shape.intersect(hitbox1, hitbox2);
+        return !intersect.getBoundsInParent().isEmpty();
+    }
+    /**
+     * Checks if the x position of the object is within the player's range (constant).
+     * @param objectIsoXY the object's isometric x and y position
+     * @return true if the x position of the object is within the player's range, false otherwise
+     */
+    private boolean checkX(double[] objectIsoXY) {
+        return (objectIsoXY[0] > player.getPositionX() - TILE_WIDTH && objectIsoXY[0] < player.getPositionX() + 3 * TILE_WIDTH);
+    }
+    /**
+     * Checks if the y position of the object is lower than the player's y position.
+     * @param objectIsoXY the object's isometric x and y position
+     * @param objectTexture the object's texture
+     * @return true if the y position of the object is lower than the player's y position, false otherwise
+     */
+    private boolean checkY(double[] objectIsoXY, Image objectTexture) {
+        return (player.getPositionY() + (double) TILE_HEIGHT / 2 + player.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight()));
+    }
+    /**
+     * Converts the cartesian x and y position to isometric x and y position.
+     * @param cartX the cartesian x position
+     * @param cartY the cartesian y position
+     * @return the isometric x and y position
+     */
+    private double[] cartesianToIsometric(int cartX, int cartY) {
         double[] isoXY = new double[2];
         isoXY[0] = (cartX - cartY);
         isoXY[1] = (double) (cartX + cartY) / 2;
         return isoXY;
     }
-    public void placeIsometricTileWithTexture(ImageView img, int cartX, int cartY) {
+    /**
+     * Places the isometric tile with the specified texture.
+     * @param img the image view
+     * @param cartX the cartesian x position
+     * @param cartY the cartesian y position
+     */
+    private void placeIsometricTileWithTexture(ImageView img, int cartX, int cartY) {
         double[] isoXY = cartesianToIsometric(cartX, cartY);
         img.setX(isoXY[0] - TILE_WIDTH);
         img.setY(isoXY[1] - (double) TILE_HEIGHT / 2);
