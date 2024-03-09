@@ -1,7 +1,7 @@
 # [Game Name]
-Welcome to the "Game Name" repository.
+Welcome to the "Infinity Express - Destination Abyss"
 
-"Game Name" represents both a game engine and a complete game, developed as a semester project for the PJV course.
+"Infinity Express - Destination Abyss" represents both a game engine and a complete game, developed as a semester project for the PJV course.
 
 ---
 
@@ -16,16 +16,16 @@ Welcome to the "Game Name" repository.
 - [Development process](./README.md#Development-process)
 
 <a name="about"></a>
-## About
-"Game Name" is an immersive 2D isometric game, challenging players to survive and ultimately escape from an infinite train journey.
+## 🔎 About
+"Infinity Express - Destination Abyss" is an immersive 2D isometric game, challenging players to survive and ultimately escape from an infinite train journey.
 As the train endlessly chugs along, wagons are dynamically generated, providing a unique experience with every playthrough.
 Adding a personal touch, players can import custom wagon maps in TXT format, seamlessly integrating their creations into the game environment.
 
-Developed in Java, "Game Name" leverages the power of the JavaFX library to deliver stunning graphics and smooth gameplay.
+Developed in Java, the game leverages the power of the JavaFX library to deliver stunning graphics and smooth gameplay.
 The game engine is crafted with flexibility in mind, offering easy modifiability for adding new game objects and mechanics.
 
 <a name="features"></a>
-## Features
+## ⚙️ Features
 - **Endless Train:** Wagons are automatically generated, providing an endless gameplay experience.
 
 - **Custom wagons:** Players have the ability to create and import their own wagons, which can then be found within the game.
@@ -33,7 +33,7 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 - **Isometric View:** The game employs an isometric view, enhancing the visual experience with pixel textures for a unique and immersive gameplay perspective.
 
 <a name="checkpoints"></a>
-## Development checkpoints
+## 🚩 Development checkpoints
 **CP1 - Project Vision (until week 3 - 10/03, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
@@ -58,7 +58,7 @@ Completed documentation from the user's perspective.
 </details>
 
 <a name="technical-requirements"></a>
-## Requirements for project
+## 📋 Requirements for project
 
 <details><summary>Click to expand</summary>
 
@@ -84,9 +84,9 @@ Completed documentation from the user's perspective.
 </details>
 
 <a name="game-details"></a>
-## Game details
+## :information_source: Game details
 For information about the game mechanics, storyline, and technical specifications, please refer to [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
 
 <a name="development-process"></a>
-## Development process
+## 🏗️ Development process
 [screenshots text]
