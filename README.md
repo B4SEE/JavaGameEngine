@@ -42,7 +42,7 @@ the chosen topic, expected features and vision of the project
 from the document it should be possible to imagine what the work will look like.
 </details>
 
-**CP2 - Object design (by week 8 - 12 April, 23:59)** :x:
+**CP2 - Object design (by week 8 - 12 April, 23:59)** :construction:
 
 <details><summary>Click to expand</summary>
 Documentation on the project Wiki from the user's perspective (e.g. manual)
@@ -50,7 +50,7 @@ on the Project Wiki, added documentation from the programmer's perspective (desc
 source files in the project repository - skeletons of the main classes and interfaces, so that the proposed architecture is visible
 </details>
 
-**CP3 - Final presentation (by week 14 - 24 May, 23:59)** :x:
+**CP3 - Final presentation (by week 14 - 24 May, 23:59)** :construction:
 
 <details><summary>Click to expand</summary>
 Presentation of the whole work and the architecture of the application to the teacher.
