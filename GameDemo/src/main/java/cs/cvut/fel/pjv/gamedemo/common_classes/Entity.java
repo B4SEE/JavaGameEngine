@@ -1,22 +1,26 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Shape;
 
 public class Entity {
-    public final int id;
-    public final String name;
+    private final int id;
+    private final String name;
     private String texturePath;
     private String type;
     private int positionX;
     private int positionY;
     private int height;
     private int hitBoxSize;
+    private Shape hitbox;
+    private Shape attackRange;
+    private int attackRangeSize;
     private int health;
     private final int maxHealth;
     private int damage;
     private ImageView entityView;
 
-    protected Wagon currentWagon;
+    private Wagon currentWagon;
 
     public Entity(int id, String name, String texturePath, int maxHealth) {
         this.id = id;
@@ -37,6 +41,12 @@ public class Entity {
         this.maxHealth = health;
         this.damage = damage;
         this.currentWagon = currentWagon;
+    }
+    public int getId() {
+        return id;
+    }
+    public String getName() {
+        return name;
     }
 
     public void setTexturePath(String texturePath) {
@@ -86,7 +96,24 @@ public class Entity {
     public int getHitBoxSize() {
         return hitBoxSize;
     }
-
+    public void setHitbox(Shape hitbox) {
+        this.hitbox = hitbox;
+    }
+    public Shape getHitbox() {
+        return hitbox;
+    }
+    public void setAttackRange(Shape attackRange) {
+        this.attackRange = attackRange;
+    }
+    public Shape getAttackRange() {
+        return attackRange;
+    }
+    public void setAttackRangeSize(int attackRangeSize) {
+        this.attackRangeSize = attackRangeSize;
+    }
+    public int getAttackRangeSize() {
+        return attackRangeSize;
+    }
     public void setHealth(int health) {
         this.health = health;
     }
@@ -115,6 +142,14 @@ public class Entity {
         return entityView;
     }
 
+    public void setCurrentWagon(Wagon currentWagon) {
+        this.currentWagon = currentWagon;
+    }
+
+    public Wagon getCurrentWagon() {
+        return currentWagon;
+    }
+
     public void takeDamage(int damage) {
         health -= damage;
     }
@@ -132,9 +167,19 @@ public class Entity {
         return health > 0;
     }
 
-    public Entity closestEntity(Entity[] entities) {
-        Entity closest = null;
-        //find closest Entity
-        return closest;
+    public Entity[] inAttackRange(Entity[] entities) {
+        Entity[] inRange = new Entity[entities.length];
+        int i = 0;
+        for (Entity entity : entities) {
+            if (entity != null) {
+                if (entity != this) {
+                    if (entity.isAlive() && attackRange.contains(entity.getPositionX(), entity.getPositionY())) {
+                        inRange[i] = entity;
+                        i++;
+                    }
+                }
+            }
+        }
+        return inRange;
     }
 }

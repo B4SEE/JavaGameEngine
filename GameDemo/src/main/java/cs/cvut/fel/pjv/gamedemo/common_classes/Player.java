@@ -79,7 +79,11 @@ public class Player extends Entity {
             shoot((Firearm) item);
         } else if (item instanceof MeleeWeapon) {
             super.setDamage(super.getDamage() + ((MeleeWeapon) item).getDamage());
-            super.attack(super.closestEntity(super.currentWagon.getEntitiesArray()));
+            Entity[] entities = super.getCurrentWagon().getEntitiesArray();
+            Entity[] inRange = super.inAttackRange(entities);
+            for (Entity entity : inRange) {
+                entity.takeDamage(((MeleeWeapon) item).getDamage());
+            }
         }
     }
 
