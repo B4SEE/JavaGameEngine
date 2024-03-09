@@ -17,9 +17,10 @@ public class Constants {
     public static final int TRAIN_WAGONS = 10;
 
     public static final Map <String, String> OBJECT_IDS = Map.of(
-            "BB", "0",
-            "BG", "0",
+            "BB", "0.png",
+            "BG", "0.png",
             "TF", "tile_floor.png",
+            "BW", "0.png",
             "SW", "block_wall.png",
             "HW", "block_wagon_wall.png",
             "WW", "3h_block.png"
@@ -29,6 +30,7 @@ public class Constants {
             "BB", "blank_0",
             "BG", "blank_gap_0",
             "TF", "floor_0",
+            "BW", "blank_wall_3",
             "SW", "wall_1",
             "HW", "wagon_wall_2",
             "WW", "wagon_wall_3"
