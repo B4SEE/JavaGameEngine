@@ -14,14 +14,14 @@ Welcome to the "Infinity Express - Destination Abyss"
 &nbsp;
 
 ## Table of Contents
-- [About](./README.md#About)
-- [Features](./README.md#Features)
-- [Development checkpoints](./README.md#Development-checkpoints)
-- [Requirements for project](./README.md#Requirements-for-project)
-- [Game details](./README.md#Game-details)
-- [Development process](./README.md#Development-process)
-- [How to run](./README.md#How-to-run)
-- [Contact](./README.md#Contact)
+- [About](./README.md#-about)
+- [Features](./README.md#-features)
+- [Development checkpoints](./README.md#-development-checkpoints)
+- [Requirements for project](./README.md#-requirements-for-project)
+- [Game details](./README.md#information_source-game-details)
+- [Development process](./README.md#-development-process)
+- [How to run](./README.md#-how-to-run)
+- [Contact](./README.md#-contact)
 
 &nbsp;
 
@@ -37,6 +37,7 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 &nbsp;
 
 ## ⚙️ Features
+
 - **Endless Train:** Wagons are automatically generated, providing an endless gameplay experience.
 
 - **Custom wagons:** Players have the ability to create and import their own wagons, which can then be found within the game.
@@ -46,6 +47,7 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 &nbsp;
 
 ## 🚩 Development checkpoints
+
 **CP1 - Project Vision (until week 3 - 10/03, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
@@ -99,16 +101,19 @@ Completed documentation from the user's perspective.
 &nbsp;
 
 ## :information_source: Game details
+
 For information about the game mechanics, storyline, and technical specifications, please refer to [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
 
 &nbsp;
 
 ## 🏗️ Development process
+
 [soon]
 
 &nbsp;
 
 ## 🚀 How to run
+
 ! Project is not runnable yet. !
 
 the instructions will be added later.
