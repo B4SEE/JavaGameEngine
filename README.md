@@ -15,7 +15,7 @@ Welcome to the "Infinity Express - Destination Abyss"
 
 ## Table of Contents
 - [About](./README.md#-about)
-- [Features](./README.md#%EF%B8%8F-features)
+- [Features](./README.md#gear-features)
 - [Development checkpoints](./README.md#-development-checkpoints)
 - [Requirements for project](./README.md#-requirements-for-project)
 - [Game details](./README.md#information_source-game-details)
@@ -36,7 +36,7 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 
 &nbsp;
 
-## ⚙️ Features
+## :gear: Features
 
 - **Endless Train:** Wagons are automatically generated, providing an endless gameplay experience.
 
