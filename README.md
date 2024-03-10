@@ -100,7 +100,7 @@ Completed documentation from the user's perspective.
 
 &nbsp;
 
-## :information_source: Game details
+## :information_source: Wiki
 
 For information about the game mechanics, storyline, and technical specifications, please refer to [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
 
@@ -108,7 +108,59 @@ For information about the game mechanics, storyline, and technical specification
 
 ## 🏗️ Development process
 
-[soon]
+<details><summary>Click to expand</summary>
+
+### **Week 1 - 2**
+
+<details><summary>Click to expand</summary>
+
+Main [idea](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home) of the game and initial planning. Basic model [schematic](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home) with the main classes was created. First logic for the iso engine and basic rendering was implemented.
+
+Video of the progress:
+
+![Week 1-2](./projectDevelopmentFiles/videos/isometric_demo.mp4)
+
+</details>
+
+---
+
+### **Week 3**
+
+<details><summary>Click to expand</summary>
+
+**05.03.24** - iso rendering was improved, collision detection added, player rendering and movement added, event handling added, main loop added;
+
+Video of the progress:
+
+![Week 3 05-03-2024](./projectDevelopmentFiles/videos/collision.mp4)
+
+**06.03.24** - drawing queue added, all constant numbers were replaced with variables, rendering was optimized; started working on game wiki.
+
+Video of the progress:
+
+![Week 3 06-03-2024](./projectDevelopmentFiles/videos/drawing_queue_works.mp4)
+
+![Week 3 06-03-2024-1](./projectDevelopmentFiles/videos/formulas_check.mp4)
+
+**09.03.24** - loading maps from files (human-readable) added, player movement was improved, entity rendering, movement and logic added, player's and entity's methods were merged, doc comments added; final version of the game wiki was uploaded.
+
+Video of the progress:
+
+![Week 3 09-03-2024](./projectDevelopmentFiles/videos/entity_added.mp4)
+
+**10.03.24** - slipping when colliding with a wall added, fighting logic added, player death logic added, basic reset and stopGame methods were added;
+
+Video of the progress:
+
+![Week 3 10-03-2024](./projectDevelopmentFiles/videos/wall_slipping.mp4)
+
+![Week 3 10-03-2024-1](./projectDevelopmentFiles/videos/fight.mp4)
+
+</details>
+
+---
+
+</details>
 
 &nbsp;
 
