@@ -8,6 +8,9 @@ public class Entity {
     private final String name;
     private String texturePath;
     private String type;
+    private String behaviour;
+    private int startPositionX;
+    private int startPositionY;
     private int positionX;
     private int positionY;
     private int height;
@@ -65,6 +68,29 @@ public class Entity {
         return type;
     }
 
+    public void setBehaviour(String behaviour) {
+        this.behaviour = behaviour;
+    }
+
+    public String getBehaviour() {
+        return behaviour;
+    }
+
+    public void setStartPositionX(int startPositionX) {
+        this.startPositionX = startPositionX;
+    }
+
+    public int getStartPositionX() {
+        return startPositionX;
+    }
+
+    public void setStartPositionY(int startPositionY) {
+        this.startPositionY = startPositionY;
+    }
+
+    public int getStartPositionY() {
+        return startPositionY;
+    }
     public void setPositionX(int positionX) {
         this.positionX = positionX;
     }
@@ -173,7 +199,7 @@ public class Entity {
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity != this) {
-                    if (entity.isAlive() && attackRange.contains(entity.getPositionX(), entity.getPositionY())) {
+                    if (entity.isAlive() && checkIntersection(attackRange, entity.getHitbox())) {
                         inRange[i] = entity;
                         i++;
                     }
@@ -181,5 +207,9 @@ public class Entity {
             }
         }
         return inRange;
+    }
+
+    private boolean checkIntersection(Shape shape1, Shape shape2) {
+        return shape1.getBoundsInParent().intersects(shape2.getBoundsInParent());
     }
 }
