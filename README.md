@@ -1,4 +1,8 @@
-# Infinity Express - Destination Abyss
+# Semester project for PJV (programming in Java) summer course 2023/2024
+
+---
+
+## Infinity Express - Destination Abyss
 Welcome to the "Infinity Express - Destination Abyss"
 
 "Infinity Express - Destination Abyss" represents both a game engine and a complete game, developed as a semester project for the PJV course.
@@ -10,17 +14,19 @@ Welcome to the "Infinity Express - Destination Abyss"
 &nbsp;
 
 ## Table of Contents
-- [About](./README.md#about)
-- [Features](./README.md#features)
-- [Development checkpoints](./README.md#development-checkpoints)
-- [Requirements for project](./README.md#requirements-for-project)
-- [Game details](./README.md#game-details)
+- [About](./README.md#About)
+- [Features](./README.md#Features)
+- [Development checkpoints](./README.md#Development-checkpoints)
+- [Requirements for project](./README.md#Requirements-for-project)
+- [Game details](./README.md#Game-details)
 - [Development process](./README.md#Development-process)
+- [How to run](./README.md#How-to-run)
+- [Contact](./README.md#Contact)
 
 &nbsp;
 
-<a name="about"></a>
 ## 🔎 About
+
 "Infinity Express - Destination Abyss" is an immersive 2D isometric game, challenging players to survive and ultimately escape from an infinite train journey.
 As the train endlessly chugs along, wagons are dynamically generated, providing a unique experience with every playthrough.
 Adding a personal touch, players can import custom wagon maps in TXT format, seamlessly integrating their creations into the game environment.
@@ -30,7 +36,6 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 
 &nbsp;
 
-<a name="features"></a>
 ## ⚙️ Features
 - **Endless Train:** Wagons are automatically generated, providing an endless gameplay experience.
 
@@ -40,7 +45,6 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 
 &nbsp;
 
-<a name="checkpoints"></a>
 ## 🚩 Development checkpoints
 **CP1 - Project Vision (until week 3 - 10/03, 23:59)** :heavy_check_mark:
 
@@ -67,7 +71,6 @@ Completed documentation from the user's perspective.
 
 &nbsp;
 
-<a name="technical-requirements"></a>
 ## 📋 Requirements for project
 
 <details><summary>Click to expand</summary>
@@ -95,12 +98,35 @@ Completed documentation from the user's perspective.
 
 &nbsp;
 
-<a name="game-details"></a>
 ## :information_source: Game details
 For information about the game mechanics, storyline, and technical specifications, please refer to [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
 
 &nbsp;
 
-<a name="development-process"></a>
 ## 🏗️ Development process
-[screenshots text]
+[soon]
+
+&nbsp;
+
+## 🚀 How to run
+! Project is not runnable yet. !
+
+the instructions will be added later.
+
+&nbsp;
+
+## 📞 Contact
+
+<details><summary>Click to expand</summary>
+
+### **Teacher** - [RNDr. Ladislav Serédi](https://usermap.cvut.cz/profile/91b0ad62-3bc8-4227-a6c0-4481d2ebd12f)
+
+📧 Email: [seredlad@fel.cvut.cz](mailto:seredlad@fel.cvut.cz)
+
+&nbsp;
+
+### **Author** - Eleonora Virych
+
+📧 Email: [virycele@fel.cvut.cz](mailto:seredlad@fel.cvut.cz)
+
+</details>
