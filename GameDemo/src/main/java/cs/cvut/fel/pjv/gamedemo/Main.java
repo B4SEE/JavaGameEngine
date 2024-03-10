@@ -1,6 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo;
 
 import cs.cvut.fel.pjv.gamedemo.IsometricEngine.Isometric;
+import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.application.Application;
@@ -15,13 +16,16 @@ import java.io.IOException;
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        Player player = new Player(0, "PLAYER_NAME", "player_front.png", 0, 0);
+        Player player = new Player(0, "PLAYER_NAME", "player_front.png", 400, 0);
         player.setHitBoxSize(1);
         player.setAttackRangeSize(1);
-        Entity entity = new Entity(1, "ENTITY_NAME", "player_front.png", "enemy", 0, 0, 1, 100, 10, null);
+        player.setHealth(Constants.PLAYER_MAX_HEALTH);
+        Entity entity = new Entity(1, "ENTITY_NAME", "player_front.png", "NEUTRAL", 0, 0, 1, 100, 1, null);
         entity.setHeight(2);
         entity.setHitBoxSize(1);
         entity.setAttackRangeSize(1);
+//        entity.setPositionX(100);
+//        entity.setPositionY(100);
         Entity[] entities = {entity};
         Isometric isometric = new Isometric();
         isometric.initialiseStage(stage);
