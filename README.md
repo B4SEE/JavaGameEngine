@@ -18,7 +18,7 @@ Welcome to the "Infinity Express - Destination Abyss"
 - [Features](./README.md#gear-features)
 - [Development checkpoints](./README.md#-development-checkpoints)
 - [Requirements for project](./README.md#-requirements-for-project)
-- [Game details](./README.md#information_source-game-details)
+- [Wiki](./README.md#information_source-wiki)
 - [Development process](./README.md#-development-process)
 - [How to run](./README.md#-how-to-run)
 - [Contact](./README.md#-contact)
