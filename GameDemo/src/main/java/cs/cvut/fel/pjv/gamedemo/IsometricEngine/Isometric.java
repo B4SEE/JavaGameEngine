@@ -5,20 +5,13 @@ import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.animation.AnimationTimer;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import javafx.scene.shape.*;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -38,6 +31,7 @@ public class Isometric {
 ////third number tile letter id (for example: AA, BB, CC)
 ////'_' separates tiles, '-' separates rows
     private String map = "";
+    private int[][] mapArray;
     private Object[][] objectsToDraw;
     private Shape walls;
     private Player player;
@@ -74,8 +68,12 @@ public class Isometric {
             } else if (l - lastTime < INTERVAL) {
                 updateWalls();
                 showCoordinatesOnCursor();
-                updateEntityPosition(player, playerDeltaX, playerDeltaY, 0, 0);
+                updatePlayerPosition();
                 moveEntities();
+                if (!player.isAlive()) {
+                    updateLabel("You died");
+                    stopGame();
+                }
             }
         }
     };
@@ -107,9 +105,9 @@ public class Isometric {
         grid.setPrefSize(1000, 1000);
         grid.setStyle("-fx-background-color: #000000;");
         placeMap();
-        Scene scene = new Scene(grid, 1600, 800);
+        Scene scene = mainStage.getScene();
         mainStage.setTitle("My JavaFX Application");
-        mainStage.setScene(scene);
+        mainStage.setResizable(false);
         mainStage.show();
         timer.start();
         scene.setOnKeyReleased(keyEvent -> {
@@ -141,9 +139,48 @@ public class Isometric {
                     player.setTexturePath("player_right.png");
                     updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
                     break;
+                case R:
+                    Entity[] entitiesInRange = player.inAttackRange(entities);
+                    if (entitiesInRange != null) {
+                        for (Entity entity : entitiesInRange) {
+                            if (entity != null) {
+                                if (entity.isAlive()) {
+                                    player.attack(entity);
+                                    if (Objects.equals(entity.getType(), "NEUTRAL")) {
+                                        entity.setType("ENEMY");
+                                    }
+                                }
+                            }
+                        }
+                    }
             }
             updateWalls();
         });
+    }
+    /**
+     * Resets the game.
+     * Resets the player and entities, clears the grid, and starts the game.
+     */
+    public void reset() {
+        resetPlayer();
+        resetEntities();
+        grid.getChildren().clear();
+        start();
+    }
+    public void stopGame() {
+        timer.stop();
+        grid.getChildren().clear();
+        label.setText("Game over");
+        label.setLayoutX(500);
+        label.setLayoutY(500);
+        label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+        grid.getChildren().add(label);
+        mainStage.getScene().onKeyPressedProperty().set(keyEvent -> {
+            if (keyEvent.getCode().toString().equals("ENTER")) {
+                reset();
+            }
+        });
+        mainStage.getScene().onKeyReleasedProperty().set(null);
     }
     /**
      * Initializes the main stage.
@@ -151,6 +188,8 @@ public class Isometric {
      */
     public void initialiseStage(Stage stage) {
         mainStage = stage;
+        Scene scene = new Scene(grid, 1600, 800);
+        mainStage.setScene(scene);
     }
     /**
      * Sets the player.
@@ -160,8 +199,31 @@ public class Isometric {
         this.player = player;
         player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), player.getHitBoxSize()));
         player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), 1));
+        player.setStartPositionX(player.getPositionX());
+        player.setStartPositionY(player.getPositionY());
         updatePlayerDeltaX(0);
         updatePlayerDeltaY(0);
+    }
+    /**
+     * Resets the player.
+     */
+    public void resetPlayer() {
+        grid.getChildren().remove(player.getEntityView());
+        grid.getChildren().remove(player.getHitbox());
+        grid.getChildren().remove(player.getAttackRange());
+
+        player.setHealth(Constants.PLAYER_MAX_HEALTH);
+        player.setPositionX(player.getStartPositionX());
+        player.setPositionY(player.getStartPositionY());
+        player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), player.getHitBoxSize()));
+        player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), 1));
+    }
+    /**
+     * Gets the player.
+     * @return the player
+     */
+    public Player getPlayer() {
+        return player;
     }
     /**
      * Sets the entities.
@@ -173,14 +235,33 @@ public class Isometric {
         for (Entity entity : this.entities) {
             entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
             entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
+            entity.setStartPositionX(entity.getPositionX());
+            entity.setStartPositionY(entity.getPositionY());
         }
     }
     /**
-     * Gets the player.
-     * @return the player
+     * Resets the entities.
      */
-    public Player getPlayer() {
-        return player;
+    public void resetEntities() {
+        for (Entity entity : entities) {
+            grid.getChildren().remove(entity.getEntityView());
+            grid.getChildren().remove(entity.getHitbox());
+            grid.getChildren().remove(entity.getAttackRange());
+            drawnEntities = new Entity[entities.length];
+
+            entity.setHealth(entity.getMaxHealth());
+            entity.setPositionX(entity.getStartPositionX());
+            entity.setPositionY(entity.getStartPositionY());
+            entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
+            entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
+        }
+    }
+    /**
+     * Gets the entities.
+     * @return the entities
+     */
+    public Entity[] getEntities() {
+        return entities;
     }
     /**
      * Sets the map.
@@ -252,59 +333,108 @@ public class Isometric {
         });
     }
     /**
+     * Updates the player's position.
+     * If the player's hitbox collides with the walls, the player's position is not updated.
+     */
+    public void updatePlayerPosition() {
+        mainStage.setTitle("player health: " + player.getHealth());
+        updateEntityPosition(player, playerDeltaX, playerDeltaY, Constants.PLAYER_BASIC_SPEED_X, Constants.PLAYER_BASIC_SPEED_Y);
+    }
+    /**
      * Updates the position of the entity.
      * @param entity the entity
      * @param deltaX the delta x
      * @param deltaY the delta y
-     * @param deltaSpeedX the delta speed x
-     * @param deltaSpeedY the delta speed y
+     * @param speedX the x-axis speed
+     * @param speedY the y-axis speed
      * if the entity's hitbox collides with the walls, the entity's position is not updated
-     * @return the updated entity position
      */
-    public void updateEntityPosition(Entity entity, int deltaX, int deltaY, int deltaSpeedX, int deltaSpeedY) {
-        System.out.println(entity.getHitbox().getTranslateX());
-        entity.getHitbox().translateXProperty().set(entity.getPositionX() + deltaX);
-        entity.getHitbox().translateYProperty().set(entity.getPositionY() + deltaY);
-        entity.getAttackRange().translateXProperty().set(entity.getPositionX() + deltaX);
-        entity.getAttackRange().translateYProperty().set(entity.getPositionY() + deltaY);
-        if (checkCollision(entity.getHitbox(), walls)) {
-            System.out.println("Collision with walls" + " at " + entity.getPositionX() + " " + entity.getPositionY());
-            return;
+    public void updateEntityPosition(Entity entity, int deltaX, int deltaY, int speedX, int speedY) {
+
+        //slipX and slipY are used to set how fast the entity will slip when trying to move diagonally
+        int slipX = 5;
+        int slipY = 5;
+
+        //logic for slipping when entity collides with walls
+        if (!tryToMove(entity, deltaX, deltaY)) {
+            if (deltaX > 0) {
+                if (tryToMove(entity, 0, -slipY)) {
+                    deltaY = -slipY;
+                } else if (tryToMove(entity, 0, slipY)) {
+                    deltaY = slipY;
+                } else {
+                    return;
+                }
+            } else if (deltaX < 0) {
+                if (tryToMove(entity, 0, slipY)) {
+                    deltaY = slipY;
+                } else if (tryToMove(entity, 0, -slipY)) {
+                    deltaY = -slipY;
+                } else {
+                    return;
+                }
+            } else if (deltaY > 0) {
+                if (tryToMove(entity, slipX, 0)) {
+                    deltaX = slipX;
+                    deltaY = 0;
+                } else if (tryToMove(entity, -slipX, 0)) {
+                    deltaX = -slipX;
+                    deltaY = 0;
+                } else {
+                    return;
+                }
+            } else if (deltaY < 0) {
+                if (tryToMove(entity, -slipX, 0)) {
+                    deltaX = -slipX;
+                    deltaY = 0;
+                } else if (tryToMove(entity, slipX, 0)) {
+                    deltaX = slipX;
+                    deltaY = 0;
+                } else {
+                    return;
+                }
+            }
         }
+
+        //normalise the vector for diagonal movement
         double mag = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-        int speedX = Constants.ENTITY_BASIC_SPEED_X + deltaSpeedX;
-        int speedY = Constants.ENTITY_BASIC_SPEED_Y + deltaSpeedY;
-        if (entity instanceof Player) {
-            speedX = Constants.PLAYER_BASIC_SPEED_X;
-            speedY = Constants.PLAYER_BASIC_SPEED_Y;
-        }
+
         deltaX = (int) (deltaX / mag * speedX / 2);
         deltaY = (int) (deltaY / mag * speedY / 2);
         entity.setPositionX(entity.getPositionX() + deltaX);
         entity.setPositionY(entity.getPositionY() + deltaY);
     }
+    private boolean tryToMove(Entity entity, int deltaX, int deltaY) {
+        entity.getHitbox().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
+        entity.getHitbox().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
+        entity.getAttackRange().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
+        entity.getAttackRange().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
+        if (checkCollision(entity.getHitbox(), walls)) {
+            return false;
+        }
+        return true;
+    }
     /**
      * Moves the entities towards the player.
      */
     public void moveEntities() {
-        //find deltaX and deltaY for each entity to move towards the player
         if (entities != null) {
             for (Entity entity : entities) {
                 if (entity != null && entity.isAlive()) {
-//                    if (entity.inAttackRange(new Entity[]{player})[0] != null) {
-//                        entity.attack(player);
-//                    } else {
-//                        int deltaX = player.getPositionX() - entity.getPositionX();
-//                        int deltaY = player.getPositionY() - entity.getPositionY();
-//                        updateEntityPosition(entity, deltaX, deltaY);
-//                    }
+                    if (Objects.equals(entity.getType(), "NEUTRAL")) {
+                        return;
+                    }
+                    if (entity.inAttackRange(new Entity[]{player})[0] != null) {
+                        entity.attack(player);
+                    }
+
                     int x = player.getPositionX() - entity.getPositionX();
                     int y = player.getPositionY() - entity.getPositionY();
 
                     int deltaX = x > 0 ? 1 : -1;
                     int deltaY = y > 0 ? 1 : -1;
 
-                    updateEntityPosition(entity, deltaX, deltaY,0,0);
+                    updateEntityPosition(entity, deltaX, deltaY,Constants.ENTITY_BASIC_SPEED_X, Constants.ENTITY_BASIC_SPEED_Y);
                 }
             }
         }
