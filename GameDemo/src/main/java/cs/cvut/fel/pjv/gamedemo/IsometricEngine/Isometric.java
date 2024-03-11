@@ -42,6 +42,7 @@ public class Isometric {
     private Stage mainStage;
     private Pane grid = new Pane();
     private Label label = new Label();
+    private long time;
     public Isometric() {
     }
     public Isometric(Stage stage) {
@@ -49,9 +50,8 @@ public class Isometric {
     }
 
     private AnimationTimer timer = new AnimationTimer() {
-        final long INTERVAL = 100000000000L;
+        final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
-
         /**
          * Updates the game state every INTERVAL nanoseconds.
          * Updates the walls and player position.
@@ -62,6 +62,8 @@ public class Isometric {
          */
         @Override
         public void handle(long l) {
+            time = l / (INTERVAL / 1000);
+            System.out.println(time);
             if (lastTime < 0) {
                 lastTime = l;
                 return;
@@ -69,14 +71,36 @@ public class Isometric {
                 updateWalls();
                 showCoordinatesOnCursor();
                 updatePlayerPosition();
-                moveEntities();
+
+                updateEntities();
+
                 if (!player.isAlive()) {
                     updateLabel("You died");
                     stopGame();
                 }
+
+                updateLabel("Player health: " + player.getHealth());
             }
         }
     };
+
+    /**
+     * Updates the entities.
+     */
+    private void updateEntities() {
+        if (entities == null) {
+            return;
+        }
+        for (Entity entity : entities) {
+            if (entity != null && entity.isAlive()) {
+                if (Objects.equals(entity.getType(), "NEUTRAL")) {
+                    return;
+                }
+                moveEntities();
+                tryAttackPlayer(entity);
+            }
+        }
+    }
 
     /**
      * Initializes and starts the game.
@@ -421,22 +445,36 @@ public class Isometric {
         if (entities != null) {
             for (Entity entity : entities) {
                 if (entity != null && entity.isAlive()) {
-                    if (Objects.equals(entity.getType(), "NEUTRAL")) {
-                        return;
-                    }
-                    if (entity.inAttackRange(new Entity[]{player})[0] != null) {
-                        entity.attack(player);
-                    }
 
                     int x = player.getPositionX() - entity.getPositionX();
                     int y = player.getPositionY() - entity.getPositionY();
 
                     int deltaX = x > 0 ? 1 : -1;
                     int deltaY = y > 0 ? 1 : -1;
+                    //A* algorithm needed
 
                     updateEntityPosition(entity, deltaX, deltaY,Constants.ENTITY_BASIC_SPEED_X, Constants.ENTITY_BASIC_SPEED_Y);
                 }
             }
+        }
+    }
+
+    /**
+     * Checks if the entity can attack the player.
+     * If the entity is in attack range and can attack, the entity attacks the player.
+     * Entity cannot attack while the cooldown is active.
+     * @param entity
+     */
+    private void tryAttackPlayer(Entity entity) {
+        if ((entity.inAttackRange(new Entity[]{player})[0] != null) && entity.getCanAttack()) {
+            entity.attack(player);
+            entity.setCanAttack(false);
+            entity.setWhenAttacked(time);
+            return;
+        }
+        if (!entity.getCanAttack() && (time - entity.getWhenAttacked() != 0) && (time - entity.getWhenAttacked()) % entity.getCooldown() == 0) {
+            entity.setCanAttack(true);
+            entity.setWhenAttacked(0);
         }
     }
     /**
