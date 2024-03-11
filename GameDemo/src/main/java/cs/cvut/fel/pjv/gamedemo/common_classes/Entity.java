@@ -21,6 +21,11 @@ public class Entity {
     private int health;
     private final int maxHealth;
     private int damage;
+    //
+    private int cooldown;
+    private boolean canAttack = true;
+    private long whenAttacked;
+    //
     private ImageView entityView;
 
     private Wagon currentWagon;
@@ -158,6 +163,30 @@ public class Entity {
 
     public int getDamage() {
         return damage;
+    }
+
+    public void setCooldown(int cooldown) {
+        this.cooldown = cooldown;
+    }
+
+    public int getCooldown() {
+        return cooldown;
+    }
+
+    public void setCanAttack(boolean canAttack) {
+        this.canAttack = canAttack;
+    }
+
+    public boolean getCanAttack() {
+        return canAttack;
+    }
+
+    public void setWhenAttacked(long whenAttacked) {
+        this.whenAttacked = whenAttacked;
+    }
+
+    public long getWhenAttacked() {
+        return whenAttacked;
     }
 
     public void setEntityView(ImageView entityView) {
