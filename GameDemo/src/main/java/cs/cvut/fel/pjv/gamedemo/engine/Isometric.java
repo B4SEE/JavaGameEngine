@@ -64,7 +64,7 @@ public class Isometric {
         }
         for (Entity entity : entities) {
             if (entity != null && entity.isAlive()) {
-                if (Objects.equals(entity.getType(), "NEUTRAL")) {
+                if (Objects.equals(entity.getBehaviour(), "NEUTRAL")) {
                     return;
                 }
                 moveEntities();
@@ -267,7 +267,7 @@ public class Isometric {
             entity.setPositionY(entity.getStartPositionY());
             entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
             entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
-            entity.setType(entity.getInitialType());
+            entity.setBehaviour(entity.getInitialBehaviour());
         }
     }
     /**
@@ -484,8 +484,8 @@ public class Isometric {
                 if (entity != null) {
                     if (entity.isAlive()) {
                         player.attack(entity);
-                        if (Objects.equals(entity.getType(), "NEUTRAL")) {
-                            entity.setType("ENEMY");
+                        if (Objects.equals(entity.getBehaviour(), "NEUTRAL")) {
+                            entity.setBehaviour("ENEMY");
                         }
                     }
                 }
