@@ -1,10 +1,9 @@
-package cs.cvut.fel.pjv.gamedemo.IsometricEngine;
+package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
-import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -18,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Isometric {
     private final int TILE_WIDTH = 32;
@@ -31,7 +31,6 @@ public class Isometric {
 ////third number tile letter id (for example: AA, BB, CC)
 ////'_' separates tiles, '-' separates rows
     private String map = "";
-    private int[][] mapArray;
     private Object[][] objectsToDraw;
     private Shape walls;
     private Player player;
@@ -39,55 +38,27 @@ public class Isometric {
     private Entity[] drawnEntities;
     private int playerDeltaX = 0;
     private int playerDeltaY = 0;
-    private Stage mainStage;
+    protected Stage mainStage;
     private Pane grid = new Pane();
     private Label label = new Label();
     private long time;
+    private Scene isoScene;
     public Isometric() {
     }
     public Isometric(Stage stage) {
         initialiseStage(stage);
     }
+    public void updateTime(long time) {
+        this.time = time;
+    }
 
-    private AnimationTimer timer = new AnimationTimer() {
-        final long INTERVAL = 1_000_000_000_000L;
-        long lastTime = -1;
-        /**
-         * Updates the game state every INTERVAL nanoseconds.
-         * Updates the walls and player position.
-         * If the last time is not set, sets it to the current time.
-         * If the time difference between the last time and the current time is less than INTERVAL,
-         * updates the walls, shows the cursor coordinates, and updates the player position.
-         * @param l current time in nanoseconds
-         */
-        @Override
-        public void handle(long l) {
-            time = l / (INTERVAL / 1000);
-            System.out.println(time);
-            if (lastTime < 0) {
-                lastTime = l;
-                return;
-            } else if (l - lastTime < INTERVAL) {
-                updateWalls();
-                showCoordinatesOnCursor();
-                updatePlayerPosition();
-
-                updateEntities();
-
-                if (!player.isAlive()) {
-                    updateLabel("You died");
-                    stopGame();
-                }
-
-                updateLabel("Player health: " + player.getHealth());
-            }
-        }
-    };
-
+    public void showHealth() {
+        mainStage.setTitle("player health: " + player.getHealth());
+    }
     /**
      * Updates the entities.
      */
-    private void updateEntities() {
+    public void updateEntities() {
         if (entities == null) {
             return;
         }
@@ -100,6 +71,24 @@ public class Isometric {
                 tryAttackPlayer(entity);
             }
         }
+    }
+
+    public boolean checkEntities() {
+        if (!player.isAlive()) {
+            return true;
+        }
+        if (entities != null) {
+            for (Entity entity : entities) {
+                if (entity != null && entity.isAlive()) {
+                    if (!entity.isAlive()) {
+                        grid.getChildren().remove(entity.getEntityView());
+                        grid.getChildren().remove(entity.getHitbox());
+                        grid.getChildren().remove(entity.getAttackRange());
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -129,57 +118,15 @@ public class Isometric {
         grid.setPrefSize(1000, 1000);
         grid.setStyle("-fx-background-color: #000000;");
         placeMap();
-        Scene scene = mainStage.getScene();
+        isoScene = mainStage.getScene();
         mainStage.setTitle("My JavaFX Application");
         mainStage.setResizable(false);
         mainStage.show();
-        timer.start();
-        scene.setOnKeyReleased(keyEvent -> {
-            switch (keyEvent.getCode()) {
-                case W, S:
-                    updatePlayerDeltaY(0);
-                    break;
-                case A, D:
-                    updatePlayerDeltaX(0);
-                    break;
-            }
-        });
-        //player movement is laggy, don't know why, need to fix
-        scene.setOnKeyPressed(keyEvent -> {
-            switch (keyEvent.getCode()) {
-                case W:
-                    player.setTexturePath("player_back.png");
-                    updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
-                    break;
-                case S:
-                    player.setTexturePath("player_front.png");
-                    updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
-                    break;
-                case A:
-                    player.setTexturePath("player_left.png");
-                    updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
-                    break;
-                case D:
-                    player.setTexturePath("player_right.png");
-                    updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
-                    break;
-                case R:
-                    Entity[] entitiesInRange = player.inAttackRange(entities);
-                    if (entitiesInRange != null) {
-                        for (Entity entity : entitiesInRange) {
-                            if (entity != null) {
-                                if (entity.isAlive()) {
-                                    player.attack(entity);
-                                    if (Objects.equals(entity.getType(), "NEUTRAL")) {
-                                        entity.setType("ENEMY");
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
-            updateWalls();
-        });
+        setKeyHandleToMovement();
+    }
+
+    public void updatePlayerTexture(String texturePath) {
+        player.setTexturePath(texturePath);
     }
     /**
      * Resets the game.
@@ -191,20 +138,62 @@ public class Isometric {
         grid.getChildren().clear();
         start();
     }
-    public void stopGame() {
-        timer.stop();
-        grid.getChildren().clear();
-        label.setText("Game over");
-        label.setLayoutX(500);
-        label.setLayoutY(500);
-        label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-        grid.getChildren().add(label);
-        mainStage.getScene().onKeyPressedProperty().set(keyEvent -> {
-            if (keyEvent.getCode().toString().equals("ENTER")) {
-                reset();
+    public void resumeGame() {
+        if (mainStage.getScene() != isoScene) {
+            mainStage.setScene(isoScene);
+        }
+    }
+    public void setHandleToNull() {
+        isoScene.onKeyReleasedProperty().set(null);
+        isoScene.onKeyPressedProperty().set(null);
+    }
+    public void setKeyHandleToMovement() {
+        isoScene.setOnKeyReleased(keyEvent -> {
+            switch (keyEvent.getCode()) {
+                case W, S:
+                    updatePlayerDeltaY(0);
+                    break;
+                case A, D:
+                    updatePlayerDeltaX(0);
+                    break;
             }
         });
-        mainStage.getScene().onKeyReleasedProperty().set(null);
+        isoScene.setOnKeyPressed(keyEvent -> {
+            switch (keyEvent.getCode()) {
+                case W:
+                    updatePlayerTexture("player_back.png");
+                    updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
+                    break;
+                case S:
+                    updatePlayerTexture("player_front.png");
+                    updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
+                    break;
+                case A:
+                    updatePlayerTexture("player_left.png");
+                    updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
+                    break;
+                case D:
+                    updatePlayerTexture("player_right.png");
+                    updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
+                    break;
+                case R:
+                    playerAttack();
+            }
+            updateWalls();
+        });
+    }
+    public void clearAll() {
+        grid.getChildren().clear();
+        objectsToDraw = null;
+        map = "";
+        walls = null;
+        player = null;
+        entities = null;
+        drawnEntities = null;
+        playerDeltaX = 0;
+        playerDeltaY = 0;
+        label = new Label();
+        time = 0;
     }
     /**
      * Initializes the main stage.
@@ -212,7 +201,7 @@ public class Isometric {
      */
     public void initialiseStage(Stage stage) {
         mainStage = stage;
-        Scene scene = new Scene(grid, 1600, 800);
+        Scene scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         mainStage.setScene(scene);
     }
     /**
@@ -278,6 +267,7 @@ public class Isometric {
             entity.setPositionY(entity.getStartPositionY());
             entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
             entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
+            entity.setType(entity.getInitialType());
         }
     }
     /**
@@ -315,22 +305,28 @@ public class Isometric {
                 ImageView object = new ImageView(objectTexture);
                 object.setFitWidth(TILE_WIDTH);
                 object.setFitHeight(TILE_HEIGHT);
+                //rotate 45 if floor
+                if (objectsToDraw[i][j].getHeight() == 0) {
+                    object.setRotate(45);
+                }
                 grid.add(object, j, i);
             }
         }
         grid.setPrefSize(1000, 1000);
         mainStage.setTitle("Map preview");
         grid.setStyle("-fx-background-color: #000000;");
-        mainStage.setScene(new Scene(grid, 1600, 800));
+        mainStage.setScene(new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT));
         mainStage.show();
     }
     /**
      * Updates the label with the specified text.
      * @param text the text to display
      */
-    public void updateLabel(String text) {
+    public void updateLabel(String text, int x, int y) {
         grid.getChildren().remove(label);
         label.setText(text);
+        label.setLayoutX(x);
+        label.setLayoutY(y);
         label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
         grid.getChildren().add(label);
     }
@@ -466,6 +462,9 @@ public class Isometric {
      * @param entity
      */
     private void tryAttackPlayer(Entity entity) {
+        if (entity.getCooldown() == 0) {
+            entity.setCanAttack(true);
+        }
         if ((entity.inAttackRange(new Entity[]{player})[0] != null) && entity.getCanAttack()) {
             entity.attack(player);
             entity.setCanAttack(false);
@@ -475,6 +474,22 @@ public class Isometric {
         if (!entity.getCanAttack() && (time - entity.getWhenAttacked() != 0) && (time - entity.getWhenAttacked()) % entity.getCooldown() == 0) {
             entity.setCanAttack(true);
             entity.setWhenAttacked(0);
+        }
+    }
+
+    public void playerAttack() {
+        Entity[] entitiesInRange = player.inAttackRange(entities);
+        if (entitiesInRange != null) {
+            for (Entity entity : entitiesInRange) {
+                if (entity != null) {
+                    if (entity.isAlive()) {
+                        player.attack(entity);
+                        if (Objects.equals(entity.getType(), "NEUTRAL")) {
+                            entity.setType("ENEMY");
+                        }
+                    }
+                }
+            }
         }
     }
     /**
@@ -506,7 +521,7 @@ public class Isometric {
     /**
      * Updates the walls.
      */
-    private void updateWalls() {
+    public void updateWalls() {
         grid.getChildren().remove(player.getEntityView());
         grid.getChildren().remove(player.getHitbox());
         grid.getChildren().remove(player.getAttackRange());
