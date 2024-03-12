@@ -9,9 +9,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class GameLogic {
     private Isometric isometric;
     private Stage stage;
@@ -21,10 +18,6 @@ public class GameLogic {
         long lastTime = -1;
         /**
          * Updates the game state every INTERVAL nanoseconds.
-         * Updates the walls and player position.
-         * If the last time is not set, sets it to the current time.
-         * If the time difference between the last time and the current time is less than INTERVAL,
-         * updates the walls, shows the cursor coordinates, and updates the player position.
          * @param l current time in nanoseconds
          */
         @Override
@@ -35,13 +28,21 @@ public class GameLogic {
             } else if (l - lastTime < INTERVAL) {
                 isometric.updateWalls();
 
-                isometric.showHealth();
+//                isometric.showHealth();
 
                 isometric.updateEntities();
 
                 isometric.updatePlayerPosition();
 
                 isometric.updateTime(time);
+
+//                if (time % 2 == 0) {
+//                    //check if player can interact with object
+//
+//                }
+                if (isometric.checkIfPlayerCanInteract()) {
+                    System.out.println("Player can interact");
+                }
 
                 if (isometric.checkEntities()) {
                     isometric.setHandleToNull();
@@ -50,29 +51,49 @@ public class GameLogic {
             }
         }
     };
-    public void restartGame() {
-        isometric.reset();
-        timer.start();
-    }
     public GameLogic(Stage stage) {
         isometric = new Isometric();
         this.stage = stage;
     }
+    /**
+     * Restarts the game.
+     */
+    public void restartGame() {
+        isometric.reset();
+        timer.start();
+    }
+    /**
+     * Starts the game.
+     */
     public void start() {
         isometric.start();
         timer.start();
     }
+    /**
+     * Pauses the game.
+     */
     public void pauseGame() {
         timer.stop();
     }
+    /**
+     * Resumes the game.
+     */
     public void resumeGame() {
-        isometric.resumeGame();
         timer.start();
     }
+    /**
+     * Ends the game.
+     */
     public void endGame() {
         timer.stop();
         stage.close();
     }
+    /**
+     * Stops the game.
+     * Shows the death scene.
+     * Allows the player to restart the game or exit to the main menu.
+     * @see #mainMenu()
+     */
     public void stopGame() {
         timer.stop();
         //save game scene
@@ -103,6 +124,13 @@ public class GameLogic {
             }
         });
     }
+
+    /**
+     * Loads the game.
+     * @param player player
+     * @param entities entities
+     * @param mapPath path to the map
+     */
     public void loadGame(Player player, Entity[] entities, String mapPath) {
         if (player == null || mapPath == null) {
             throw new IllegalArgumentException("Invalid input");
@@ -113,10 +141,15 @@ public class GameLogic {
             isometric.setEntities(entities);
         }
         isometric.setMap(mapPath);
-        start();
     }
+    /**
+     * Saves the game.
+     */
     public void saveGame() {
     }
+    /**
+     * Shows the main menu.
+     */
     public void mainMenu() {
         isometric.clearAll();
         GridPane grid = new GridPane();
