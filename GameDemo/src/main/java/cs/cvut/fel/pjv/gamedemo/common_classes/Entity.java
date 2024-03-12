@@ -8,6 +8,7 @@ public class Entity {
     private final String name;
     private String texturePath;
     private String type;
+    private String initialBehaviour;
     private String behaviour;
     private int startPositionX;
     private int startPositionY;
@@ -71,6 +72,14 @@ public class Entity {
 
     public String getType() {
         return type;
+    }
+
+    public String getInitialBehaviour() {
+        return initialBehaviour;
+    }
+
+    public void setInitialBehaviour(String initialType) {
+        this.initialBehaviour = initialType;
     }
 
     public void setBehaviour(String behaviour) {
