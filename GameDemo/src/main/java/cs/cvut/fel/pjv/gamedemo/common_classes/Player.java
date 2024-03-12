@@ -8,14 +8,19 @@ public class Player extends Entity {
     private int money = 0;
 
     public Player(int id, String name, String texturePath, int positionX, int positionY) {
-        super(id, name, texturePath, "PLAYER", positionX, positionY, 0, 0, 0, null);
+        super(id, name, texturePath, "PLAYER", positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
         super.setHeight(2);
-        this.maxHunger = 0;
+        super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
+        this.hunger = Constants.PLAYER_MAX_HUNGER;
+        this.maxHunger = Constants.PLAYER_MAX_HUNGER;
+        this.handItem = null;
+        this.playerInventory = new Inventory(Constants.PLAYER_INVENTORY_SIZE);
     }
 
     public Player(Wagon currentWagon) {
         super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
         super.setHeight(2);
+        super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.handItem = null;
