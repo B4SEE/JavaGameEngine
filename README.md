@@ -125,6 +125,6 @@ the instructions will be added later.
 
 ### **Author** - Eleonora Virych
 
-📧 Email: [virycele@fel.cvut.cz](mailto:seredlad@fel.cvut.cz)
+📧 Email: [virycele@fel.cvut.cz](mailto:virycele@fel.cvut.cz)
 
 </details>
