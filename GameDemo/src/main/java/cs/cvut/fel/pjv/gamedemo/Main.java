@@ -15,13 +15,14 @@ public class Main extends Application {
         player.setHitBoxSize(1);
         player.setAttackRangeSize(1);
         player.setHealth(Constants.PLAYER_MAX_HEALTH);
-        Entity entity = new Entity(1, "ENTITY_NAME", "player_front.png", "NEUTRAL", 0, 0, 1, 100, 10, null);
+        Entity entity = new Entity(1, "ENTITY_NAME", "player_front.png", "ENTITY", 0, 0, 1, 100, 10, null);
         entity.setHeight(2);
         entity.setHitBoxSize(1);
         entity.setAttackRangeSize(1);
         entity.setWhenAttacked(0);
         entity.setCooldown(0);
-        entity.setInitialType(entity.getType());
+        entity.setBehaviour("NEUTRAL");
+        entity.setInitialBehaviour(entity.getBehaviour());
         Entity[] entities = {entity};
 //        Inventory inventory = new Inventory(50);
 //        Item item = new Item(0, "ITEM_NAME", "block_wall.png");
