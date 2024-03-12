@@ -37,4 +37,14 @@ public class Constants {
             "HW", "wagon_wall_2",
             "WW", "wagon_wall_3"
     );
+    public static final Map <String, String> INTERACTIVE_OBJECTS = Map.of(
+            "WD", "3h_block.png",//wagon_door.png
+            "LD", "lockable_door.png",
+            "CO", "block_wall.png"//chest_object.png
+    );
+    public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.of(
+            "WD", "wagon_door",
+            "LD", "lockable_door",
+            "CO", "chest_object"
+    );
 }
