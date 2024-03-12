@@ -15,7 +15,9 @@ public class Constants {
     public static final int ENTITY_BASIC_SPEED_X = 3;
     public static final int ENTITY_BASIC_SPEED_Y = 3;
     public static final int TRAIN_WAGONS = 10;
-
+    public static final int INVENTORY_WIDTH = 10;
+    public static final int WINDOW_WIDTH = 1600;
+    public static final int WINDOW_HEIGHT = 800;
     public static final Map <String, String> OBJECT_IDS = Map.of(
             "BB", "0.png",
             "BG", "0.png",
