@@ -5,8 +5,6 @@ public class Door extends Object {
     public Door(int id, String name, String texturePath, int[] targetId_teleportX_teleportY, boolean isLocked) {
         super(id, name, texturePath);
         super.setObjectInventory(null);
-        super.setHeight(1);
-        super.setIsSolid(true);
         this.targetId_teleportX_teleportY = targetId_teleportX_teleportY;
         this.isLocked = isLocked;
     }
