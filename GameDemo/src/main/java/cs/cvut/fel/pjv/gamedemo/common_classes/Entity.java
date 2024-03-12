@@ -3,6 +3,8 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Shape;
 
+import java.util.Objects;
+
 public class Entity {
     private final int id;
     private final String name;
@@ -215,11 +217,15 @@ public class Entity {
     }
 
     public void takeDamage(int damage) {
+        System.out.println(name + " took " + damage + " damage.");
         health -= damage;
     }
 
     public void attack(Entity target) {
         target.takeDamage(damage);
+        if (Objects.equals(target.getBehaviour(), "NEUTRAL")) {
+            target.setBehaviour("ENEMY");
+        }
     }
 
     public void move(int deltaX, int deltaY) {
@@ -231,6 +237,11 @@ public class Entity {
         return health > 0;
     }
 
+    /**
+     * Returns an array of entities in the attack range of the entity.
+     * @param entities array of entities
+     * @return array of entities in the attack range of the entity
+     */
     public Entity[] inAttackRange(Entity[] entities) {
         Entity[] inRange = new Entity[entities.length];
         int i = 0;
@@ -246,7 +257,12 @@ public class Entity {
         }
         return inRange;
     }
-
+    /**
+     * Checks if the entity's attack range intersects with the hitbox of another entity.
+     * @param shape1 attack range of the entity
+     * @param shape2 hitbox of another entity
+     * @return true if the attack range intersects with the hitbox of another entity, false otherwise
+     */
     private boolean checkIntersection(Shape shape1, Shape shape2) {
         return shape1.getBoundsInParent().intersects(shape2.getBoundsInParent());
     }
