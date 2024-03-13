@@ -4,7 +4,9 @@ public class Door extends Object {
     private boolean isLocked;
     public Door(int id, String name, String texturePath, int[] targetId_teleportX_teleportY, boolean isLocked) {
         super(id, name, texturePath);
+        super.setTwoLetterId(Constants.WAGON_DOOR);
         super.setObjectInventory(null);
+        super.setIsSolid(true);
         this.targetId_teleportX_teleportY = targetId_teleportX_teleportY;
         this.isLocked = isLocked;
     }
