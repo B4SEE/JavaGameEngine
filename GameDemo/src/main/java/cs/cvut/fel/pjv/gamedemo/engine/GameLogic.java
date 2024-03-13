@@ -1,10 +1,11 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
+import cs.cvut.fel.pjv.gamedemo.common_classes.Wagon;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -87,6 +88,7 @@ public class GameLogic {
     public void endGame() {
         timer.stop();
         stage.close();
+        System.exit(0);
     }
     /**
      * Stops the game.
@@ -128,19 +130,24 @@ public class GameLogic {
     /**
      * Loads the game.
      * @param player player
-     * @param entities entities
-     * @param mapPath path to the map
+     * @param wagon wagon to be loaded
      */
-    public void loadGame(Player player, Entity[] entities, String mapPath) {
-        if (player == null || mapPath == null) {
+    public void loadGame(Player player, Wagon wagon) {
+        if (player == null || wagon == null) {
             throw new IllegalArgumentException("Invalid input");
         }
+
+        //question: entities represented by wagon in array, how can I add new entities to the wagon?
+        //should I make fixed size of the array for maximum entities count and then add entities to the array?
+        //or should I make the array dynamic and add entities to the array?
+
+        //is my code even correct?
+
         isometric.initialiseStage(stage);
         isometric.setPlayer(player);
-        if (entities != null) {
-            isometric.setEntities(entities);
-        }
-        isometric.setMap(mapPath);
+        wagon.generateWagon();
+        System.out.println(wagon.getSeed());
+        isometric.initialiseWagon(wagon);
     }
     /**
      * Saves the game.
@@ -160,5 +167,12 @@ public class GameLogic {
         grid.add(label, 0, 0);
         Scene mainMenuScene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         stage.setScene(mainMenuScene);
+
+        Button exitButton = new Button("Exit");
+        exitButton.setOnAction(actionEvent -> {
+            endGame();
+        });
+        exitButton.setStyle("-fx-font-size: 20; -fx-text-fill: #e31111;");
+        grid.add(exitButton, 0, 1);
     }
 }
