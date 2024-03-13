@@ -19,7 +19,7 @@ public class Train {
             }
         }
         //if no empty space is found, remove the oldest wagon (with the lowest id)
-        removeWagon(wagonsArray[findMinId()]);
+        removeWagon(wagonsArray[findMinWagonId()]);
         addWagon(wagon);
     }
 
@@ -31,13 +31,23 @@ public class Train {
         }
     }
 
-    private int findMinId() {
-        int minId = wagonsArray[0].id;
+    private int findMinWagonId() {
+        int minId = wagonsArray[0].getId();
         for (int i = 1; i < wagonsArray.length; i++) {
-            if (wagonsArray[i].id < minId) {
-                minId = wagonsArray[i].id;
+            if (wagonsArray[i].getId() < minId) {
+                minId = wagonsArray[i].getId();
             }
         }
         return minId;
+    }
+
+    public int findMaxWagonId() {
+        int maxId = wagonsArray[0].getId();
+        for (int i = 1; i < wagonsArray.length; i++) {
+            if (wagonsArray[i].getId() > maxId) {
+                maxId = wagonsArray[i].getId();
+            }
+        }
+        return maxId;
     }
 }
