@@ -1,19 +1,20 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
+import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.*;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Isometric {
@@ -24,9 +25,17 @@ public class Isometric {
 
     //    map example: 11AA_12BB_13CC-21AA_00AA_00BB
 //first number tile type: 0 - floor (not Solid), 1 - wall (Solid), 2 - interactive: chest object (not solid), lockable door (solid/not solid), wagon door (solid)
+//type 3 is invalid and used only to generate wagon, wagon seed is valid map and only contains 0, 1, 2;
 //second number tile height min 1, max 3; floor height is always 0; responsible for drawing order (if player should be drawn in front or behind the object)
 //third number tile letter id (for example: AA, BB, CC), represents texture; Dictionaries are in Constants class
 //'_' separates tiles, '-' separates rows
+
+    //question: can I move some of the methods to other classes?
+
+    //question: can I interpreter Isometric class as a graphic (game) engine? or is it too specific?
+    //it became even more specific after adding relation with Wagon class, maps cannot be generated and placed without initialised Wagon instance;
+
+    //Note: need to implement A* algorithm for entity movement
     private String map = "";
     private Object[][] objectsToDraw;
     private Object[] interactiveObjects;
@@ -79,7 +88,7 @@ public class Isometric {
         }
         for (Entity entity : entities) {
             if (entity != null && entity.isAlive()) {
-                if (Objects.equals(entity.getBehaviour(), "NEUTRAL")) {
+                if (Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
                     return;
                 }
                 moveEntities();
@@ -157,7 +166,7 @@ public class Isometric {
             System.out.println("Exiting the program");
             System.exit(1);
         }
-        if (!loadMap(map)) {
+        if (!checkStringMapValidity(map)) {
             System.out.println("Map string is not valid");
             System.out.println("Exiting the program");
             System.exit(1);
@@ -166,7 +175,6 @@ public class Isometric {
         grid.setStyle("-fx-background-color: #000000;");
         placeMap();
         isoScene = mainStage.getScene();
-//        mainStage.setTitle("My JavaFX Application");
         mainStage.setResizable(false);
         mainStage.show();
         setKeyHandleToMovement();
@@ -261,6 +269,25 @@ public class Isometric {
         Scene scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         mainStage.setScene(scene);
     }
+    public void initialiseWagon(Wagon wagon) {
+        if (wagon == null) {
+            wagon = new Wagon("DEFAULT");
+            wagon.generateWagon();
+        }
+        setMap(wagon.getSeed());
+        setObjectsToDraw(wagon.getObjectsArray());
+        setInteractiveObjects(wagon.getInteractiveObjects());
+        setEntities(wagon.getEntitiesArray());
+    }
+    public void setMap(String map) {
+        this.map = map;
+    }
+    public void setObjectsToDraw(Object[][] objectsToDraw) {
+        this.objectsToDraw = objectsToDraw;
+    }
+    public void setInteractiveObjects(Object[] interactiveObjects) {
+        this.interactiveObjects = interactiveObjects;
+    }
     /**
      * Sets the player.
      * @param player the player
@@ -335,13 +362,6 @@ public class Isometric {
         return entities;
     }
     /**
-     * Sets the map.
-     * @param filePath the file path of the map
-     */
-    public void setMap(String filePath) {
-        this.map = loadMapFromFile(filePath);
-    }
-    /**
      * Displays a preview of the map using the specified map data.
      * If the map data is invalid, an error message is printed and the function returns.
      * Otherwise, the map is loaded and displayed in a GridPane with objects represented by images.
@@ -352,7 +372,10 @@ public class Isometric {
             System.out.println("Map is not valid");
             return;
         }
-        loadMap(map);
+        if (objectsToDraw == null) {
+            System.out.println("Map was not initialised properly");
+            return;
+        }
         GridPane grid = new GridPane();
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
@@ -430,8 +453,8 @@ public class Isometric {
     public void updateEntityPosition(Entity entity, int deltaX, int deltaY, int speedX, int speedY) {
 
         //slipX and slipY are used to set how fast the entity will slip when trying to move diagonally
-        int slipX = 5;
-        int slipY = 5;
+        int slipX = Constants.SLIP_X;
+        int slipY = Constants.SLIP_Y;
 
         //logic for slipping when entity collides with walls
         if (!tryToMove(entity, deltaX, deltaY)) {
@@ -518,7 +541,7 @@ public class Isometric {
                     int deltaY = y > 0 ? 1 : -1;
                     //A* algorithm needed
 
-                    updateEntityPosition(entity, deltaX, deltaY,Constants.ENTITY_BASIC_SPEED_X, Constants.ENTITY_BASIC_SPEED_Y);
+                    updateEntityPosition(entity, deltaX, deltaY, Constants.ENTITY_BASIC_SPEED_X, Constants.ENTITY_BASIC_SPEED_Y);
                 }
             }
         }
@@ -652,113 +675,33 @@ public class Isometric {
         }
     }
     /**
-     * Loads the map from the specified file path.
-     * @param path the file path of the map
-     * @return the map as a string
-     */
-    private String loadMapFromFile(String path) {
-        File file = new File(path);
-        StringBuilder map = new StringBuilder();
-        try {
-            java.util.Scanner scanner = new java.util.Scanner(file);
-            while (scanner.hasNextLine()) {
-                map.append(scanner.nextLine());
-                map.append("-");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return map.toString();
-    }
-    /**
-     * Loads the map from the specified string.
-     * @param map the map as a string
-     * @return true if the map was loaded successfully, false otherwise
-     */
-    private boolean loadMap(String map) {
-        if (!checkStringMapValidity(map)) {
-            return false;
-        }
-        String[] rows = map.split("-");
-        String[] subRows = rows[0].split("_");
-        objectsToDraw = new Object[rows.length][subRows.length];
-        int interactiveObjectsCount = 0;
-        for (int i = 0; i < rows.length; i++) {
-            subRows = rows[i].split("_");
-            for (int j = 0; j < subRows.length; j++) {
-                if (subRows[j].charAt(0) == '0') {
-                    String letterID = subRows[j].substring(2, 4);
-                    Object object = new Object(Character.getNumericValue(Character.getNumericValue(subRows[j].charAt(0))), Constants.OBJECT_NAMES.get(letterID), Constants.OBJECT_IDS.get(letterID), letterID, 0, 0, 0, false);
-
-                    objectsToDraw[i][j] = object;
-                    continue;
-                }
-                //initialise interactive objects (wagon door, lockable door and chest object)
-                if (subRows[j].charAt(0) == '2') {
-                    String letterID = subRows[j].substring(2, 4);
-                    interactiveObjectsCount++;
-                    if (letterID.equals("CO")) {
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, 0, 0, 0, false);
-                        object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
-                        System.out.println(object.getObjectInventory().inventorySize);
-                        object.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
-                        object.setIsSolid(false);
-                        objectsToDraw[i][j] = object;
-                    }
-                    if (letterID.equals("LD")) {
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, false);
-                        object.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
-                        objectsToDraw[i][j] = object;
-                    }
-                    if (letterID.equals("WD")) {
-                        Door wagonDoor = new Door(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), new int[]{-1, 0, 0}, false);
-                        wagonDoor.setIsSolid(true);
-                        wagonDoor.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
-                        objectsToDraw[i][j] = wagonDoor;
-                    }
-                    continue;
-                }
-                String letterID = subRows[j].substring(2, 4);
-                Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.OBJECT_NAMES.get(letterID), Constants.OBJECT_IDS.get(letterID), letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, true);
-                objectsToDraw[i][j] = object;
-            }
-        }
-        interactiveObjects = new Object[interactiveObjectsCount];
-        System.out.println(interactiveObjectsCount);
-        for (Object[] objects : objectsToDraw) {
-            for (Object object : objects) {
-                if (object.getId() == 2) {
-                    interactiveObjects[interactiveObjectsCount - 1] = object;
-                    interactiveObjectsCount--;
-                }
-            }
-        }
-        return true;
-    }
-    /**
      * Checks if the map is valid.
      * @param map the map as a string
      * @return true if the map is valid, false otherwise
      */
     private boolean checkStringMapValidity(String map) {
         try {
-            String[] rows = map.split("-");
-            String[] subRows = rows[0].split("_");
+            String[] rows = map.split(Constants.MAP_ROW_SEPARATOR);
+            String[] subRows = rows[0].split(Constants.MAP_COLUMN_SEPARATOR);
 
             for (String subRow : subRows) {
                 if (subRow.length() != subRows[0].length()) {
                     return false;
                 }
-                if (subRow.charAt(0) != '0' && subRow.charAt(0) != '1' && subRow.charAt(0) != '2') {
+                //check if not in Constants.ALLOWED_CODES
+                if (!List.of(Constants.ALLOWED_CODES).contains(subRow.charAt(0))) {
                     return false;
                 }
-                if (subRow.charAt(1) != '0' && subRow.charAt(1) != '1' && subRow.charAt(1) != '2' && subRow.charAt(1) != '3') {
+                if (!List.of(Constants.ALLOWED_HEIGHTS).contains(subRow.charAt(1))) {
                     return false;
                 }
                 if (!Character.isLetter(subRow.charAt(2))) {
                     return false;
                 }
                 if (!Character.isLetter(subRow.charAt(3))) {
+                    return false;
+                }
+                if (!Constants.OBJECT_IDS.containsKey(subRow.substring(2, 4)) && !Constants.INTERACTIVE_OBJECTS.containsKey(subRow.substring(2, 4))) {
                     return false;
                 }
             }
@@ -880,13 +823,11 @@ public class Isometric {
     private void placePolygons() {
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
-                if (objectsToDraw[i][j].getHeight() > 0) {
-                    if (objectsToDraw[i][j].getHeight() > 0) {
-                        int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
-                        int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
-                        Polygon parallelogram = getObjectHitBox(x, y, TILE_WIDTH, 0);
-                        objectsToDraw[i][j].setObjectHitbox(parallelogram);
-                    }
+                if (objectsToDraw[i][j].getHeight() > 0 || objectsToDraw[i][j].isSolid()) {
+                    int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
+                    int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
+                    Polygon parallelogram = getObjectHitBox(x, y, TILE_WIDTH, 0);
+                    objectsToDraw[i][j].setObjectHitbox(parallelogram);
                 }
             }
         }
