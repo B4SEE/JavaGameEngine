@@ -6,8 +6,8 @@ import javafx.scene.shape.Shape;
 import java.util.Objects;
 
 public class Entity {
-    private final int id;
-    private final String name;
+    private int id;//might be unnecessary
+    private String name;
     private String texturePath;
     private String type;
     private String initialBehaviour;
@@ -17,12 +17,14 @@ public class Entity {
     private int positionX;
     private int positionY;
     private int height;
+    private int speed_x;
+    private int speed_y;
     private int hitBoxSize;
     private Shape hitbox;
     private Shape attackRange;
     private int attackRangeSize;
     private int health;
-    private final int maxHealth;
+    private int maxHealth;
     private int damage;
     //
     private int cooldown;
@@ -33,11 +35,10 @@ public class Entity {
 
     private Wagon currentWagon;
 
-    public Entity(int id, String name, String texturePath, int maxHealth) {
-        this.id = id;
+    public Entity(String name, String texturePath) {
         this.name = name;
         this.texturePath = texturePath;
-        this.maxHealth = maxHealth;
+        this.maxHealth = Constants.ENTITY_BASIC_MAX_HEALTH;
     }
 
     public Entity(int id, String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage, Wagon currentWagon) {
@@ -52,6 +53,41 @@ public class Entity {
         this.maxHealth = health;
         this.damage = damage;
         this.currentWagon = currentWagon;
+    }
+    public void setAsDefaultEnemy() {
+        setType(Constants.ENEMY);
+
+        setBehaviour(Constants.AGGRESSIVE);
+        setInitialBehaviour(getBehaviour());
+
+        setHeight(Constants.ENEMY_BASIC_HEIGHT);
+
+        speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
+        speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
+
+        int maxHealth = (int) (Math.random() * (Constants.ENEMY_BASIC_MAX_HEALTH_MAX - Constants.ENEMY_BASIC_MAX_HEALTH_MIN) + Constants.ENEMY_BASIC_MAX_HEALTH_MIN);
+        maxHealth = (maxHealth / 10) * 10;
+        this.maxHealth = maxHealth;
+
+        setHealth(maxHealth);
+
+        setHitBoxSize(Constants.ENEMY_BASIC_HITBOX);
+        setAttackRangeSize(Constants.ENEMY_BASIC_ATTACK_RANGE);
+
+        setDamage(Constants.ENEMY_BASIC_DAMAGE);
+        setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
+    }
+
+    public void setAsDefaultNPC() {
+        setType(Constants.NPC);
+        setBehaviour(Constants.NEUTRAL);
+        setInitialBehaviour(getBehaviour());
+        setHeight(Constants.ENEMY_BASIC_HEIGHT);
+        setHitBoxSize(Constants.ENEMY_BASIC_HITBOX);
+        setAttackRangeSize(Constants.ENEMY_BASIC_ATTACK_RANGE);
+        setDamage(Constants.ENEMY_BASIC_DAMAGE);
+        setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
+        setHealth(maxHealth);
     }
     public int getId() {
         return id;
@@ -131,6 +167,18 @@ public class Entity {
         return height;
     }
 
+    public void setSpeedX(int speed_x) {
+        this.speed_x = speed_x;
+    }
+    public int getSpeedX() {
+        return speed_x;
+    }
+    public void setSpeedY(int speed_y) {
+        this.speed_y = speed_y;
+    }
+    public int getSpeedY() {
+        return speed_y;
+    }
     public void setHitBoxSize(int hitBoxSize) {
         this.hitBoxSize = hitBoxSize;
     }
