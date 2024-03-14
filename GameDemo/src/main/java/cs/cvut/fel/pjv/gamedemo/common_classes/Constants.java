@@ -57,6 +57,8 @@ public class Constants {
     public static final Character WALL = '1';
     public static final Character INTERACTIVE_OBJECT = '2';
     public static final Character[] ALLOWED_CODES = {FLOOR, WALL, INTERACTIVE_OBJECT};
+    public static final Character FLOOR_HEIGHT = '0';
+    public static final Character MIN_WALL_HEIGHT = '1';
     public static final Character[] ALLOWED_HEIGHTS = {'0', '1', '2', '3'};
     public static final Map <String, String> OBJECT_IDS = Map.of(
             "BB", "0.png",
