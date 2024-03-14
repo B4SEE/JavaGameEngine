@@ -206,12 +206,15 @@ public class Wagon {
                     interactiveObjectsCount++;
                     String letterID = subRows[j].substring(2, 4);
                     if (letterID.equals(Constants.CHEST_OBJECT)) {
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, false);
+                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, 0, 0, 0, false);
                         object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
+                        object.setHeight(1);
+                        System.out.println(object.getHeight());
                         objectsArray[i][j] = object;
                     }
                     if (letterID.equals(Constants.LOCKABLE_DOOR)) {
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, false);
+                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, 0, 0, 0, false);
+                        object.setHeight(2);
                         objectsArray[i][j] = object;
                     }
                     if (letterID.equals(Constants.WAGON_DOOR)) {

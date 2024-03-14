@@ -18,16 +18,16 @@ public class Constants {
     public static final int ENEMY_BASIC_MAX_HEALTH_MIN = 70;
     public static final int ENEMY_BASIC_MAX_HEALTH_MAX = 230;
     public static final int ENEMY_BASIC_HEIGHT = 2;
-    public static final int ENEMY_BASIC_SPEED_X_MAX = PLAYER_BASIC_SPEED_X - 1;
+    public static final int ENEMY_BASIC_SPEED_X_MAX = 3;
     public static final int ENEMY_BASIC_SPEED_X_MIN = ENTITY_BASIC_SPEED_X;
-    public static final int ENEMY_BASIC_SPEED_Y_MAX = PLAYER_BASIC_SPEED_Y - 1;
+    public static final int ENEMY_BASIC_SPEED_Y_MAX = 3;
     public static final int ENEMY_BASIC_SPEED_Y_MIN = ENTITY_BASIC_SPEED_Y;
     public static final int ENEMY_BASIC_HITBOX = 1;
     public static final int ENEMY_BASIC_ATTACK_RANGE = 1;
     public static final int ENEMY_BASIC_DAMAGE = PLAYER_BASIC_DAMAGE - 1;
     public static final int ENEMY_BASIC_COOLDOWN = 2;
     public static final int TRAIN_WAGONS = 10;
-    public static final int INVENTORY_WIDTH = 10;
+    public static final int INVENTORY_MAX_WIDTH = 10;
     public static final int WINDOW_WIDTH = 1600;
     public static final int WINDOW_HEIGHT = 800;
     public static final int SLIP_X = 10;
@@ -60,12 +60,13 @@ public class Constants {
     public static final Character FLOOR_HEIGHT = '0';
     public static final Character MIN_WALL_HEIGHT = '1';
     public static final Character[] ALLOWED_HEIGHTS = {'0', '1', '2', '3'};
+    //consider enum
     public static final Map <String, String> OBJECT_IDS = Map.of(
             "BB", "0.png",
             "BG", "0.png",
             "TF", "tile_floor.png",
             "BW", "0.png",
-            "SW", "block_wall.png",
+            "SW", "1h_wall.png",
             "HW", "block_wagon_wall.png",
             "WW", "3h_block.png",
             ENEMY_SPAWN, "block_wall.png",
@@ -77,16 +78,16 @@ public class Constants {
             "BG", "blank_gap_0",
             "TF", "floor_0",
             "BW", "blank_wall_3",
-            "SW", "wall_1",
+            "SW", "1h_wall",
             "HW", "wagon_wall_2",
             "WW", "wagon_wall_3",
             ENEMY_SPAWN, "enemy_spawn.png",
             TRAP, "trap.png"
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.of(
-            WAGON_DOOR, "3h_block.png",//wagon_door.png
-            LOCKABLE_DOOR, "lockable_door.png",
-            CHEST_OBJECT, "block_wall.png"//chest_object.png
+            WAGON_DOOR, "wagon_door.png",//wagon_door.png
+            LOCKABLE_DOOR, "block_wagon_wall.png",
+            CHEST_OBJECT, "chest_object_1.png"//chest_object.png
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.of(
             WAGON_DOOR, "wagon_door",

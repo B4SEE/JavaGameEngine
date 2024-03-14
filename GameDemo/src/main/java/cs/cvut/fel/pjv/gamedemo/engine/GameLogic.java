@@ -139,7 +139,7 @@ public class GameLogic {
 
         //question: entities represented by wagon in array, how can I add new entities to the wagon?
         //should I make fixed size of the array for maximum entities count and then add entities to the array?
-        //or should I make the array dynamic and add entities to the array?
+        //or should I make the array dynamic and add entities to the array? *
 
         //is my code even correct?
 

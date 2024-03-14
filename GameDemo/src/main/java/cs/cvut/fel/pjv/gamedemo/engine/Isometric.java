@@ -30,9 +30,9 @@ public class Isometric {
 //third number tile letter id (for example: AA, BB, CC), represents texture; Dictionaries are in Constants class
 //'_' separates tiles, '-' separates rows
 
-    //question: can I move some of the methods to other classes?
+    //question: can I move some of the methods to other classes? yes
 
-    //question: can I interpreter Isometric class as a graphic (game) engine? or is it too specific?
+    //question: can I interpreter Isometric class as a graphic (game) engine? or is it too specific? yes
     //it became even more specific after adding relation with Wagon class, maps cannot be generated and placed without initialised Wagon instance;
 
     //Note: need to implement A* algorithm for entity movement
@@ -97,6 +97,10 @@ public class Isometric {
         }
     }
 
+    /**
+     * Checks if the player can interact with the objects.
+     * @return true if the player has interactive objects in his attack range, false otherwise
+     */
     public boolean checkIfPlayerCanInteract() {
         if (interactiveObjects == null) {
             return false;
@@ -261,7 +265,7 @@ public class Isometric {
         time = 0;
     }
     /**
-     * Initializes the main stage.
+     * Initialises the main stage.
      * @param stage the main stage
      */
     public void initialiseStage(Stage stage) {
@@ -269,6 +273,11 @@ public class Isometric {
         Scene scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         mainStage.setScene(scene);
     }
+
+    /**
+     * initialises the wagon.
+     * @param wagon the wagon
+     */
     public void initialiseWagon(Wagon wagon) {
         if (wagon == null) {
             wagon = new Wagon("DEFAULT");
@@ -379,8 +388,8 @@ public class Isometric {
         GridPane grid = new GridPane();
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
-                int x = TILE_WIDTH + j * TILE_WIDTH;
-                int y = i * TILE_HEIGHT;
+//                int x = TILE_WIDTH + j * TILE_WIDTH;
+//                int y = i * TILE_HEIGHT;
                 Image objectTexture = new Image(Objects.requireNonNull(getClass().getClassLoader().getResource(objectsToDraw[i][j].getTexturePath())).toExternalForm());
                 ImageView object = new ImageView(objectTexture);
                 object.setFitWidth(TILE_WIDTH);
@@ -541,7 +550,7 @@ public class Isometric {
                     int deltaY = y > 0 ? 1 : -1;
                     //A* algorithm needed
 
-                    updateEntityPosition(entity, deltaX, deltaY, Constants.ENTITY_BASIC_SPEED_X, Constants.ENTITY_BASIC_SPEED_Y);
+                    updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
                 }
             }
         }
@@ -551,9 +560,9 @@ public class Isometric {
      * Checks if the entity can attack the player.
      * If the entity is in attack range and can attack, the entity attacks the player.
      * Entity cannot attack while the cooldown is active.
-     * @param entity
+     * @param entity the entity
      */
-    private void tryAttack(Entity entity, Entity[] targets) {
+    private void tryAttack(Entity entity, Entity[] targets) { //needs to be moved to Entity class
         if (entity.getCooldown() == 0) {
             entity.setCanAttack(true);
         }
@@ -638,7 +647,7 @@ public class Isometric {
         int count = 0;
         for (Object[] objects : objectsToDraw) {
             for (Object object : objects) {
-                if (object.isSolid()) {
+                if (object.getHeight() > 0) {
                     Image objectTexture = new Image(object.getTexturePath());
                     double[] objectIsoXY = cartesianToIsometric(object.getCartX(), object.getCartY());
                     grid.getChildren().remove(object.getTexture());
