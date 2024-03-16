@@ -79,7 +79,7 @@ Completed documentation from the user's perspective.
 - :construction: The game will be able to load a list of items from a file. These items will be given to the player at the beginning of the game. At the end of the game, the game will be able to save the list of items in the same format.
 
 
-- :construction: Each level will be described in an external file in a suitable format - it is up to you what format you choose. For demonstration purposes, just create one or two levels of the game to demonstrate the functionality of all the elements, inventory, making an item from resources, and overcoming obstacles.
+- :heavy_check_mark: Each level will be described in an external file in a suitable format - it is up to you what format you choose. For demonstration purposes, just create one or two levels of the game to demonstrate the functionality of all the elements, inventory, making an item from resources, and overcoming obstacles.
 
 
 - :heavy_check_mark: If the level files are not "human-editable", an editor for these files must be created.
@@ -91,7 +91,7 @@ Completed documentation from the user's perspective.
 - :construction: The hero will be able to interact with other objects using some of the items he has collected (open a door with a key, smash a chest with a stick, etc.).
 
 
-- :construction: The hero will be able to use the collected materials to make a certain object (make a lamp out of a light bulb and a battery, make bread out of wheat, water and fire, etc.).
+- :heavy_check_mark: The hero will be able to use the collected materials to make a certain object (make a lamp out of a light bulb and a battery, make bread out of wheat, water and fire, etc.).
 
 
 - :construction: The game engine must be equipped with a GUI.
