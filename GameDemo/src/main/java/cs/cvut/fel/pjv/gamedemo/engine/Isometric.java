@@ -13,9 +13,14 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Isometric {
     private final int TILE_WIDTH = 32;
@@ -47,7 +52,7 @@ public class Isometric {
     private int playerDeltaY = 0;
     protected Stage mainStage;
     private Pane grid = new Pane();
-    private Label label = new Label();
+    private Label hint = new Label();
     private Label healthLabel = new Label();
     private long time;
     private Scene isoScene;
@@ -92,7 +97,7 @@ public class Isometric {
                     return;
                 }
                 moveEntities();
-                tryAttack(entity, new Entity[]{player});
+                entity.tryAttack(entity, new Entity[]{player}, time);
             }
         }
     }
@@ -101,18 +106,18 @@ public class Isometric {
      * Checks if the player can interact with the objects.
      * @return true if the player has interactive objects in his attack range, false otherwise
      */
-    public boolean checkIfPlayerCanInteract() {
+    public Object checkIfPlayerCanInteract() {
         if (interactiveObjects == null) {
-            return false;
+            return null;
         }
         for (Object object : interactiveObjects) {
             if (checkCollision(player.getAttackRange(), object.getObjectHitbox())) {
 //                updateLabel("Press E to interact", player.getPositionX() - 50, player.getPositionY() - 50);
-                return true;
+                return object;
             }
         }
 //        updateLabel("No interactive objects nearby", player.getPositionX() - 50, player.getPositionY() - 50);
-        return false;
+        return null;
     }
 
     /**
@@ -125,7 +130,7 @@ public class Isometric {
      */
     public boolean checkEntities() {
         if (!player.isAlive()) {
-            grid.getChildren().remove(label);
+            grid.getChildren().remove(hint);
 
             return true;
         }
@@ -181,7 +186,6 @@ public class Isometric {
         isoScene = mainStage.getScene();
         mainStage.setResizable(false);
         mainStage.show();
-        setKeyHandleToMovement();
     }
 
     /**
@@ -211,41 +215,41 @@ public class Isometric {
     /**
      * Sets the key event handlers for player movement.
      */
-    public void setKeyHandleToMovement() {
-        isoScene.setOnKeyReleased(keyEvent -> {
-            switch (keyEvent.getCode()) {
-                case W, S:
-                    updatePlayerDeltaY(0);
-                    break;
-                case A, D:
-                    updatePlayerDeltaX(0);
-                    break;
-            }
-        });
-        isoScene.setOnKeyPressed(keyEvent -> {
-            switch (keyEvent.getCode()) {
-                case W:
-                    updatePlayerTexture("player_back.png");
-                    updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
-                    break;
-                case S:
-                    updatePlayerTexture("player_front.png");
-                    updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
-                    break;
-                case A:
-                    updatePlayerTexture("player_left.png");
-                    updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
-                    break;
-                case D:
-                    updatePlayerTexture("player_right.png");
-                    updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
-                    break;
-                case R:
-                    tryAttack(player, entities);
-            }
-            updateWalls();
-        });
-    }
+//    public void setKeyHandleToMovement() {
+//        isoScene.setOnKeyReleased(keyEvent -> {
+//            switch (keyEvent.getCode()) {
+//                case W, S:
+//                    updatePlayerDeltaY(0);
+//                    break;
+//                case A, D:
+//                    updatePlayerDeltaX(0);
+//                    break;
+//            }
+//        });
+//        isoScene.setOnKeyPressed(keyEvent -> {
+//            switch (keyEvent.getCode()) {
+//                case W:
+//                    updatePlayerTexture("player_back.png");
+//                    updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
+//                    break;
+//                case S:
+//                    updatePlayerTexture("player_front.png");
+//                    updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
+//                    break;
+//                case A:
+//                    updatePlayerTexture("player_left.png");
+//                    updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
+//                    break;
+//                case D:
+//                    updatePlayerTexture("player_right.png");
+//                    updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
+//                    break;
+//                case R:
+//                    tryAttack(player, entities);
+//            }
+//            updateWalls();
+//        });
+//    }
 
     /**
      * Clears the grid and all the game data.
@@ -260,7 +264,7 @@ public class Isometric {
         drawnEntities = null;
         playerDeltaX = 0;
         playerDeltaY = 0;
-        label = new Label();
+        hint = new Label();
         healthLabel = new Label();
         time = 0;
     }
@@ -411,13 +415,13 @@ public class Isometric {
      * Updates the label with the specified text.
      * @param text the text to display
      */
-    public void updateLabel(String text, int x, int y) {
-        grid.getChildren().remove(label);
-        label.setText(text);
-        label.setLayoutX(x);
-        label.setLayoutY(y);
-        label.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-        grid.getChildren().add(label);
+    public void updateHint(String text, int x, int y) {
+        grid.getChildren().remove(hint);
+        hint.setText(text);
+        hint.setLayoutX(x);
+        hint.setLayoutY(y);
+        hint.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+        grid.getChildren().add(hint);
     }
     private void updateHealthLabel(String text, int x, int y) {
         grid.getChildren().remove(healthLabel);
@@ -553,33 +557,6 @@ public class Isometric {
                     updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
                 }
             }
-        }
-    }
-
-    /**
-     * Checks if the entity can attack the player.
-     * If the entity is in attack range and can attack, the entity attacks the player.
-     * Entity cannot attack while the cooldown is active.
-     * @param entity the entity
-     */
-    private void tryAttack(Entity entity, Entity[] targets) { //needs to be moved to Entity class
-        if (entity.getCooldown() == 0) {
-            entity.setCanAttack(true);
-        }
-        Entity[] inAttackRange = entity.inAttackRange(targets);
-        if (entity.getCanAttack()) {
-            for (Entity target : inAttackRange) {
-                if (target != null) {
-                    entity.attack(target);
-                }
-            }
-            entity.setCanAttack(false);
-            entity.setWhenAttacked(time);
-            return;
-        }
-        if (!entity.getCanAttack() && (time - entity.getWhenAttacked() != 0) && (time - entity.getWhenAttacked()) % entity.getCooldown() == 0) {
-            entity.setCanAttack(true);
-            entity.setWhenAttacked(0);
         }
     }
 
@@ -739,6 +716,7 @@ public class Isometric {
                 int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
 
                 if (objectsToDraw[i][j].getHeight() == 0) {
+                    System.out.println(objectsToDraw[i][j].getTexturePath());
                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
                     objectsToDraw[i][j].setCartX(x);
@@ -764,6 +742,8 @@ public class Isometric {
                 if (objectsToDraw[i][j].getHeight() > 0) {
                     int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
                     int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
+
+                    //get texture
 
                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
@@ -813,12 +793,6 @@ public class Isometric {
      */
     private void drawEntity(Entity entity) {
         entity.setEntityView(new ImageView(entity.getTexturePath()));
-
-        if (!(entity instanceof Player)) {
-            updateHealthLabel("Health: " + entity.getHealth(), entity.getPositionX() - 50, entity.getPositionY() - 50);
-        } else {
-            updateLabel("player health: " + player.getHealth(), player.getPositionX() - 50, player.getPositionY() - 50);
-        }
 
         grid.getChildren().add(entity.getHitbox());
         grid.getChildren().add(entity.getAttackRange());
@@ -972,4 +946,9 @@ public class Isometric {
         img.setY(isoXY[1] - (double) TILE_HEIGHT / 2);
         grid.getChildren().add(img);
     }
+
+    public Pane getIsoGrid() {
+        return grid;
+    }
+
 }
