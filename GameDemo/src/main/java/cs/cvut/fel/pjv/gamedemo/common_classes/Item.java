@@ -1,21 +1,25 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Item {
-    public final int id;
-    public final String name;
-    public final String texturePath;
+    private final String name;
+    private final String texturePath;
     private String type;
 
-    public Item(int id, String name, String texturePath) {
-        this.id = id;
+    public Item(String name, String texturePath) {
         this.name = name;
         this.texturePath = texturePath;
     }
 
-    public Item(int id, String name, String texturePath, String type) {
-        this.id = id;
+    public Item(String name, String texturePath, String type) {
         this.name = name;
         this.texturePath = texturePath;
         this.type = type;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public String getTexturePath() {
+        return texturePath;
     }
 
     public void setType(String type) {
