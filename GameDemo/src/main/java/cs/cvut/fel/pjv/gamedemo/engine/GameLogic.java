@@ -1,19 +1,27 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Wagon;
+import cs.cvut.fel.pjv.gamedemo.common_classes.*;
+import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 public class GameLogic {
     private Isometric isometric;
+    //test
+    private boolean added = false;
     private Stage stage;
     private long time;
+    private Player player;
+    private Wagon wagon;
     private AnimationTimer timer = new AnimationTimer() {
         final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
@@ -41,8 +49,12 @@ public class GameLogic {
 //                    //check if player can interact with object
 //
 //                }
-                if (isometric.checkIfPlayerCanInteract()) {
+
+                if (isometric.checkIfPlayerCanInteract() != null) {
                     System.out.println("Player can interact");
+                    isometric.updateHint("Press E to interact", player.getPositionX(), player.getPositionY() - 25);
+                } else {
+                    isometric.updateHint("Player: " + player.getHealth() + " HP, " + player.getHunger() + " hunger", player.getPositionX(), player.getPositionY() - 25);
                 }
 
                 if (isometric.checkEntities()) {
@@ -56,6 +68,22 @@ public class GameLogic {
         isometric = new Isometric();
         this.stage = stage;
     }
+
+    private void prepare() {
+//        isometric.initialiseStage(stage);
+//        isometric.initialiseWagon(wagon);
+//        isometric.setPlayer(player);
+//        isometric.updateWalls();
+//        isometric.updateEntities();
+//        isometric.updatePlayerPosition();
+//        isometric.updateTime(time);
+    }
+//    private void prepareHint() {
+//        hint.setText(hintString);
+//        hint.setLayoutX(400);
+//        hint.setLayoutY(400);
+//        hint.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+//    }
     /**
      * Restarts the game.
      */
@@ -127,6 +155,137 @@ public class GameLogic {
         });
     }
 
+    private void setPlayerHandle() {
+        Scene scene = stage.getScene();
+        scene.setOnKeyReleased(keyEvent -> {
+            switch (keyEvent.getCode()) {
+                case W, S:
+                    isometric.updatePlayerDeltaY(0);
+                    break;
+                case A, D:
+                    isometric.updatePlayerDeltaX(0);
+                    break;
+            }
+        });
+        scene.setOnKeyPressed(keyEvent -> {
+            switch (keyEvent.getCode()) {
+                case W:
+                    isometric.updatePlayerTexture("player_back.png");
+                    isometric.updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
+                    break;
+                case S:
+                    isometric.updatePlayerTexture("player_front.png");
+                    isometric.updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
+                    break;
+                case A:
+                    isometric.updatePlayerTexture("player_left.png");
+                    isometric.updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
+                    break;
+                case D:
+                    isometric.updatePlayerTexture("player_right.png");
+                    isometric.updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
+                    break;
+                case R:
+                    player.tryAttack(player, isometric.getEntities(), time);
+                    break;
+                case TAB:
+                    setPlayerInventoryHandle();
+                    break;
+                case E:
+                    if (isometric.checkIfPlayerCanInteract() != null) {
+                        Object object = isometric.checkIfPlayerCanInteract();
+//                        if (object.equals("WD")) {
+//                            openDoor();
+//                        }
+                        if (Objects.equals(object.getTwoLetterId(), "CO")) {
+                            setObjectInventoryHandle(object);
+                        }
+//                        if (object.equals("LD")) {
+//                            openLockableDoor(player);
+//                        }
+                    }
+            }
+            isometric.updateWalls();
+        });
+    }
+
+    private void setObjectInventoryHandle(Object object) {
+        Inventory objectInventory = object.getObjectInventory();
+        if (objectInventory != null) {
+
+            if (objectInventory.inventorySize >= 3 && !added) {
+                Item item = new Item("block", "block_wall.png");
+                Item item2 = new Item("seat", "seat_1.png");
+                Item item3 = new Item("box", "chest_object_1.png");
+                objectInventory.addItem(item);
+                objectInventory.addItem(item2);
+                objectInventory.addItem(item3);
+                added = true;
+            }
+
+
+            Scene scene = stage.getScene();
+            scene.setOnKeyReleased(null);
+            scene.setOnKeyPressed(null);
+
+            timer.stop();
+
+            Scene objectInventoryScene = objectInventory.openInventory();
+
+            stage.setScene(objectInventoryScene);
+
+            objectInventoryScene.setOnKeyPressed(keyEvent -> {
+                if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.TAB) {
+                    if (!objectInventory.getTakenItems().isEmpty()) {
+                        List<Item> takenItems = objectInventory.getTakenItems();
+                        List<Item> itemsToRemove = new ArrayList<>(takenItems);
+                        List<Item> addedItems = new ArrayList<>();
+
+                        //try to add items to player's inventory
+                        for (Item item : itemsToRemove) {
+                            if (player.getPlayerInventory().addItem(item)) {
+                                objectInventory.removeTakenItem(item);
+                                addedItems.add(item);
+                            } else {
+                                //if player's inventory is full, stop adding items and put remaining items back to object's inventory
+                                for (Item remainingItem : itemsToRemove) {
+                                    if (!addedItems.contains(remainingItem)) {
+                                        objectInventory.addItem(remainingItem);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    objectInventory.closeInventory(stage);
+                    stage.setScene(scene);
+                    setPlayerHandle();
+                    timer.start();
+                }
+            });
+        }
+    }
+
+    private void setPlayerInventoryHandle() {
+        Scene scene = stage.getScene();
+        scene.setOnKeyReleased(null);
+        scene.setOnKeyPressed(null);
+
+        timer.stop();
+
+        Scene playerInventory = player.getPlayerInventory().openInventory();
+        stage.setScene(playerInventory);
+
+        playerInventory.setOnKeyPressed(keyEvent -> {
+            if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.TAB) {
+                player.getPlayerInventory().closeInventory(stage);
+                stage.setScene(scene);
+                setPlayerHandle();
+                timer.start();
+            }
+        });
+    }
+
     /**
      * Loads the game.
      * @param player player
@@ -136,6 +295,8 @@ public class GameLogic {
         if (player == null || wagon == null) {
             throw new IllegalArgumentException("Invalid input");
         }
+        this.player = player;
+        this.wagon = wagon;
 
         //question: entities represented by wagon in array, how can I add new entities to the wagon?
         //should I make fixed size of the array for maximum entities count and then add entities to the array?
@@ -148,6 +309,7 @@ public class GameLogic {
         wagon.generateWagon();
         System.out.println(wagon.getSeed());
         isometric.initialiseWagon(wagon);
+        setPlayerHandle();
     }
     /**
      * Saves the game.
