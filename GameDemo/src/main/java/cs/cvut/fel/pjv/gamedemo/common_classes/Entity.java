@@ -316,4 +316,31 @@ public class Entity {
     private boolean checkIntersection(Shape shape1, Shape shape2) {
         return shape1.getBoundsInParent().intersects(shape2.getBoundsInParent());
     }
+
+    /**
+     * Checks if the entity can attack the player.
+     * If the entity is in attack range and can attack, the entity attacks the player.
+     * Entity cannot attack while the cooldown is active.
+     * @param entity the entity
+     */
+    public void tryAttack(Entity entity, Entity[] targets, long time) { //needs to be moved to Entity class
+        if (entity.getCooldown() == 0) {
+            entity.setCanAttack(true);
+        }
+        Entity[] inAttackRange = entity.inAttackRange(targets);
+        if (entity.getCanAttack()) {
+            for (Entity target : inAttackRange) {
+                if (target != null) {
+                    entity.attack(target);
+                }
+            }
+            entity.setCanAttack(false);
+            entity.setWhenAttacked(time);
+            return;
+        }
+        if (!entity.getCanAttack() && (time - entity.getWhenAttacked() != 0) && (time - entity.getWhenAttacked()) % entity.getCooldown() == 0) {
+            entity.setCanAttack(true);
+            entity.setWhenAttacked(0);
+        }
+    }
 }
