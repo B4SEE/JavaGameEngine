@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import java.util.List;
 import java.util.Map;
 
 public class Constants {
@@ -11,7 +12,7 @@ public class Constants {
     public static final int PLAYER_HITBOX = 1;
     public static final int PLAYER_MAX_HEALTH = 8;//100
     public static final int PLAYER_MAX_HUNGER = 100;
-    public static final int PLAYER_INVENTORY_SIZE = 15;
+    public static final int PLAYER_INVENTORY_SIZE = 20;
     public static final int ENTITY_BASIC_MAX_HEALTH = 100;
     public static final int ENTITY_BASIC_SPEED_X = 3;
     public static final int ENTITY_BASIC_SPEED_Y = 3;
@@ -60,6 +61,11 @@ public class Constants {
     public static final Character FLOOR_HEIGHT = '0';
     public static final Character MIN_WALL_HEIGHT = '1';
     public static final Character[] ALLOWED_HEIGHTS = {'0', '1', '2', '3'};
+    public static final int INVENTORY_LEFT_CORNER_X = 300;
+    public static final int INVENTORY_LEFT_CORNER_Y = 100;
+
+    public static final int SLOT_SIZE = 64;
+    public static final int SLOT_GAP = 20;
     //consider enum
     public static final Map <String, String> OBJECT_IDS = Map.of(
             "BB", "0.png",
@@ -67,8 +73,10 @@ public class Constants {
             "TF", "tile_floor.png",
             "BW", "0.png",
             "SW", "1h_wall.png",
-            "HW", "block_wagon_wall.png",
+//            "HW", "block_wagon_wall.png",
             "WW", "3h_block.png",
+            "SS", "seat_1.png",
+            "CA", "carpet_1.png",
             ENEMY_SPAWN, "block_wall.png",
             TRAP, "block_wall.png"
     );
@@ -81,8 +89,9 @@ public class Constants {
             "SW", "1h_wall",
             "HW", "wagon_wall_2",
             "WW", "wagon_wall_3",
-            ENEMY_SPAWN, "enemy_spawn.png",
-            TRAP, "trap.png"
+            "SS", "seat",
+            ENEMY_SPAWN, "enemy_spawn",
+            TRAP, "trap"
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.of(
             WAGON_DOOR, "wagon_door.png",//wagon_door.png
@@ -98,5 +107,15 @@ public class Constants {
             "DEFAULT", new String[]{"zombie"},//new String[]{"zombie", "robot"},
             "COMPARTMENT", new String[]{"zombie", "robot", "bully"},
             "RESTAURANT", new String[]{"gentleman"}
+    );
+
+    public static final Map <List<String>, String> CRAFT_RECIPES = Map.of(
+            List.of("block", "seat"), "box"
+    );
+
+    public static final Map <String, String> ITEM_TEXTURES = Map.of(
+            "block", "block_wall.png",
+            "seat", "seat_1.png",
+            "box", "chest_object_1.png"
     );
 }
