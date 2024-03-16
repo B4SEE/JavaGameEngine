@@ -1,215 +1,62 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Inventory {
     public final int inventorySize;
-    private Item[] itemsArray;
-    private Label itemNameLabel = new Label();
-
-    private int deltaX = 1;
-    private int deltaY = 0;
+    protected Item[] itemsArray;
+    protected final Label itemNameLabel = new Label();
+    protected Scene scene;
+    protected Pane grid = new Pane();
+    private boolean vendor;
+    private Item selectedItem;
+    private List<Item> takenItems = new ArrayList<>();
 
     public Inventory(int size) {
         inventorySize = size;
         itemsArray = new Item[size];
     }
-    public Scene openInventory(boolean playerInventory) {//this implementation allows player to only take items from inventory, but not to put them back
-        Pane grid = new Pane();
-        drawInventory(300, 100, grid, playerInventory);
-        Scene scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+
+    public boolean isVendor() {
+        return vendor;
+    }
+
+    public void setVendor(boolean vendor) {
+        this.vendor = vendor;
+    }
+    public Scene openInventory() {//this implementation allows player to only take items from inventory, but not to put them back
+        updateInventory();
+        scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+        setSceneHandlers();
         return scene;
     }
-    private void drawMainHandSlot(int leftCornerX, int leftCornerY, Pane grid) {
-        int slotSize = 64;
-        int slotGap = 20;
-        int mainHandSlotGap = 1;
-        Rectangle mainHandSlot = new Rectangle(slotSize, slotSize);
-        setRoundBorders(mainHandSlot);
-        mainHandSlot.setStyle("-fx-fill: #a20808; -fx-stroke: #ffffff; -fx-stroke-width: 10");
-        //set main hand slot near inventory center at the left with gap
-        mainHandSlot.setX(leftCornerX - (slotSize + slotGap) - mainHandSlotGap * (slotSize + slotGap));
-        mainHandSlot.setY(leftCornerY + (inventorySize / Constants.INVENTORY_MAX_WIDTH / 2) * (slotSize + slotGap));
-        grid.getChildren().add(mainHandSlot);
-    }
-    private void drawCraftTable(int leftCornerX, int leftCornerY, Pane grid) {
-        int slotSize = 64;
-        int slotGap = 20;
-        int craftSlotGap = 1;
-        //2 slots for crafting, 1 for result
-
-        int x = leftCornerX - (slotSize + slotGap) - craftSlotGap * (slotSize + slotGap);
-        int y = leftCornerY + (inventorySize / Constants.INVENTORY_MAX_WIDTH) * (slotSize + slotGap) + craftSlotGap * (slotSize + slotGap);
-
-        Rectangle craftSlot1 = new Rectangle(slotSize, slotSize);
-        setRoundBorders(craftSlot1);
-        craftSlot1.setStyle("-fx-fill: #a20808; -fx-stroke: #ffffff; -fx-stroke-width: 10");
-        craftSlot1.setX(x);
-        craftSlot1.setY(y);
-
-        Rectangle craftSlot2 = new Rectangle(slotSize, slotSize);
-        setRoundBorders(craftSlot2);
-        craftSlot2.setStyle("-fx-fill: #a20808; -fx-stroke: #ffffff; -fx-stroke-width: 10");
-        craftSlot2.setX(x + 1 * (slotSize + slotGap));
-        craftSlot2.setY(y);
-
-        ImageView imageView = new ImageView(new Image("arrow.png"));
-        imageView.setFitHeight(slotSize);
-        imageView.setFitWidth(slotSize);
-        imageView.setX(x + 2 * (slotSize + slotGap));
-        imageView.setY(y);
-
-        Rectangle resultSlot = new Rectangle(slotSize, slotSize);
-        setRoundBorders(resultSlot);
-        resultSlot.setStyle("-fx-fill: #476946; -fx-stroke: #ffffff; -fx-stroke-width: 10");
-        resultSlot.setX(x + 3 * (slotSize + slotGap));
-        resultSlot.setY(y);
-
-        grid.getChildren().add(craftSlot1);
-        grid.getChildren().add(craftSlot2);
-        grid.getChildren().add(imageView);
-        grid.getChildren().add(resultSlot);
-    }
-    private void drawInventory(int leftCornerX, int leftCornerY, Pane grid, boolean playerInventory) {
-        int slotSize = 64;
-        int slotGap = 20;
-        int mainHandSlotGap = 3;
-
-        //add big border to inventory
-
-        Rectangle border = new Rectangle(Constants.INVENTORY_MAX_WIDTH * (slotSize + slotGap) + slotGap, (inventorySize / Constants.INVENTORY_MAX_WIDTH) * (slotSize + slotGap) + slotGap);
-        border.setStyle("-fx-stroke: #ffffff; -fx-stroke-width: 10");
-        border.setX(leftCornerX - slotGap);
-        border.setY(leftCornerY - slotGap);
-        grid.getChildren().add(border);
-
-        grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
-
-        if (playerInventory) {
-            drawMainHandSlot(leftCornerX, leftCornerY, grid);
-            drawCraftTable(leftCornerX, leftCornerY, grid);
-        }
-
-        for (int i = 0; i < inventorySize; i++) {
-            int i1 = leftCornerX + i % Constants.INVENTORY_MAX_WIDTH * (slotSize + slotGap);
-            int i2 = leftCornerY + i / Constants.INVENTORY_MAX_WIDTH * (slotSize + slotGap);
-            if (itemsArray[i] != null) {
-                ImageView imageView = new ImageView(itemsArray[i].texturePath);
-                imageView.setFitHeight(slotSize);
-                imageView.setFitWidth(slotSize);
-                //add item to grid (left aligned)
-                imageView.setX(i1);
-                imageView.setY(i2);
-                imageView.setStyle("-fx-stroke: #ffffff; -fx-stroke-width: 10");
-                grid.getChildren().add(imageView);
-            } else {
-                //add empty slot
-                Rectangle rectangle = new Rectangle(slotSize, slotSize);
-                setRoundBorders(rectangle);
-                rectangle.setStyle("-fx-stroke: #ffffff; -fx-stroke-width: 10");
-                rectangle.setX(i1);
-                rectangle.setY(i2);
-                grid.getChildren().add(rectangle);
-            }
-        }
-    }
-
-    private void setRoundBorders(Rectangle rectangle) {
-        rectangle.setArcHeight(10);
-        rectangle.setArcWidth(10);
-    }
-
-    private void addSceneHandler(Scene scene, GridPane grid) {//works but not as expected; when item selected, there is no way to deselect it and there is need to click twice to put;
-        scene.setOnMouseMoved(e -> {
-            int x = (int) e.getX() / (64 + 10) - deltaX;
-            int y = (int) e.getY() / (64 + 10) - deltaY;
-            int index = y * Constants.INVENTORY_MAX_WIDTH + x;
-
-            grid.getChildren().remove(itemNameLabel);
-            itemNameLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-            if (index >= 0) {
-                if (index < inventorySize && itemsArray[index] != null) {
-                    itemNameLabel.setText(itemsArray[index].name);
-                    //if clicked on item, select it (border)
-                    scene.setOnMouseClicked(event -> {
-                        Shape shape = new Rectangle(64, 64);
-                        shape.setStyle("-fx-stroke: #ffffff;");
-                        grid.add(shape, x + deltaX, y + deltaY);
-
-                        scene.setOnMouseClicked(event1 -> {
-                            int x1 = (int) event1.getX() / (64 + 10) - deltaX;
-                            int y1 = (int) event1.getY() / (64 + 10) - deltaY;
-                            int index1 = y1 * Constants.INVENTORY_MAX_WIDTH + x1;
-                            if (index1 >= 0 && index1 < inventorySize && itemsArray[index1] == null) {
-                                itemsArray[index1] = itemsArray[index];
-                                itemsArray[index] = null;
-                                grid.getChildren().remove(shape);
-                                grid.getChildren().remove(itemNameLabel);
-                                drawInventory(grid, true);
-                            } else if (index1 >= 0 && index1 < inventorySize) {
-                                if (index1 == index) {
-                                    grid.getChildren().remove(shape);
-                                }
-                            }
-                            scene.setOnMouseClicked(null);
-                        });
-                    });
-                } else {
-                    itemNameLabel.setText("Empty slot");
-                }
-            } else {
-                itemNameLabel.setText("Main hand slot");
-            }
-            grid.add(itemNameLabel, Constants.INVENTORY_MAX_WIDTH + deltaX, y + deltaY);
-        });
-    }
-    private void drawInventory(GridPane grid, boolean playerInventory) {//should be implemented
+    public void updateInventory() {
         grid.getChildren().clear();
-        grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
-        grid.setPrefSize(800, 800);
-        //add style to grid lines
-        grid.setHgap(10);
-        grid.setVgap(10);
-        int lowestY = inventorySize / Constants.INVENTORY_MAX_WIDTH;
-
-        int deltaX = 1;
-        int deltaY = 0;
-
-        if (playerInventory) {
-
-            Rectangle mainHandSlot = new Rectangle(64, 64);
-            mainHandSlot.setStyle("-fx-fill: #af0303; -fx-stroke: #490606;");
-
-            Rectangle craftSlot = new Rectangle(64, 64);
-            craftSlot.setStyle("-fx-fill: #af0303; -fx-stroke: #490606;");
-
-            grid.add(mainHandSlot, 0, 0);
-        }
-        for (int i = 0; i < inventorySize; i++) {
-            if (itemsArray[i] != null) {
-                ImageView imageView = new ImageView(itemsArray[i].texturePath);
-                imageView.setFitHeight(64);
-                imageView.setFitWidth(64);
-                //add item to grid (left aligned)
-                grid.add(imageView, i % Constants.INVENTORY_MAX_WIDTH + deltaX, i / Constants.INVENTORY_MAX_WIDTH + deltaY);
-            } else {
-                //add empty slot
-                Rectangle rectangle = new Rectangle(64, 64);
-                rectangle.setStyle("-fx-fill: #af0303; -fx-stroke: #490606;");
-                grid.add(rectangle, i % Constants.INVENTORY_MAX_WIDTH + deltaX, i / Constants.INVENTORY_MAX_WIDTH + deltaY);
-            }
-        }
+        drawInventory();
+        Label inventoryLabel = new Label("Chest");
+        inventoryLabel.setLayoutX(0);
+        inventoryLabel.setLayoutY(0);
+        inventoryLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+        grid.getChildren().add(inventoryLabel);
     }
+
     public void closeInventory(Stage stage) {
+        clearSceneHandlers();
         stage.setScene(null);
+        grid.getChildren().clear();
+        grid = new Pane();
+        scene = null;
     }
 
     public boolean addItem(Item item) {
@@ -226,6 +73,14 @@ public class Inventory {
         return false;
     }
 
+    public Item takeItem(int index) {
+        if (index < 0 || index >= inventorySize) {
+            return null;
+        }
+        Item item = itemsArray[index];
+        itemsArray[index] = null;
+        return item;
+    }
     public boolean removeItem(Item item) {
         if (item == null) {
             return false;
@@ -246,5 +101,221 @@ public class Inventory {
 
     public Item[] getItemsArray() {
         return itemsArray;
+    }
+
+    //scene handlers
+    private void setSceneHandlers() {
+        //set basic handler
+        setSceneBasicHandler();
+        //update handler if vendor
+    }
+
+    private void setSceneBasicHandler() {
+        //basic means chest inventory
+        //when clicked, item is selected and button to take it to player inventory is shown
+        //only one item can be selected at a time
+        //item cannot be taken if player inventory is full
+
+        scene.setOnMouseMoved(e -> {
+
+            grid.getChildren().remove(itemNameLabel);
+
+            int x = (int) (e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
+            int y = (int) (e.getY() - Constants.INVENTORY_LEFT_CORNER_Y) / (64 + 20);
+
+            int index = y * Constants.INVENTORY_MAX_WIDTH + x;
+
+            if (index >= 0) {
+                if (index < inventorySize && itemsArray[index] != null) {
+                    itemNameLabel.setText(itemsArray[index].getName());
+                    //if clicked on item, select it (border)
+                } else {
+                    itemNameLabel.setText("Empty");
+                }
+                itemNameLabel.setLayoutX(Constants.INVENTORY_MAX_WIDTH);
+                itemNameLabel.setLayoutY(25);
+                itemNameLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+                grid.getChildren().add(itemNameLabel);
+            }
+            setSceneSelectHandler();
+        });
+    }
+
+    protected void clearSceneHandlers() {
+        scene.setOnMouseClicked(null);
+        scene.setOnMouseMoved(null);
+    }
+
+    private void setSceneSelectHandler() {
+        scene.setOnMouseClicked(e -> {
+            int x = (int) (e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
+            int y = (int) (e.getY() - Constants.INVENTORY_LEFT_CORNER_Y) / (64 + 20);
+            int index = y * Constants.INVENTORY_MAX_WIDTH + x;
+            if (index >= 0 && index < inventorySize && itemsArray[index] != null) {
+                //get slot rectangle
+                clearSceneHandlers();
+
+                updateInventory();
+
+                Rectangle slot = (Rectangle) getSlot(x, y);
+                slot.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 10;");
+
+                selectedItem = itemsArray[index];
+                System.out.println("selected");
+
+                if (vendor) {
+                    //add button to take item (if player inventory is not full and player has enough money)
+                } else {
+                    Button takeButton = getTakeButton(index);
+                    grid.getChildren().add(takeButton);
+                }
+
+                setSceneDeselectHandler();
+            }
+        });
+    }
+
+    private void setSceneDeselectHandler() {
+        scene.setOnMouseClicked(e1 -> {
+            int x2 = (int) (e1.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
+            int y2 = (int) (e1.getY() - Constants.INVENTORY_LEFT_CORNER_Y) / (64 + 20);
+            int index2 = y2 * Constants.INVENTORY_MAX_WIDTH + x2;
+            if (index2 >= 0 && index2 < inventorySize && itemsArray[index2] != null) {
+
+                updateInventory();
+
+                //remove button
+                grid.getChildren().removeIf(node -> node instanceof Button);
+
+                selectedItem = null;
+                System.out.println("deselected");
+
+                clearSceneHandlers();
+                setSceneBasicHandler();
+            }
+        });
+    }
+
+    protected Shape getSlot(int x, int y) {
+        return grid.getChildren().stream()
+                .filter(node -> node instanceof Rectangle)
+                .map(node -> (Rectangle) node)
+                .filter(node -> node.getX() == x * (64 + 20) + Constants.INVENTORY_LEFT_CORNER_X && node.getY() == y * (64 + 20) + Constants.INVENTORY_LEFT_CORNER_Y)
+                .findFirst()
+                .orElse(null);
+    }
+
+
+
+    private void setSceneVendorHandler() {
+        //basic means chest inventory
+        //when clicked, item is selected and button to take it to player inventory is shown
+        //only one item can be selected at a time
+        //item cannot be taken if player inventory is full or if player does not have enough money
+    }
+
+    //drawing methods
+    private Shape getBorder() {
+        //add big border to inventory
+        int borderWidth = Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
+        int borderHeight = inventorySize / Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
+
+        if (inventorySize % Constants.INVENTORY_MAX_WIDTH != 0) {
+            borderHeight += Constants.SLOT_SIZE + Constants.SLOT_GAP;
+            if (inventorySize < 10) {
+                borderWidth = inventorySize % Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
+            }
+        }
+
+        Rectangle border = new Rectangle(borderWidth, borderHeight);
+        border.setStyle("-fx-stroke: #ffffff; -fx-stroke-width: 10");
+        border.setX(Constants.INVENTORY_LEFT_CORNER_X - Constants.SLOT_GAP);
+        border.setY(Constants.INVENTORY_LEFT_CORNER_Y - Constants.SLOT_GAP);
+        setRoundBorders(border);
+
+        return border;
+    }
+    protected void drawInventory() {
+
+        grid.getChildren().add(getBorder());
+
+        grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
+
+        //draw items
+        for (int i = 0; i < inventorySize; i++) {
+            int i1 = Constants.INVENTORY_LEFT_CORNER_X + i % Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP);
+            int i2 = Constants.INVENTORY_LEFT_CORNER_Y + i / Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP);
+
+            Rectangle rectangle = new Rectangle(Constants.SLOT_SIZE, Constants.SLOT_SIZE);
+            setRoundBorders(rectangle);
+            rectangle.setStyle("-fx-stroke: #ffffff; -fx-stroke-width: 10;");
+            rectangle.setX(i1);
+            rectangle.setY(i2);
+            grid.getChildren().add(rectangle);
+
+            if (itemsArray[i] != null) {
+                ImageView imageView = new ImageView(itemsArray[i].getTexturePath());
+                imageView.setFitHeight(Constants.SLOT_SIZE);
+                imageView.setFitWidth(Constants.SLOT_SIZE);
+                //add item to grid (left aligned)
+                imageView.setX(i1);
+                imageView.setY(i2);
+                imageView.setStyle("-fx-stroke: #ffffff; -fx-stroke-width: 10");
+                grid.getChildren().add(imageView);
+            }
+        }
+    }
+
+    private Button getTakeButton(int index) {
+        Button takeButton = new Button("Take");
+        int takeButtonGap = 1;
+        takeButton.setPrefSize(100, 50);
+        takeButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - takeButtonGap * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
+        takeButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + (Constants.SLOT_SIZE / 2) - 25 + (index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
+        takeButton.setStyle("-fx-background-color: #484848; -fx-text-fill: #ffffff; -fx-font-size: 20;");
+        EventHandler takeButtonHandler = e -> {
+            //takenItem will be added to player inventory, if possible
+            //otherwise, it will be put back to chest inventory (by GameLogic)
+            addTakenItem(takeItem(getSelectedItemIndex()));
+            grid.getChildren().removeIf(node -> node instanceof Button);
+            clearSceneHandlers();
+            setSceneHandlers();
+            updateInventory();
+        };
+        takeButton.setOnAction(takeButtonHandler);
+        return takeButton;
+    }
+    protected int getSelectedItemIndex() {
+        for (int i = 0; i < inventorySize; i++) {
+            if (itemsArray[i] != null) {
+                if (itemsArray[i] == selectedItem) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    protected Item getSelectedItem() {
+        return selectedItem;
+    }
+
+    protected void setSelectedItem(Item selectedItem) {
+        this.selectedItem = selectedItem;
+    }
+    public void addTakenItem(Item takenItem) {
+        this.takenItems.add(takenItem);
+    }
+
+    public List<Item> getTakenItems() {
+        return takenItems;
+    }
+    public void removeTakenItem(Item takenItem) {
+        this.takenItems.remove(takenItem);
+    }
+    protected void setRoundBorders(Rectangle rectangle) {
+        //set round borders
+        rectangle.setArcHeight(10);
+        rectangle.setArcWidth(10);
     }
 }
