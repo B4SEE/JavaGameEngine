@@ -186,6 +186,9 @@ public class Wagon {
         for (int i = 0; i < rows.length; i++) {
             subRows = rows[i].split(Constants.MAP_COLUMN_SEPARATOR);
             for (int j = 0; j < subRows.length; j++) {
+
+                String texture = Constants.OBJECT_IDS.get(subRows[j].substring(2, 4));
+
                 if (subRows[j].charAt(0) == Constants.FLOOR) {
                     String letterID = subRows[j].substring(2, 4);
                     if (letterID.equals(Constants.ENEMY_SPAWN)) {
@@ -197,7 +200,7 @@ public class Wagon {
                         trapsCount++;
                     }
 
-                    Object object = new Object(Character.getNumericValue(Character.getNumericValue(subRows[j].charAt(0))), Constants.OBJECT_NAMES.get(letterID), Constants.OBJECT_IDS.get(letterID), letterID, 0, 0, 0, false);
+                    Object object = new Object(Character.getNumericValue(Character.getNumericValue(subRows[j].charAt(0))), Constants.OBJECT_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
 
                     objectsArray[i][j] = object;
                     continue;
@@ -206,19 +209,22 @@ public class Wagon {
                     interactiveObjectsCount++;
                     String letterID = subRows[j].substring(2, 4);
                     if (letterID.equals(Constants.CHEST_OBJECT)) {
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, 0, 0, 0, false);
+                        texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
+                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
                         object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
                         object.setHeight(1);
                         System.out.println(object.getHeight());
                         objectsArray[i][j] = object;
                     }
                     if (letterID.equals(Constants.LOCKABLE_DOOR)) {
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), letterID, 0, 0, 0, false);
+                        texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
+                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
                         object.setHeight(2);
                         objectsArray[i][j] = object;
                     }
                     if (letterID.equals(Constants.WAGON_DOOR)) {
-                        Door wagonDoor = new Door(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), Constants.INTERACTIVE_OBJECTS.get(letterID), new int[]{-1, 0, 0}, false);
+                        texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
+                        Door wagonDoor = new Door(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, new int[]{-1, 0, 0}, false);
                         wagonDoor.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
                         wagonDoor.setTwoLetterId(letterID);//without this, the door's twoLetterId is null
                         objectsArray[i][j] = wagonDoor;
@@ -226,7 +232,7 @@ public class Wagon {
                     continue;
                 }
                 String letterID = subRows[j].substring(2, 4);
-                Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.OBJECT_NAMES.get(letterID), Constants.OBJECT_IDS.get(letterID), letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, true);
+                Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.OBJECT_NAMES.get(letterID), texture, letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, true);
                 objectsArray[i][j] = object;
             }
         }
@@ -302,4 +308,17 @@ public class Wagon {
             return false;
         }
     }
+
+//    private String setRandomTexture(String path) {
+////        path = "src/main/resources/" + path;
+////
+////        getResourceAsStream(path);
+//
+////        String[] textures = new File(path).list();
+////        System.out.println(Arrays.toString(textures));
+////        if (textures != null) {
+////            return textures[(int) (Math.random() * textures.length)];
+////        }
+////        return null;
+////    }
 }
