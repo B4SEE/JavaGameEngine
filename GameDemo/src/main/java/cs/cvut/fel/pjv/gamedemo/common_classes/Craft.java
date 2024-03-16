@@ -1,4 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+import java.util.List;
+
 public class Craft {
     private Item firstItem;
     private Item secondItem;
@@ -29,7 +32,21 @@ public class Craft {
         return secondItem;
     }
 
-    public void craft(Item firstItem, Item secondItem) {
-        //check if in dictionary
+    public Item craft(Item firstItem, Item secondItem) {
+//        String[] craftItems = {firstItem.getName(), secondItem.getName()};
+        List<String> craftItems = List.of(firstItem.getName(), secondItem.getName());
+        //check if in Constants.CRAFT_RECIPES
+        String name = Constants.CRAFT_RECIPES.get(craftItems);
+        System.out.println(name);
+        if (name != null) {
+            return new Item(name, Constants.ITEM_TEXTURES.get(name));
+        } else {
+            List<String> craftItemsReversed = List.of(secondItem.getName(), firstItem.getName());
+            name = Constants.CRAFT_RECIPES.get(craftItemsReversed);
+            if (name != null) {
+                return new Item(name, Constants.ITEM_TEXTURES.get(name));
+            }
+        }
+        return null;
     }
 }
