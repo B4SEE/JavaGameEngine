@@ -3,6 +3,7 @@ public class Item {
     private final String name;
     private final String texturePath;
     private String type;
+    private int value;
 
     public Item(String name, String texturePath) {
         this.name = name;
@@ -28,5 +29,13 @@ public class Item {
 
     public String getType() {
         return type;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
     }
 }
