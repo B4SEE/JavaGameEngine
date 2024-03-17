@@ -95,7 +95,7 @@ public class Constants {
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.of(
             WAGON_DOOR, "wagon_door.png",//wagon_door.png
-            LOCKABLE_DOOR, "block_wagon_wall.png",
+            LOCKABLE_DOOR, "lockable_door_closed.png",
             CHEST_OBJECT, "chest_object_1.png"//chest_object.png
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.of(
