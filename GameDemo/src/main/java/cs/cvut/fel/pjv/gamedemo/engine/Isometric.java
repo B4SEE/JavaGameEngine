@@ -638,9 +638,9 @@ public class Isometric {
                 int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
 
                 if (objectsToDraw[i][j].getHeight() == 0) {
-                    System.out.println(objectsToDraw[i][j].getTexturePath());
                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
+                    objectsToDraw[i][j].setCartX(x);
                     objectsToDraw[i][j].setCartX(x);
                     objectsToDraw[i][j].setCartY(y);
 
@@ -712,7 +712,6 @@ public class Isometric {
      * Draws the entity.
      */
     private void drawEntity(Entity entity) {
-        System.out.println(entity.getTexturePath());
         entity.setEntityView(new ImageView(entity.getTexturePath()));
 
         grid.getChildren().add(entity.getHitbox());

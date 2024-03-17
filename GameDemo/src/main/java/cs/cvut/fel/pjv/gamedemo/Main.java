@@ -3,7 +3,6 @@ package cs.cvut.fel.pjv.gamedemo;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -36,6 +35,8 @@ public class Main extends Application {
         Item item16 = new Item("block", "block_wall.png");
         Item item17 = new Item("seat", "seat_1.png");
         Item item18 = new Item("box", "chest_object_1.png");
+        Item item19 = new Item("box", "chest_object_1.png");
+        Item item20 = new Item("box", "chest_object_1.png");
 
         PlayerInventory playerInventory = new PlayerInventory();
 
@@ -57,7 +58,10 @@ public class Main extends Application {
         playerInventory.addItem(item16);
         playerInventory.addItem(item17);
         playerInventory.addItem(item18);
+        playerInventory.addItem(item19);
+        playerInventory.addItem(item20);
         player.setPlayerInventory(playerInventory);
+        player.getPlayerInventory().setMoney(60);
 
         // Load and start the game
         GameLogic gameLogic = new GameLogic(stage);

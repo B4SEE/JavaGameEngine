@@ -127,9 +127,7 @@ public class Wagon {
             for (int i = 0; i < rows.length; i++) {
                 subRows = rows[i].split(Constants.MAP_COLUMN_SEPARATOR);
                 for (int j = 0; j < subRows.length; j++) {
-//                    System.out.println("-" + subRows[j].charAt(0));
                     if (subRows[j].charAt(0) == Constants.RANDOM) {
-//                        System.out.println(subRows[j]);
                         int chance = Integer.parseInt(subRows[j].substring(2, 4));
                         int generate = (int) (Math.random() * 100);
                         if (chance > generate) {
@@ -176,40 +174,33 @@ public class Wagon {
         objectsArray = new Object[rows.length][subRows.length];
 
         int interactiveObjectsCount = 0;
-        int entitiesCount = 0;
-        int trapsCount = 0;
 
         for (int i = 0; i < rows.length; i++) {
             subRows = rows[i].split(Constants.MAP_COLUMN_SEPARATOR);
             for (int j = 0; j < subRows.length; j++) {
 
                 String texture = Constants.OBJECT_IDS.get(subRows[j].substring(2, 4));
+                String letterID = subRows[j].substring(2, 4);
 
                 if (subRows[j].charAt(0) == Constants.FLOOR) {
-                    String letterID = subRows[j].substring(2, 4);
-                    if (letterID.equals(Constants.ENEMY_SPAWN)) {
-                        System.out.println(subRows[j]);
-                        entitiesCount++;
-                    }
+
                     if (letterID.equals(Constants.TRAP)) {
-                        System.out.println(subRows[j]);
-                        trapsCount++;
+//                        System.out.println(subRows[j]);
                     }
 
                     Object object = new Object(Character.getNumericValue(Character.getNumericValue(subRows[j].charAt(0))), Constants.OBJECT_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
 
                     objectsArray[i][j] = object;
+
                     continue;
                 }
                 if (subRows[j].charAt(0) == Constants.INTERACTIVE_OBJECT) {
                     interactiveObjectsCount++;
-                    String letterID = subRows[j].substring(2, 4);
                     if (letterID.equals(Constants.CHEST_OBJECT)) {
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
                         Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
                         object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
                         object.setHeight(1);
-                        System.out.println(object.getHeight());
                         objectsArray[i][j] = object;
                     }
                     if (letterID.equals(Constants.LOCKABLE_DOOR)) {
@@ -227,15 +218,10 @@ public class Wagon {
                     }
                     continue;
                 }
-                String letterID = subRows[j].substring(2, 4);
                 Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.OBJECT_NAMES.get(letterID), texture, letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, true);
                 objectsArray[i][j] = object;
             }
         }
-
-        System.out.println("io count: " + interactiveObjectsCount);
-        System.out.println("en count: " + entitiesCount);
-        System.out.println("traps count: " + trapsCount);
 
         //initialise interactive objects
         interactiveObjects = new Object[interactiveObjectsCount];
@@ -262,9 +248,6 @@ public class Wagon {
                         enemy.setAsDefaultEnemy();
                         enemy.setPositionX(enemy.getHealth());
 //                        enemy.setPositionY(enemy.getHealth());
-
-                        System.out.println(enemy.getTexturePath());
-                        System.out.println("enemy created");
 
                         entities.add(enemy);
                     }

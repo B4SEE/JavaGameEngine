@@ -67,55 +67,56 @@ public class Constants {
     public static final int SLOT_SIZE = 64;
     public static final int SLOT_GAP = 20;
     //consider enum
-    public static final Map <String, String> OBJECT_IDS = Map.of(
-            "BB", "0.png",
-            "BG", "0.png",
-            "TF", "tile_floor.png",
-            "BW", "0.png",
-            "SW", "1h_wall.png",
-//            "HW", "block_wagon_wall.png",
-            "WW", "3h_block.png",
-            "SS", "seat_1.png",
-            "CA", "carpet_1.png",
-            ENEMY_SPAWN, "block_wall.png",
-            TRAP, "block_wall.png"
+    public static final Map <String, String> OBJECT_IDS = Map.ofEntries(
+            Map.entry("BB", "0.png"),
+            Map.entry("BG", "0.png"),
+            Map.entry("TF", "tile_floor.png"),
+            Map.entry("BW", "0.png"),
+            Map.entry("SW", "1h_wall.png"),
+            Map.entry("HW", "block_wagon_wall.png"),
+            Map.entry("WW", "3h_block.png"),
+            Map.entry("SS", "seat_1.png"),
+            Map.entry("CA", "carpet_1.png"),
+            Map.entry(ENEMY_SPAWN, "block_wall.png"),
+            Map.entry(TRAP, "block_wall.png")
     );
 
-    public static final Map <String, String> OBJECT_NAMES = Map.of(
-            "BB", "blank_0",
-            "BG", "blank_gap_0",
-            "TF", "floor_0",
-            "BW", "blank_wall_3",
-            "SW", "1h_wall",
-            "HW", "wagon_wall_2",
-            "WW", "wagon_wall_3",
-            "SS", "seat",
-            ENEMY_SPAWN, "enemy_spawn",
-            TRAP, "trap"
+    public static final Map <String, String> OBJECT_NAMES = Map.ofEntries(
+            Map.entry("BB", "blank_0"),
+            Map.entry("BG", "blank_gap_0"),
+            Map.entry("TF", "floor_0"),
+            Map.entry("BW", "blank_wall_3"),
+            Map.entry("SW", "1h_wall"),
+            Map.entry("HW", "wagon_wall_2"),
+            Map.entry("WW", "wagon_wall_3"),
+            Map.entry("SS", "seat"),
+            Map.entry("CA", "carpet_1"),
+            Map.entry(ENEMY_SPAWN, "enemy_spawn"),
+            Map.entry(TRAP, "trap")
     );
-    public static final Map <String, String> INTERACTIVE_OBJECTS = Map.of(
-            WAGON_DOOR, "wagon_door.png",//wagon_door.png
-            LOCKABLE_DOOR, "lockable_door_closed.png",
-            CHEST_OBJECT, "chest_object_1.png"//chest_object.png
+    public static final Map <String, String> INTERACTIVE_OBJECTS = Map.ofEntries(
+            Map.entry(WAGON_DOOR, "wagon_door.png"),
+            Map.entry(LOCKABLE_DOOR, "lockable_door_closed.png"),
+            Map.entry(CHEST_OBJECT, "chest_object_1.png")
     );
-    public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.of(
-            WAGON_DOOR, "wagon_door",
-            LOCKABLE_DOOR, "lockable_door",
-            CHEST_OBJECT, "chest_object"
+    public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.ofEntries(
+            Map.entry(WAGON_DOOR, "wagon_door"),
+            Map.entry(LOCKABLE_DOOR, "lockable_door"),
+            Map.entry(CHEST_OBJECT, "chest_object")
     );
-    public static final Map <String, String[]> WAGON_TYPE_ENTITIES = Map.of(
-            "DEFAULT", new String[]{"zombie"},//new String[]{"zombie", "robot"},
-            "COMPARTMENT", new String[]{"zombie", "robot", "bully"},
-            "RESTAURANT", new String[]{"gentleman"}
-    );
-
-    public static final Map <List<String>, String> CRAFT_RECIPES = Map.of(
-            List.of("block", "seat"), "box"
+    public static final Map <String, String[]> WAGON_TYPE_ENTITIES = Map.ofEntries(
+            Map.entry("DEFAULT", new String[]{"zombie"}),
+            Map.entry("COMPARTMENT", new String[]{"zombie", "robot", "bully"}),
+            Map.entry("RESTAURANT", new String[]{"gentleman"})
     );
 
-    public static final Map <String, String> ITEM_TEXTURES = Map.of(
-            "block", "block_wall.png",
-            "seat", "seat_1.png",
-            "box", "chest_object_1.png"
+    public static final Map <List<String>, String> CRAFT_RECIPES = Map.ofEntries(
+            Map.entry(List.of("block", "seat"), "box")
+    );
+
+    public static final Map <String, String> ITEM_TEXTURES = Map.ofEntries(
+            Map.entry("block", "block_wall.png"),
+            Map.entry("seat", "seat_1.png"),
+            Map.entry("box", "chest_object_1.png")
     );
 }
