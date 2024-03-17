@@ -13,14 +13,9 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Isometric {
     private final int TILE_WIDTH = 32;
@@ -46,8 +41,8 @@ public class Isometric {
     private Object[] interactiveObjects;
     private Shape walls;
     private Player player;
-    private Entity[] entities;
-    private Entity[] drawnEntities;
+    private List<Entity> entities;
+    private List<Entity> drawnEntities;
     private int playerDeltaX = 0;
     private int playerDeltaY = 0;
     protected Stage mainStage;
@@ -97,7 +92,7 @@ public class Isometric {
                     return;
                 }
                 moveEntities();
-                entity.tryAttack(entity, new Entity[]{player}, time);
+                entity.tryAttack(entity, List.of(player), time);
             }
         }
     }
@@ -212,44 +207,6 @@ public class Isometric {
         isoScene.onKeyReleasedProperty().set(null);
         isoScene.onKeyPressedProperty().set(null);
     }
-    /**
-     * Sets the key event handlers for player movement.
-     */
-//    public void setKeyHandleToMovement() {
-//        isoScene.setOnKeyReleased(keyEvent -> {
-//            switch (keyEvent.getCode()) {
-//                case W, S:
-//                    updatePlayerDeltaY(0);
-//                    break;
-//                case A, D:
-//                    updatePlayerDeltaX(0);
-//                    break;
-//            }
-//        });
-//        isoScene.setOnKeyPressed(keyEvent -> {
-//            switch (keyEvent.getCode()) {
-//                case W:
-//                    updatePlayerTexture("player_back.png");
-//                    updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
-//                    break;
-//                case S:
-//                    updatePlayerTexture("player_front.png");
-//                    updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
-//                    break;
-//                case A:
-//                    updatePlayerTexture("player_left.png");
-//                    updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
-//                    break;
-//                case D:
-//                    updatePlayerTexture("player_right.png");
-//                    updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
-//                    break;
-//                case R:
-//                    tryAttack(player, entities);
-//            }
-//            updateWalls();
-//        });
-//    }
 
     /**
      * Clears the grid and all the game data.
@@ -290,7 +247,7 @@ public class Isometric {
         setMap(wagon.getSeed());
         setObjectsToDraw(wagon.getObjectsArray());
         setInteractiveObjects(wagon.getInteractiveObjects());
-        setEntities(wagon.getEntitiesArray());
+        setEntities(wagon.getEntities());
     }
     public void setMap(String map) {
         this.map = map;
@@ -339,15 +296,19 @@ public class Isometric {
      * Sets the entities.
      * @param entities the entities
      */
-    public void setEntities(Entity[] entities) {
+    public void setEntities(List<Entity> entities) {
         this.entities = entities;
-        drawnEntities = new Entity[this.entities.length];
+        drawnEntities = new ArrayList<>();
         for (Entity entity : this.entities) {
             entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
             entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
             entity.setStartPositionX(entity.getPositionX());
             entity.setStartPositionY(entity.getPositionY());
         }
+    }
+
+    public void addEntity(Entity entity) {
+        entities.add(entity);
     }
     /**
      * Resets the entities.
@@ -357,7 +318,7 @@ public class Isometric {
             grid.getChildren().remove(entity.getEntityView());
             grid.getChildren().remove(entity.getHitbox());
             grid.getChildren().remove(entity.getAttackRange());
-            drawnEntities = new Entity[entities.length];
+            drawnEntities = new ArrayList<>();
 
             entity.setHealth(entity.getMaxHealth());
             entity.setPositionX(entity.getStartPositionX());
@@ -371,45 +332,8 @@ public class Isometric {
      * Gets the entities.
      * @return the entities
      */
-    public Entity[] getEntities() {
+    public List<Entity> getEntities() {
         return entities;
-    }
-    /**
-     * Displays a preview of the map using the specified map data.
-     * If the map data is invalid, an error message is printed and the function returns.
-     * Otherwise, the map is loaded and displayed in a GridPane with objects represented by images.
-     * The size of each grid cell is determined by TILE_WIDTH and TILE_HEIGHT constants.
-     */
-    public void previewMap() {
-        if (!checkStringMapValidity(map)) {
-            System.out.println("Map is not valid");
-            return;
-        }
-        if (objectsToDraw == null) {
-            System.out.println("Map was not initialised properly");
-            return;
-        }
-        GridPane grid = new GridPane();
-        for (int i = 0; i < objectsToDraw.length; i++) {
-            for (int j = 0; j < objectsToDraw[i].length; j++) {
-//                int x = TILE_WIDTH + j * TILE_WIDTH;
-//                int y = i * TILE_HEIGHT;
-                Image objectTexture = new Image(Objects.requireNonNull(getClass().getClassLoader().getResource(objectsToDraw[i][j].getTexturePath())).toExternalForm());
-                ImageView object = new ImageView(objectTexture);
-                object.setFitWidth(TILE_WIDTH);
-                object.setFitHeight(TILE_HEIGHT);
-                //rotate 45 if floor
-                if (objectsToDraw[i][j].getHeight() == 0) {
-                    object.setRotate(45);
-                }
-                grid.add(object, j, i);
-            }
-        }
-        grid.setPrefSize(1000, 1000);
-        mainStage.setTitle("Map preview");
-        grid.setStyle("-fx-background-color: #000000;");
-        mainStage.setScene(new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT));
-        mainStage.show();
     }
     /**
      * Updates the label with the specified text.
@@ -566,7 +490,7 @@ public class Isometric {
      * If the entity is neutral, the entity's behaviour is set to enemy.
      */
     public void playerAttack() {
-        Entity[] entitiesInRange = player.inAttackRange(entities);
+        List<Entity> entitiesInRange = player.inAttackRange(entities);
         if (entitiesInRange != null) {
             for (Entity entity : entitiesInRange) {
                 if (entity != null) {
@@ -611,7 +535,7 @@ public class Isometric {
         grid.getChildren().remove(player.getHitbox());
         grid.getChildren().remove(player.getAttackRange());
         if (entities != null) {
-            drawnEntities = new Entity[entities.length];
+            drawnEntities = new ArrayList<>();
             for (Entity entity : entities) {
                 if (entity != null) {
                     grid.getChildren().remove(entity.getEntityView());
@@ -634,11 +558,10 @@ public class Isometric {
                     }
                     if (entities != null) {
                         for (Entity entity : entities) {
-                            if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                            if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
                                 if (checkX(entity, objectIsoXY) && checkY(entity, objectIsoXY, objectTexture)) {
                                     drawEntity(entity);
-                                    drawnEntities[count] = entity;
-                                    count++;
+                                    drawnEntities.add(entity);
                                 }
                             }
                         }
@@ -652,10 +575,9 @@ public class Isometric {
         }
         if (entities != null) {
             for (Entity entity : entities) {
-                if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
                     drawEntity(entity);
-                    drawnEntities[count] = entity;
-                    count++;
+                    drawnEntities.add(entity);
                 }
             }
         }
@@ -760,11 +682,10 @@ public class Isometric {
                     }
                     if (entities != null) {
                         for (Entity entity : entities) {
-                            if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                            if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
                                 if (checkX(entity, objectIsoXY) && checkY(entity, objectIsoXY, objectTexture)) {
                                     drawEntity(entity);
-                                    drawnEntities[count] = entity;
-                                    count++;
+                                    drawnEntities.add(entity);
                                 }
                             }
                         }
@@ -780,10 +701,9 @@ public class Isometric {
         }
         if (entities != null) {
             for (Entity entity : entities) {
-                if (entity != null && entity.isAlive() && !Arrays.asList(drawnEntities).contains(entity)) {
+                if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
                     drawEntity(entity);
-                    drawnEntities[count] = entity;
-                    count++;
+                    drawnEntities.add(entity);
                 }
             }
         }
@@ -792,6 +712,7 @@ public class Isometric {
      * Draws the entity.
      */
     private void drawEntity(Entity entity) {
+        System.out.println(entity.getTexturePath());
         entity.setEntityView(new ImageView(entity.getTexturePath()));
 
         grid.getChildren().add(entity.getHitbox());
@@ -799,6 +720,23 @@ public class Isometric {
         entity.getEntityView().setX(entity.getPositionX());
         entity.getEntityView().setY(entity.getPositionY());
         grid.getChildren().add(entity.getEntityView());
+    }
+
+    public Scene previewWagon(Wagon wagon) {
+        if (wagon == null) {
+            return null;
+        }
+        setMap(wagon.getSeed());
+        setObjectsToDraw(wagon.getObjectsArray());
+        setInteractiveObjects(wagon.getInteractiveObjects());
+        setEntities(wagon.getEntities());
+        grid.setPrefSize(1000, 1000);
+        grid.setStyle("-fx-background-color: #000000;");
+        placeMap();
+        isoScene = mainStage.getScene();
+        mainStage.setResizable(false);
+        mainStage.show();
+        return isoScene;
     }
     /**
      * Places the polygons for object hitboxes.
