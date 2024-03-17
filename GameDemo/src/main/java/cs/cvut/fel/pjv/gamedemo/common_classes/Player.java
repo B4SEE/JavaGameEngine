@@ -1,11 +1,12 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+import java.util.List;
+
 public class Player extends Entity {
     private int hunger;
     private final int maxHunger;
     private Item handItem;
-    private Inventory playerInventory;
-
-    private int money = 0;
+    private PlayerInventory playerInventory;
 
     public Player(int id, String name, String texturePath, int positionX, int positionY) {
         super(id, name, texturePath, "PLAYER", positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
@@ -14,7 +15,7 @@ public class Player extends Entity {
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.handItem = null;
-        this.playerInventory = new Inventory(Constants.PLAYER_INVENTORY_SIZE);
+        this.playerInventory = new PlayerInventory();
     }
 
     public Player(Wagon currentWagon) {
@@ -24,7 +25,7 @@ public class Player extends Entity {
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.handItem = null;
-        this.playerInventory = new Inventory(Constants.PLAYER_INVENTORY_SIZE);
+        this.playerInventory = new PlayerInventory();
     }
 
     public void setHunger(int hunger) {
@@ -43,11 +44,11 @@ public class Player extends Entity {
         return handItem;
     }
 
-    public void setPlayerInventory(Inventory playerInventory) {
+    public void setPlayerInventory(PlayerInventory playerInventory) {
         this.playerInventory = playerInventory;
     }
 
-    public Inventory getPlayerInventory() {
+    public PlayerInventory getPlayerInventory() {
         return playerInventory;
     }
 
@@ -84,19 +85,11 @@ public class Player extends Entity {
             shoot((Firearm) item);
         } else if (item instanceof MeleeWeapon) {
             super.setDamage(super.getDamage() + ((MeleeWeapon) item).getDamage());
-            Entity[] entities = super.getCurrentWagon().getEntitiesArray();
-            Entity[] inRange = super.inAttackRange(entities);
+            List<Entity> entities = super.getCurrentWagon().getEntities();
+            List<Entity> inRange = super.inAttackRange(entities);
             for (Entity entity : inRange) {
                 entity.takeDamage(((MeleeWeapon) item).getDamage());
             }
         }
-    }
-
-    public void setMoney(int money) {
-        this.money = money;
-    }
-
-    public int getMoney() {
-        return money;
     }
 }
