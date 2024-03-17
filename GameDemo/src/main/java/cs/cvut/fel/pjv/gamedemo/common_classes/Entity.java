@@ -3,6 +3,8 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Shape;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Entity {
@@ -292,14 +294,14 @@ public class Entity {
      * @param entities array of entities
      * @return array of entities in the attack range of the entity
      */
-    public Entity[] inAttackRange(Entity[] entities) {
-        Entity[] inRange = new Entity[entities.length];
+    public List<Entity> inAttackRange(List<Entity> entities) {
+        List<Entity> inRange = new ArrayList<>();
         int i = 0;
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity != this) {
                     if (entity.isAlive() && checkIntersection(attackRange, entity.getHitbox())) {
-                        inRange[i] = entity;
+                        inRange.add(entity);
                         i++;
                     }
                 }
@@ -323,11 +325,11 @@ public class Entity {
      * Entity cannot attack while the cooldown is active.
      * @param entity the entity
      */
-    public void tryAttack(Entity entity, Entity[] targets, long time) { //needs to be moved to Entity class
+    public void tryAttack(Entity entity, List<Entity> targets, long time) { //needs to be moved to Entity class
         if (entity.getCooldown() == 0) {
             entity.setCanAttack(true);
         }
-        Entity[] inAttackRange = entity.inAttackRange(targets);
+        List<Entity> inAttackRange = entity.inAttackRange(targets);
         if (entity.getCanAttack()) {
             for (Entity target : inAttackRange) {
                 if (target != null) {
