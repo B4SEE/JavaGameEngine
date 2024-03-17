@@ -2,10 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Wagon {
     private int id;
@@ -13,7 +10,7 @@ public class Wagon {
     private String texturePath;
     private Door doorLeft;
     private Door doorRight;
-    private Entity[] entitiesArray;
+    private List<Entity> entities = new ArrayList<>();
     private Object[][] objectsArray;
     private Object[] interactiveObjects;
     private String seed;
@@ -52,32 +49,27 @@ public class Wagon {
         this.texturePath = texturePath;
     }
 
-    public Wagon(int id, String type, String texturePath, Door doorLeft, Door doorRight, Entity[] entitiesArray, Object[][] objectsArray) {
+    public Wagon(int id, String type, String texturePath, Door doorLeft, Door doorRight, List<Entity> entities, Object[][] objectsArray) {
         this.id = id;
         this.type = type;
         this.texturePath = texturePath;
         this.doorLeft = doorLeft;
         this.doorRight = doorRight;
-        this.entitiesArray = entitiesArray;
+        this.entities = entities;
         this.objectsArray = objectsArray;
     }
-
     public void setDoorLeft(Door doorLeft) {
         this.doorLeft = doorLeft;
     }
-
     public void setDoorRight(Door doorRight) {
         this.doorRight = doorRight;
     }
-
-    public void setEntitiesArray(Entity[] entitiesArray) {
-        this.entitiesArray = entitiesArray;
+    public void setEntities(List<Entity> entities) {
+        this.entities = entities;
     }
-
-    public Entity[] getEntitiesArray() {
-        return entitiesArray;
+    public List<Entity> getEntities() {
+        return entities;
     }
-
     public void setObjectsArray(Object[][] objectsArray) {
         this.objectsArray = objectsArray;
     }
@@ -105,6 +97,10 @@ public class Wagon {
     public void generateWagon() {
         // Generate the wagon
         String path = "maps/common/" + type + "_wagon.txt";
+        String seed = load(path);
+        parseMap(seed);
+    }
+    public void setWagonMap(String path) {
         String seed = load(path);
         parseMap(seed);
     }
@@ -218,7 +214,7 @@ public class Wagon {
                     }
                     if (letterID.equals(Constants.LOCKABLE_DOOR)) {
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
-                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
+                        Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, true);
                         object.setHeight(2);
                         objectsArray[i][j] = object;
                     }
@@ -252,7 +248,6 @@ public class Wagon {
             }
         }
         //initialise entities
-        entitiesArray = new Entity[entitiesCount];
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
                 String letterID = object.getTwoLetterId();
@@ -263,14 +258,15 @@ public class Wagon {
                         String name = names[(int) (Math.random() * names.length)];
 
                         Entity enemy = new Entity(name, name + "_front.png");//works, but entities are all in the same position
+
                         enemy.setAsDefaultEnemy();
                         enemy.setPositionX(enemy.getHealth());
 //                        enemy.setPositionY(enemy.getHealth());
 
+                        System.out.println(enemy.getTexturePath());
                         System.out.println("enemy created");
 
-                        entitiesArray[entitiesCount - 1] = enemy;
-                        entitiesCount--;
+                        entities.add(enemy);
                     }
                 }
             }
