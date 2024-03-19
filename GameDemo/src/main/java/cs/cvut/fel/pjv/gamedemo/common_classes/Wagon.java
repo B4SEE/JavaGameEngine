@@ -94,6 +94,9 @@ public class Wagon {
         return seed;
     }
 
+    /**
+     * Generate the wagon
+     */
     public void generateWagon() {
         // Generate the wagon
         String path = "maps/common/" + type + "_wagon.txt";
@@ -104,6 +107,12 @@ public class Wagon {
         String seed = load(path);
         parseMap(seed);
     }
+
+    /**
+     * Load the map from the file (path)
+     * @param path - path to the file
+     * @return - the map
+     */
     private String load(String path) {
         File file = new File(path);
         StringBuilder map = new StringBuilder();
@@ -119,6 +128,10 @@ public class Wagon {
         return map.toString();
     }
 
+    /**
+     * Parse the map; replace the random objects with the actual objects.
+     * @param seed - the map
+     */
     private void parseMap(String seed) {
         try {
             String[] rows = seed.split(Constants.MAP_ROW_SEPARATOR);
@@ -160,6 +173,9 @@ public class Wagon {
         initWagon();
     }
 
+    /**
+     * Initialize the wagon; set the objects, interactive objects and entities.
+     */
     public void initWagon() {
         // Initialize the wagon
 
@@ -244,6 +260,7 @@ public class Wagon {
                         String name = names[(int) (Math.random() * names.length)];
 
                         Entity enemy = new Entity(name, name + "_front.png");//works, but entities are all in the same position
+                        enemy.setCurrentWagon(this);
 
                         enemy.setAsDefaultEnemy();
                         enemy.setPositionX(enemy.getHealth());
@@ -256,6 +273,14 @@ public class Wagon {
         }
     }
 
+    /**
+     * Check if the map is valid
+     * @param map - the map
+     * @return - true if the map is valid, false otherwise
+     * <br>
+     * <br>
+     * Note: This method luckily will be moved to the other class
+     */
     public boolean checkStringMapValidity(String map) {
         try {
             String[] rows = map.split(Constants.MAP_ROW_SEPARATOR);
@@ -288,7 +313,7 @@ public class Wagon {
         }
     }
 
-//    private String setRandomTexture(String path) {
+//    private String setRandomTexture(String path) {//not implemented yet
 ////        path = "src/main/resources/" + path;
 ////
 ////        getResourceAsStream(path);
