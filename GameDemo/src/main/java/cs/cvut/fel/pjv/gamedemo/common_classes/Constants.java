@@ -10,7 +10,7 @@ public class Constants {
     public static final int PLAYER_BASIC_SPEED_Y = 7;
     public static final int PLAYER_BASIC_DAMAGE = 5;
     public static final int PLAYER_HITBOX = 1;
-    public static final int PLAYER_MAX_HEALTH = 8;//100
+    public static final int PLAYER_MAX_HEALTH = 100;//100
     public static final int PLAYER_MAX_HUNGER = 100;
     public static final int PLAYER_INVENTORY_SIZE = 20;
     public static final int ENTITY_BASIC_MAX_HEALTH = 100;
@@ -25,7 +25,7 @@ public class Constants {
     public static final int ENEMY_BASIC_SPEED_Y_MIN = ENTITY_BASIC_SPEED_Y;
     public static final int ENEMY_BASIC_HITBOX = 1;
     public static final int ENEMY_BASIC_ATTACK_RANGE = 1;
-    public static final int ENEMY_BASIC_DAMAGE = PLAYER_BASIC_DAMAGE - 1;
+    public static final int ENEMY_BASIC_DAMAGE = 13;
     public static final int ENEMY_BASIC_COOLDOWN = 2;
     public static final int TRAIN_WAGONS = 10;
     public static final int INVENTORY_MAX_WIDTH = 10;
