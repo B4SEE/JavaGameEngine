@@ -56,6 +56,12 @@ public class Entity {
         this.damage = damage;
         this.currentWagon = currentWagon;
     }
+
+    /**
+     * Sets the entity as the default enemy.
+     * Speed and health are set to random values within the specified range.
+     * Note: hitbox size, attack range size, damage and cooldown are set to default values, but it will be changed in the future (randomized).
+     */
     public void setAsDefaultEnemy() {
         setType(Constants.ENEMY);
 
@@ -82,6 +88,9 @@ public class Entity {
         setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
     }
 
+    /**
+     * Not functional yet.
+     */
     public void setAsDefaultNPC() {
         setType(Constants.NPC);
         setBehaviour(Constants.NEUTRAL);
@@ -268,11 +277,20 @@ public class Entity {
         return currentWagon;
     }
 
+    /**
+     * Decreases the health of the entity by the specified amount.
+     * @param damage the amount of damage
+     */
+
     public void takeDamage(int damage) {
         System.out.println(name + " took " + damage + " damage.");
         health -= damage;
     }
 
+    /**
+     * Attacks the target entity.
+     * @param target the target entity
+     */
     public void attack(Entity target) {
         target.takeDamage(damage);
         if (Objects.equals(target.getBehaviour(), "NEUTRAL")) {
@@ -280,11 +298,15 @@ public class Entity {
         }
     }
 
-    public void move(int deltaX, int deltaY) {
+    public void move(int deltaX, int deltaY) {//might be unnecessary
         positionX += deltaX;
         positionY += deltaY;
     }
 
+    /**
+     * Checks if the entity is alive.
+     * @return true if the entity is alive, false otherwise
+     */
     public boolean isAlive() {
         return health > 0;
     }
@@ -292,7 +314,7 @@ public class Entity {
     /**
      * Returns an array of entities in the attack range of the entity.
      * @param entities array of entities
-     * @return array of entities in the attack range of the entity
+     * @return list of entities in the attack range of the entity
      */
     public List<Entity> inAttackRange(List<Entity> entities) {
         List<Entity> inRange = new ArrayList<>();
@@ -325,7 +347,7 @@ public class Entity {
      * Entity cannot attack while the cooldown is active.
      * @param entity the entity
      */
-    public void tryAttack(Entity entity, List<Entity> targets, long time) { //needs to be moved to Entity class
+    public void tryAttack(Entity entity, List<Entity> targets, long time) {
         if (entity.getCooldown() == 0) {
             entity.setCanAttack(true);
         }
