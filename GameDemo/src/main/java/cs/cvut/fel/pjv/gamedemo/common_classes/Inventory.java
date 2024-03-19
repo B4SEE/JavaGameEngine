@@ -32,12 +32,19 @@ public class Inventory {
     public void setVendor(boolean vendor) {
         this.vendor = vendor;
     }
+    /**
+     * Open inventory and set basic handler
+     * @return scene
+     */
     public Scene openInventory() {
         updateInventory();
         scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         setSceneBasicHandler();
         return scene;
     }
+    /**
+     * Update inventory
+     */
     public void updateInventory() {
         grid.getChildren().clear();
         drawInventory();
@@ -47,6 +54,11 @@ public class Inventory {
         inventoryLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
         grid.getChildren().add(inventoryLabel);
     }
+
+    /**
+     * Close inventory
+     * @param stage stage
+     */
     public void closeInventory(Stage stage) {
         clearSceneHandlers();
         stage.setScene(null);
@@ -54,6 +66,12 @@ public class Inventory {
         grid = new Pane();
         scene = null;
     }
+
+    /**
+     * Add item to inventory
+     * @param item item to add
+     * @return true if added, false if not
+     */
     public boolean addItem(Item item) {
         if (item == null) {
             return false;
@@ -66,6 +84,12 @@ public class Inventory {
         }
         return false;
     }
+
+    /**
+     * Take item from inventory by index
+     * @param index index of item
+     * @return item
+     */
     public Item takeItem(int index) {
         if (index < 0 || index >= inventorySize) {
             return null;
@@ -74,6 +98,12 @@ public class Inventory {
         itemsArray[index] = null;
         return item;
     }
+
+    /**
+     * Remove item from inventory
+     * @param item item to remove
+     * @return true if removed, false if not
+     */
     public boolean removeItem(Item item) {
         if (item == null) {
             return false;
@@ -92,6 +122,9 @@ public class Inventory {
     public Item[] getItemsArray() {
         return itemsArray;
     }
+    /**
+     * Set basic handler for inventory: show item name on hover, select item on click.
+     */
     private void setSceneBasicHandler() {
          scene.setOnMouseMoved(e -> {
             grid.getChildren().remove(itemNameLabel);
@@ -103,7 +136,7 @@ public class Inventory {
 
             if (index >= 0) {
                 if (index < inventorySize && itemsArray[index] != null) {
-                    itemNameLabel.setText(itemsArray[index].getName());
+                    itemNameLabel.setText(itemsArray[index].getName() + "| value: " + itemsArray[index].getValue());
                 } else {
                     itemNameLabel.setText("Empty");
                 }
@@ -116,11 +149,17 @@ public class Inventory {
         });
     }
 
+    /**
+     * Clear scene handlers
+     */
     protected void clearSceneHandlers() {
         scene.setOnMouseClicked(null);
         scene.setOnMouseMoved(null);
     }
 
+    /**
+     * Set select handler for inventory: select item on click, deselect on second click.
+     */
     private void setSceneSelectHandler() {
         scene.setOnMouseClicked(e -> {
             int x = (int) (e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
@@ -143,6 +182,9 @@ public class Inventory {
             }
         });
     }
+    /**
+     * Set deselect handler for inventory: deselect item on click, clear all buttons and reset handlers.
+     */
     private void setSceneDeselectHandler() {
         scene.setOnMouseClicked(e1 -> {
             int x2 = (int) (e1.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
@@ -157,21 +199,33 @@ public class Inventory {
             }
         });
     }
+
+    /**
+     * Get slot by coordinates
+     * @param x actual x
+     * @param y actual y
+     * @return slot
+     */
     protected Shape getSlot(int x, int y) {
         return grid.getChildren().stream()
                 .filter(node -> node instanceof Rectangle)
                 .map(node -> (Rectangle) node)
-                .filter(node -> node.getX() == x * (64 + 20) + Constants.INVENTORY_LEFT_CORNER_X && node.getY() == y * (64 + 20) + Constants.INVENTORY_LEFT_CORNER_Y)
+                .filter(node -> node.getX() == x * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.INVENTORY_LEFT_CORNER_X && node.getY() == y * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.INVENTORY_LEFT_CORNER_Y)
                 .findFirst()
                 .orElse(null);
     }
+
+    /**
+     * Create border for inventory
+     * @return border
+     */
     private Shape getBorder() {
         int borderWidth = Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
         int borderHeight = inventorySize / Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
 
         if (inventorySize % Constants.INVENTORY_MAX_WIDTH != 0) {
             borderHeight += Constants.SLOT_SIZE + Constants.SLOT_GAP;
-            if (inventorySize < 10) {
+            if (inventorySize < Constants.INVENTORY_MAX_WIDTH) {
                 borderWidth = inventorySize % Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
             }
         }
@@ -184,6 +238,10 @@ public class Inventory {
 
         return border;
     }
+
+    /**
+     * Draw inventory
+     */
     protected void drawInventory() {
         grid.getChildren().add(getBorder());
         grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
@@ -210,6 +268,12 @@ public class Inventory {
             }
         }
     }
+
+    /**
+     * Create take button for selected item
+     * @param index index of selected item
+     * @return take button
+     */
     private Button getTakeButton(int index) {
         Button takeButton = new Button("Take");
         int takeButtonGap = 1;
@@ -224,12 +288,22 @@ public class Inventory {
         takeButton.setOnAction(takeButtonHandler);
         return takeButton;
     }
+
+    /**
+     * Create buy button for selected item
+     * @param index index of selected item
+     * @return buy button
+     */
     private Button getBuyButton(int index) {
         Button buyButton = getTakeButton(index);
         buyButton.setText("Buy");
         buyButton.setStyle("-fx-background-color: #c0561a; -fx-text-fill: #ffffff; -fx-font-size: 20;");
         return buyButton;
     }
+
+    /**
+     * Clear all buttons and reset handlers
+     */
     private void clearButton() {
         grid.getChildren().removeIf(node -> node instanceof Button);
         clearSceneHandlers();
@@ -261,6 +335,11 @@ public class Inventory {
     public void removeTakenItem(Item takenItem) {
         this.takenItems.remove(takenItem);
     }
+
+    /**
+     * Set round borders for slot and border
+     * @param rectangle rectangle to set round borders
+     */
     protected void setRoundBorders(Rectangle rectangle) {
         //set round borders
         rectangle.setArcHeight(10);
