@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 public class GameLogic {
     private Isometric isometric;
     //test
@@ -26,7 +25,7 @@ public class GameLogic {
         final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
         /**
-         * Updates the game state every INTERVAL nanoseconds.
+         * Update the game state every INTERVAL nanoseconds.
          * @param l current time in nanoseconds
          */
         @Override
@@ -35,19 +34,14 @@ public class GameLogic {
             if (lastTime < 0) {
                 lastTime = l;
             } else if (l - lastTime < INTERVAL) {
+
+                isometric.updateTime(time);
+
                 isometric.updateWalls();
 
                 isometric.updateEntities();
 
-                isometric.updatePlayerPosition();
-
-                isometric.updateTime(time);
-
-                if (isometric.checkIfPlayerCanInteract() != null) {
-                    isometric.updateHint("Press E to interact", player.getPositionX(), player.getPositionY() - 25);
-                } else {
-                    isometric.updateHint("Player: " + player.getHealth() + " HP, " + player.getHunger() + " hunger", player.getPositionX(), player.getPositionY() - 25);
-                }
+                updatePlayer();
 
                 if (isometric.checkEntities()) {
                     isometric.setHandleToNull();
@@ -56,53 +50,63 @@ public class GameLogic {
             }
         }
     };
+    private void updatePlayer() {
+        isometric.updatePlayerPosition();
+        player.heal(time);
+        player.starve(time);
+        if (isometric.checkIfPlayerCanInteract() != null) {
+            isometric.updateHint("Press E to interact", player.getPositionX(), player.getPositionY() - 25);
+        } else {
+            isometric.updateHint("", player.getPositionX(), player.getPositionY() - 25);
+        }
+    }
     public GameLogic(Stage stage) {
         isometric = new Isometric();
         this.stage = stage;
     }
     /**
-     * Restarts the game.
+     * Restart the game.
      */
     public void restartGame() {
         isometric.reset();
         setPlayerHandle();
-        timer.start();
+        resumeGame();
     }
     /**
-     * Starts the game.
+     * Start the game.
      */
     public void start() {
         isometric.start();
         timer.start();
     }
     /**
-     * Pauses the game.
+     * Pause the game.
      */
     public void pauseGame() {
         timer.stop();
     }
     /**
-     * Resumes the game.
+     * Resume the game.
      */
     public void resumeGame() {
         timer.start();
     }
     /**
-     * Ends the game.
+     * End the game.
      */
     public void endGame() {
-        timer.stop();
+        pauseGame();
         stage.close();
         System.exit(0);
     }
     /**
-     * Stops the game.
-     * Shows the death scene.
-     * Allows the player to restart the game or exit to the main menu.
+     * Stop the game.
+     * Show the death scene.
+     * Allow the player to restart the game or exit to the main menu.
      * @see #mainMenu()
      */
     public void stopGame() {
-        timer.stop();
+        pauseGame();
         //save game scene
         Scene isoScene = stage.getScene();
         //create grid and scene for death
@@ -129,6 +133,9 @@ public class GameLogic {
         });
     }
 
+    /**
+     * Set the handle for the player movement and interaction.
+     */
     private void setPlayerHandle() {
         Scene scene = stage.getScene();
         scene.setOnKeyReleased(keyEvent -> {
@@ -160,7 +167,7 @@ public class GameLogic {
                     isometric.updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
                     break;
                 case R:
-                    player.tryAttack(player, isometric.getEntities(), time);
+                    playerUseHand();
                     break;
                 case TAB:
                     setPlayerInventoryHandle();
@@ -169,10 +176,11 @@ public class GameLogic {
                     if (isometric.checkIfPlayerCanInteract() != null) {
                         Object object = isometric.checkIfPlayerCanInteract();
 //                        if (object.equals("WD")) {
+                        //TODO
 //                            openDoor();
 //                        }
                         if (Objects.equals(object.getTwoLetterId(), "CO")) {
-                            setObjectInventoryHandle(object);
+                            setInventoryHandle(object.getObjectInventory());
                         } else if (Objects.equals(object.getTwoLetterId(),"LD")) {
                             useLockableDoor(object);
                             isometric.updateAll();
@@ -182,6 +190,24 @@ public class GameLogic {
             isometric.updateWalls();
         });
     }
+
+    /**
+     * Use player's item in hand: if the player has no item in hand, the player tries to attack the entity,
+     * otherwise the player uses the item.
+     */
+    private void playerUseHand() {
+        if (player.getHandItem() == null) {
+            player.tryAttack(player, isometric.getEntities(), time);
+        }
+        if (player.getHandItem() != null) {
+            player.useHandItem(time);
+        }
+    }
+
+    /**
+     * Open/close the door.
+     * @param object door to be opened/closed
+     */
     private void useLockableDoor(Object object) {
         if (object.isSolid()) {
             object.setIsSolid(false);
@@ -192,22 +218,27 @@ public class GameLogic {
         }
     }
 
-    private void setObjectInventoryHandle(Object object) {
-        Inventory objectInventory = object.getObjectInventory();
-        if (objectInventory != null) {
+    /**
+     * Set the handle for the inventory: check if the inventory is not null, clear the scene and the player handle,
+     * pause the game, set the handle for the inventory.
+     * When the inventory is closed, the handle for the player is set again and the game is resumed.
+     * @param inventory inventory to be handled
+     */
+    private void setInventoryHandle(Inventory inventory) {
+        if (inventory != null) {
 
             //for testing purposes
-            if (objectInventory.inventorySize >= 3 && !added) {
-                objectInventory.setVendor(true);
-                Item item = new Item("block", "block_wall.png");
+            if (inventory.inventorySize >= 3 && !added) {
+//                inventory.setVendor(true);
+                Food item = new Food("orange", "orange.png", 15);
                 item.setValue(10);
                 Item item2 = new Item("seat", "seat_1.png");
                 item2.setValue(20);
                 Item item3 = new Item("box", "chest_object_1.png");
                 item3.setValue(30);
-                objectInventory.addItem(item);
-                objectInventory.addItem(item2);
-                objectInventory.addItem(item3);
+                inventory.addItem(item);
+                inventory.addItem(item2);
+                inventory.addItem(item3);
                 added = true;
             }
             //
@@ -216,52 +247,58 @@ public class GameLogic {
             scene.setOnKeyReleased(null);
             scene.setOnKeyPressed(null);
 
-            timer.stop();
+            pauseGame();
 
-            Scene objectInventoryScene = objectInventory.openInventory();
+            Scene objectInventoryScene = inventory.openInventory();
 
             stage.setScene(objectInventoryScene);
 
             objectInventoryScene.setOnKeyPressed(keyEvent -> {
                 if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.TAB) {
-                    if (!objectInventory.getTakenItems().isEmpty()) {
-                        List<Item> takenItems = objectInventory.getTakenItems();
+                    if (!inventory.getTakenItems().isEmpty()) {
+                        List<Item> takenItems = inventory.getTakenItems();
                         List<Item> itemsToRemove = new ArrayList<>(takenItems);
                         List<Item> addedItems = new ArrayList<>();
-                        if (objectInventory.isVendor()) {
+                        if (inventory.isVendor()) {
                             for (Item item : itemsToRemove) {
                                 if (player.getPlayerInventory().addItem(item) && player.getPlayerInventory().getMoney() >= item.getValue()) {
-                                    objectInventory.removeTakenItem(item);
+                                    inventory.removeTakenItem(item);
                                     player.getPlayerInventory().setMoney(player.getPlayerInventory().getMoney() - item.getValue());
                                     addedItems.add(item);
-                                    objectInventory.removeTakenItem(item);
+                                    inventory.removeTakenItem(item);
                                 } else {
-                                    returnItems(addedItems, itemsToRemove, objectInventory);
+                                    returnItems(addedItems, itemsToRemove, inventory);
                                     break;
                                 }
                             }
                         } else {
                             for (Item item : itemsToRemove) {
                                 if (player.getPlayerInventory().addItem(item)) {
-                                    objectInventory.removeTakenItem(item);
+                                    inventory.removeTakenItem(item);
                                     addedItems.add(item);
-                                    objectInventory.removeTakenItem(item);
+                                    inventory.removeTakenItem(item);
                                 } else {
-                                    returnItems(addedItems, itemsToRemove, objectInventory);
+                                    returnItems(addedItems, itemsToRemove, inventory);
                                     break;
                                 }
                             }
                         }
                     }
-                    objectInventory.closeInventory(stage);
+                    inventory.closeInventory(stage);
                     stage.setScene(scene);
                     setPlayerHandle();
-                    timer.start();
+                    resumeGame();
                 }
             });
         }
     }
 
+    /**
+     * Return the items to the inventory if the player inventory is full or the player does not have enough money.
+     * @param addedItems items that were added to the player inventory
+     * @param itemsToRemove items that were taken from the object inventory
+     * @param inventory object inventory
+     */
     private void returnItems(List<Item> addedItems, List<Item> itemsToRemove, Inventory inventory) {
         for (Item remainingItem : itemsToRemove) {
             if (!addedItems.contains(remainingItem)) {
@@ -271,12 +308,16 @@ public class GameLogic {
         }
     }
 
+    /**
+     * Set the handle for the player inventory: clear the scene, clear the player handle, pause the game, set the handle for the player inventory.
+     * When the player inventory is closed, the handle for the player is set again and the game is resumed.
+     */
     private void setPlayerInventoryHandle() {
         Scene scene = stage.getScene();
         scene.setOnKeyReleased(null);
         scene.setOnKeyPressed(null);
 
-        timer.stop();
+        pauseGame();
 
         Scene playerInventory = player.getPlayerInventory().openInventory();
         stage.setScene(playerInventory);
@@ -286,13 +327,13 @@ public class GameLogic {
                 player.getPlayerInventory().closeInventory(stage);
                 stage.setScene(scene);
                 setPlayerHandle();
-                timer.start();
+                resumeGame();
             }
         });
     }
 
     /**
-     * Loads the game.
+     * Load the game.
      * @param player player
      * @param wagon wagon to be loaded
      */
@@ -302,10 +343,7 @@ public class GameLogic {
         }
         this.player = player;
         this.wagon = wagon;
-
-        //question: entities represented by wagon in array, how can I add new entities to the wagon?
-        //should I make fixed size of the array for maximum entities count and then add entities to the array?
-        //or should I make the array dynamic and add entities to the array? *List
+        player.setCurrentWagon(wagon);
 
         isometric.initialiseStage(stage);
         isometric.setPlayer(player);
@@ -315,24 +353,12 @@ public class GameLogic {
         setPlayerHandle();
     }
     /**
-     * Saves the game.
+     * Save the game.
      */
     public void saveGame() {
     }
-
-    public Scene previewMap() {
-        timer.stop();
-        if (player == null || wagon == null) {
-            throw new IllegalArgumentException("Invalid input");
-        }
-        isometric.clearAll();
-        isometric.initialiseStage(stage);
-        isometric.setPlayer(player);
-        isometric.initialiseWagon(wagon);
-        return isometric.previewWagon(wagon);
-    }
     /**
-     * Shows the main menu.
+     * Show the main menu.
      */
     public void mainMenu() {
         isometric.clearAll();
