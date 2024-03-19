@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Constants {
+    public static final int NULL_WAGON_ID = -1;
     public static final int PLAYER_START_POS_X = 0;
     public static final int PLAYER_START_POS_Y = 0;
     public static final int PLAYER_BASIC_SPEED_X = 7;
