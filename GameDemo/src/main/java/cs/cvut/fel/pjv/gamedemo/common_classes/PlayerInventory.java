@@ -25,6 +25,10 @@ public class PlayerInventory extends Inventory {
         itemsArray = new Item[Constants.PLAYER_INVENTORY_SIZE];
     }
 
+    /**
+     * Open inventory and set basic handler
+     * @return scene
+     */
     @Override
     public Scene openInventory() {
         updateInventory();
@@ -32,6 +36,10 @@ public class PlayerInventory extends Inventory {
         setSceneBasicHandler();
         return scene;
     }
+
+    /**
+     * Clear all buttons and reset handlers
+     */
     private void clearButton() {
         setSelectedItem(null);
         grid.getChildren().removeIf(node -> node instanceof Button);
@@ -39,6 +47,12 @@ public class PlayerInventory extends Inventory {
         setSceneBasicHandler();
         updateInventory();
     }
+
+    /**
+     * Create delete button for selected item
+     * @param index - index of selected item
+     * @return delete button
+     */
     private Button deleteButton(int index) {
         Button deleteButton = new Button("Delete");
         deleteButton.setPrefSize(100, 50);
@@ -52,6 +66,13 @@ public class PlayerInventory extends Inventory {
         deleteButton.setOnAction(deleteButtonHandler);
         return deleteButton;
     }
+
+    /**
+     * Create put back button for selected item in main hand, crafting table or result slot
+     * @param x - x coordinate of selected item
+     * @param y - y coordinate of selected item
+     * @return put back button
+     */
     private Button putBackButton(int x, int y) {
         Button putBackButton = new Button("Put back");
         putBackButton.setPrefSize(125, 50);
@@ -88,6 +109,12 @@ public class PlayerInventory extends Inventory {
         putBackButton.setOnAction(putBackButtonHandler);
         return putBackButton;
     }
+
+    /**
+     * Create put to craft table button for selected item
+     * @param index - index of selected item
+     * @return put to craft table button
+     */
     private Button putToCraftTableButton(int index) {
         Button putToCraftTableButton = new Button("Craft");
         putToCraftTableButton.setPrefSize(100, 50);
@@ -111,6 +138,12 @@ public class PlayerInventory extends Inventory {
         putToCraftTableButton.setOnAction(putToCraftTableButtonHandler);
         return putToCraftTableButton;
     }
+
+    /**
+     * Create equip button for selected item
+     * @param index - index of selected item
+     * @return equip button
+     */
     private Button mainHandSlotButton(int index) {
         Button mainHandSlotButton = new Button("Equip");
         mainHandSlotButton.setPrefSize(100, 50);
@@ -126,6 +159,10 @@ public class PlayerInventory extends Inventory {
         mainHandSlotButton.setOnAction(equipButtonHandler);
         return mainHandSlotButton;
     }
+
+    /**
+     * Update inventory
+     */
     @Override
     public void updateInventory() {
         grid.getChildren().clear();
@@ -140,6 +177,10 @@ public class PlayerInventory extends Inventory {
         showMoney();
         showAmmo();
     }
+
+    /**
+     * Draw main hand slot
+     */
     private void drawMainHandSlot() {
         int mainHandSlotGap = 1;
         Rectangle mainHandSlot = new Rectangle(Constants.SLOT_SIZE, Constants.SLOT_SIZE);
@@ -154,6 +195,10 @@ public class PlayerInventory extends Inventory {
             drawItemPreview(mainHandSlot, mainHandItem);
         }
     }
+
+    /**
+     * Draw crafting table
+     */
     private void drawCraftTable() {
         int craftSlotGap = 1;
 
@@ -210,12 +255,30 @@ public class PlayerInventory extends Inventory {
             drawItemPreview(resultSlot, resultItem);
         }
     }
+
+    /**
+     * Get grid x coordinate of the slot
+     * @param x - actual x coordinate of the slot
+     * @return grid x coordinate
+     */
     private int getGridX(int x) {
         return (x - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP);
     }
+
+    /**
+     * Get grid y coordinate of the slot
+     * @param y - actual y coordinate of the slot
+     * @return grid y coordinate
+     */
     private int getGridY(int y) {
         return (y - Constants.INVENTORY_LEFT_CORNER_Y) / (Constants.SLOT_SIZE + Constants.SLOT_GAP);
     }
+
+    /**
+     * Draw item preview
+     * @param slot - slot where to draw
+     * @param item - item to draw
+     */
     private void drawItemPreview(Rectangle slot, Item item) {
         ImageView imageView = new ImageView(new Image(item.getTexturePath()));
         imageView.setFitHeight(Constants.SLOT_SIZE);
@@ -224,6 +287,10 @@ public class PlayerInventory extends Inventory {
         imageView.setY(slot.getY());
         grid.getChildren().add(imageView);
     }
+
+    /**
+     * Set basic handler for inventory: show item name on hover, select item on click.
+     */
     private void setSceneBasicHandler() {
         scene.setOnMouseMoved(e -> {
 
@@ -250,6 +317,12 @@ public class PlayerInventory extends Inventory {
         });
     }
 
+    /**
+     * Get grid x and y coordinates of mouse
+     * @param actualX - x coordinate of mouse
+     * @param actualY - y coordinate of mouse
+     * @return grid x and y coordinates
+     */
     private int[] getMouseGridXY(double actualX, double actualY) {
         int x = (int) ((actualX - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         int y = (int) ((actualY - Constants.INVENTORY_LEFT_CORNER_Y) / (Constants.SLOT_SIZE + Constants.SLOT_GAP));
@@ -261,6 +334,10 @@ public class PlayerInventory extends Inventory {
 
         return new int[]{x, y};
     }
+
+    /**
+     * Set select handler for inventory: select item on click, deselect on second click.
+     */
     private void setSceneSelectHandler() {
         scene.setOnMouseClicked(e -> {
 
@@ -309,6 +386,18 @@ public class PlayerInventory extends Inventory {
             }
         });
     }
+
+    /**
+     * Set selection handler for main hand slot, crafting table and result slot
+     * @param x - x coordinate of selected item
+     * @param y - y coordinate of selected item
+     * @param item - selected item
+     * @param buttonText - text of put back button
+     * <br>
+     * Note: this method is used for main hand slot, crafting table and result slot because they are not part of the inventory array;
+     * it means that they cannot be selected by the basic handler (that select items from the inventory array by their index);
+     * this also means that they are separate inventory slots and can hold items, making actual inventory size bigger (size + main hand slot + crafting table 2 slots)
+     */
     private void setNonInventorySelectionHandler(int x, int y, Item item, String buttonText) {
         clearSceneHandlers();
         updateInventory();
@@ -320,6 +409,10 @@ public class PlayerInventory extends Inventory {
         grid.getChildren().add(putBackButton);
         setSceneDeselectHandler();
     }
+
+    /**
+     * Set deselect handler for inventory: deselect item on click, clear all buttons and reset handlers.
+     */
     private void setSceneDeselectHandler() {
         scene.setOnMouseClicked(e1 -> {
             updateInventory();
@@ -329,14 +422,22 @@ public class PlayerInventory extends Inventory {
             setSceneBasicHandler();
         });
     }
-    public void showMoney() {
+
+    /**
+     * Show player's money
+     */
+    private void showMoney() {
         Label moneyLabel = new Label("Money: " + money);
         moneyLabel.setLayoutX(0);
         moneyLabel.setLayoutY(50);
         moneyLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
         grid.getChildren().add(moneyLabel);
     }
-    public void showAmmo() {
+
+    /**
+     * Show player's ammo
+     */
+    private void showAmmo() {
         Label ammoLabel = new Label("Ammo: " + ammo);
         ammoLabel.setLayoutX(0);
         ammoLabel.setLayoutY(75);
@@ -354,5 +455,12 @@ public class PlayerInventory extends Inventory {
     }
     public int getAmmo() {
         return ammo;
+    }
+    public void setMainHandItem(Item item) {
+        mainHandItem = item;
+    }
+
+    public Item getMainHandItem() {
+        return mainHandItem;
     }
 }
