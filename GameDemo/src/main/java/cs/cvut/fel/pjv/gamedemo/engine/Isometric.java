@@ -17,25 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 //consider bitmap
-public class Isometric {
+public class Isometric {//Note: need to implement A* algorithm for entity movement
     private final int TILE_WIDTH = 32;
     private final int TILE_HEIGHT = 32;
     private int deltaX = 10;
     private int deltaY = 0;
-
-    //    map example: 11AA_12BB_13CC-21AA_00AA_00BB
-//first number tile type: 0 - floor (not Solid), 1 - wall (Solid), 2 - interactive: chest object (not solid), lockable door (solid/not solid), wagon door (solid)
-//type 3 is invalid and used only to generate wagon, wagon seed is valid map and only contains 0, 1, 2;
-//second number tile height min 1, max 3; floor height is always 0; responsible for drawing order (if player should be drawn in front or behind the object)
-//third number tile letter id (for example: AA, BB, CC), represents texture; Dictionaries are in Constants class
-//'_' separates tiles, '-' separates rows
-
-    //question: can I move some of the methods to other classes? yes
-
-    //question: can I interpreter Isometric class as a graphic (game) engine? or is it too specific? yes
-    //it became even more specific after adding relation with Wagon class, maps cannot be generated and placed without initialised Wagon instance;
-
-    //Note: need to implement A* algorithm for entity movement
     private String map = "";
     private Object[][] objectsToDraw;
     private Object[] interactiveObjects;
@@ -48,7 +34,6 @@ public class Isometric {
     protected Stage mainStage;
     private Pane grid = new Pane();
     private Label hint = new Label();
-    private Label healthLabel = new Label();
     private long time;
     private Scene isoScene;
     public Isometric() {
@@ -141,8 +126,8 @@ public class Isometric {
      * the program exits with an error message.
      * <br>
      * <br>
-     * Sets up the game grid, loads the map, and sets the scene.
-     * Sets key event handlers for player movement.
+     * Set up the game grid, load the map, and set the scene.
+     * Set key event handlers for player movement.
      * <br>
      * <br>
      * Note: Player movement may experience lag, requires further investigation.
@@ -467,24 +452,6 @@ public class Isometric {
             }
         }
     }
-
-    /**
-     * Check if the player can attack the entities.
-     * If the entities are in attack range, the player attacks the entities.
-     * If the entity is neutral, the entity's behaviour is set to enemy.
-     */
-    public void playerAttack() {
-        List<Entity> entitiesInRange = player.inAttackRange(entities);
-        if (entitiesInRange != null) {
-            for (Entity entity : entitiesInRange) {
-                if (entity != null) {
-                    if (entity.isAlive()) {
-                        player.attack(entity);
-                    }
-                }
-            }
-        }
-    }
     /**
      * Update all the objects in the game.
      */
@@ -494,6 +461,7 @@ public class Isometric {
         placePolygons();
         mergeObjectHitboxes();
         placeWalls();
+        updateEntities();
     }
     /**
      * Move the grid by the specified delta x and delta y.
@@ -518,6 +486,7 @@ public class Isometric {
         grid.getChildren().remove(player.getEntityView());
         grid.getChildren().remove(player.getHitbox());
         grid.getChildren().remove(player.getAttackRange());
+        grid.getChildren().removeIf(node -> node instanceof Rectangle);
         if (entities != null) {
             drawnEntities = new ArrayList<>();
             for (Entity entity : entities) {
@@ -525,13 +494,10 @@ public class Isometric {
                     grid.getChildren().remove(entity.getEntityView());
                     grid.getChildren().remove(entity.getHitbox());
                     grid.getChildren().remove(entity.getAttackRange());
-                    //remove all rectangles (health bars)
-                    grid.getChildren().removeIf(node -> node instanceof Rectangle);
                 }
             }
         }
         boolean playerDrawn = false;
-        int count = 0;
         for (Object[] objects : objectsToDraw) {
             for (Object object : objects) {
                 if (object.getHeight() > 0) {
@@ -626,14 +592,16 @@ public class Isometric {
                 if (objectsToDraw[i][j].getHeight() == 0) {
                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
-                    objectsToDraw[i][j].setCartX(x);
-                    objectsToDraw[i][j].setCartX(x);
-                    objectsToDraw[i][j].setCartY(y);
+                    objectsToDraw[i][j].setCartX((int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()));
+                    objectsToDraw[i][j].setCartY((int) (y + TILE_HEIGHT - objectTexture.getHeight()));
+                    double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
+                    objectsToDraw[i][j].setIsoX(objectIsoXY[0]);
+                    objectsToDraw[i][j].setIsoY(objectIsoXY[1]);
 
                     ImageView object = new ImageView(objectTexture);
                     objectsToDraw[i][j].setTexture(object);
 
-                    placeIsometricTileWithTexture(object, (int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()), (int) (y + TILE_HEIGHT - objectTexture.getHeight()));
+                    placeIsometricTileWithTexture(object, objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
                 }
             }
         }
@@ -661,6 +629,9 @@ public class Isometric {
                     ImageView object = new ImageView(objectTexture);
                     objectsToDraw[i][j].setTexture(object);
                     double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
+                    objectsToDraw[i][j].setIsoX(objectIsoXY[0]);
+                    objectsToDraw[i][j].setIsoY(objectIsoXY[1]);
+//                    System.out.println("Drawing object at " + objectsToDraw[i][j].getIsoX() + " " + objectsToDraw[i][j].getIsoY());
 
                     if (checkX(player, objectIsoXY) && checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
                         drawEntity(player);
@@ -714,6 +685,7 @@ public class Isometric {
      * @param entity the entity
      */
     private void drawBars(Entity entity) {
+
         int maxHealth = entity.getMaxHealth();
         int health = entity.getHealth();
 
@@ -894,8 +866,15 @@ public class Isometric {
         grid.getChildren().add(img);
     }
 
-    public Pane getIsoGrid() {
+    public Pane getIsoGrid() {//might be unnecessary
         return grid;
     }
-
+    public void updateWagonArray(Wagon wagon) {//updates coordinates of objects in the wagon
+        if (wagon == null) {
+            return;
+        }
+        wagon.setObjectsArray(objectsToDraw);
+        wagon.setEntities(entities);
+        wagon.setInteractiveObjects(interactiveObjects);
+    }
 }
