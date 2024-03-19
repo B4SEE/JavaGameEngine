@@ -21,6 +21,7 @@ public class GameLogic {
     private long time;
     private Player player;
     private Wagon wagon;
+    private Train train;
     private AnimationTimer timer = new AnimationTimer() {
         final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
@@ -175,10 +176,9 @@ public class GameLogic {
                 case E:
                     if (isometric.checkIfPlayerCanInteract() != null) {
                         Object object = isometric.checkIfPlayerCanInteract();
-//                        if (object.equals("WD")) {
-                        //TODO
-//                            openDoor();
-//                        }
+                        if (Objects.equals(object.getTwoLetterId(), "WD")) {
+                            openWagonDoor((Door) object);
+                        }
                         if (Objects.equals(object.getTwoLetterId(), "CO")) {
                             setInventoryHandle(object.getObjectInventory());
                         } else if (Objects.equals(object.getTwoLetterId(),"LD")) {
@@ -189,6 +189,64 @@ public class GameLogic {
             }
             isometric.updateWalls();
         });
+    }
+
+    private void openWagonDoor(Door door) {
+        if (door.getTargetId() == -1) {
+//            String[] wagonTypes = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
+            String[] wagonTypes = {"CARGO", "DEFAULT"};
+            //select random wagon type
+            String wagonType = wagonTypes[(int) (Math.random() * wagonTypes.length)];
+            Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType, "wall_3.png");
+            if (door == wagon.getDoorLeft()) {
+                nextWagon.generateNextWagon(wagon, true);
+
+                train.addWagon(nextWagon);
+
+                isometric.initialiseWagon(nextWagon);
+
+                isometric.updateAll();
+
+                wagon.getDoorLeft().teleport(player);
+
+                this.wagon = nextWagon;
+
+                player.setCurrentWagon(wagon);
+            } else if (door == wagon.getDoorRight()) {
+                nextWagon.generateNextWagon(wagon, false);
+
+                train.addWagon(nextWagon);
+
+                isometric.initialiseWagon(nextWagon);
+
+                isometric.updateAll();
+
+                wagon.getDoorRight().teleport(player);
+
+                this.wagon = nextWagon;
+
+                player.setCurrentWagon(wagon);
+            }
+        } else {
+            for (Wagon wagon : train.wagonsArray) {
+                if (wagon.getId() == door.getTargetId()) {
+                    if (door == this.wagon.getDoorLeft()) {
+                        isometric.initialiseWagon(wagon);
+                        isometric.updateAll();
+                        this.wagon.getDoorLeft().teleport(player);
+                        this.wagon = wagon;
+                        player.setCurrentWagon(wagon);
+                    } else {
+                        isometric.initialiseWagon(wagon);
+                        isometric.updateAll();
+                        this.wagon.getDoorRight().teleport(player);
+                        this.wagon = wagon;
+                        player.setCurrentWagon(wagon);
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     /**
@@ -343,6 +401,9 @@ public class GameLogic {
         }
         this.player = player;
         this.wagon = wagon;
+        this.train = new Train();
+        train.addWagon(wagon);
+
         player.setCurrentWagon(wagon);
 
         isometric.initialiseStage(stage);
@@ -351,6 +412,9 @@ public class GameLogic {
         System.out.println(wagon.getSeed());
         isometric.initialiseWagon(wagon);
         setPlayerHandle();
+//        System.out.println("------------");
+//        System.out.println(train.wagonsArray[0].getSeed());
+//        System.out.println("------------");
     }
     /**
      * Save the game.
