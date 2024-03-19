@@ -6,17 +6,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
+//consider bitmap
 public class Isometric {
     private final int TILE_WIDTH = 32;
     private final int TILE_HEIGHT = 32;
@@ -58,7 +58,7 @@ public class Isometric {
     }
 
     /**
-     * Updates the time.
+     * Update the time.
      * @param time the current time (in seconds)
      * <br>
      * <br>
@@ -69,18 +69,8 @@ public class Isometric {
     public void updateTime(long time) {
         this.time = time;
     }
-
     /**
-     * Sets stage title to player health.
-     * <br>
-     * <br>
-     * Note: not the final implementation, function will be used to draw health bar for all entities and player
-     */
-    public void showHealth() {
-        mainStage.setTitle("player health: " + player.getHealth());
-    }
-    /**
-     * Updates the entities.
+     * Update the entities.
      */
     public void updateEntities() {
         if (entities == null) {
@@ -98,8 +88,8 @@ public class Isometric {
     }
 
     /**
-     * Checks if the player can interact with the objects.
-     * @return true if the player has interactive objects in his attack range, false otherwise
+     * Check if the player can interact with the objects.
+     * @return the object the player can interact with, null otherwise
      */
     public Object checkIfPlayerCanInteract() {
         if (interactiveObjects == null) {
@@ -116,8 +106,8 @@ public class Isometric {
     }
 
     /**
-     * Checks if the entities and player are alive.
-     * Removes the entities from the grid if they are not alive.
+     * Check if the entities and player are alive.
+     * Remove the entities from the grid if they are not alive.
      * @return true if the player is not alive, false otherwise
      * <br>
      * <br>
@@ -136,8 +126,6 @@ public class Isometric {
                         grid.getChildren().remove(entity.getEntityView());
                         grid.getChildren().remove(entity.getHitbox());
                         grid.getChildren().remove(entity.getAttackRange());
-
-                        grid.getChildren().remove(healthLabel);
                     }
                 }
             }
@@ -146,7 +134,7 @@ public class Isometric {
     }
 
     /**
-     * Initializes and starts the game.
+     * Initialize and start the game.
      * <br>
      * <br>
      * If the main stage, player, or map is not initialized properly,
@@ -184,15 +172,15 @@ public class Isometric {
     }
 
     /**
-     * Updates player's texture.
+     * Update player's texture.
      * @param texturePath the texture path
      */
     public void updatePlayerTexture(String texturePath) {
         player.setTexturePath(texturePath);
     }
     /**
-     * Resets the game:
-     * resets the player and entities, clears the grid, and restarts the game.
+     * Reset the game:
+     * reset the player and entities, clear the grid, and restart the game.
      */
     public void reset() {
         resetPlayer();
@@ -201,7 +189,7 @@ public class Isometric {
         start();
     }
     /**
-     * Sets the key event handlers to null. Needed for death screen.
+     * Set the key event handlers to null. Needed for death screen.
      */
     public void setHandleToNull() {
         isoScene.onKeyReleasedProperty().set(null);
@@ -209,7 +197,7 @@ public class Isometric {
     }
 
     /**
-     * Clears the grid and all the game data.
+     * Clear the grid and all the game data.
      */
     public void clearAll() {
         grid.getChildren().clear();
@@ -222,11 +210,10 @@ public class Isometric {
         playerDeltaX = 0;
         playerDeltaY = 0;
         hint = new Label();
-        healthLabel = new Label();
         time = 0;
     }
     /**
-     * Initialises the main stage.
+     * Initialise the main stage.
      * @param stage the main stage
      */
     public void initialiseStage(Stage stage) {
@@ -236,7 +223,7 @@ public class Isometric {
     }
 
     /**
-     * initialises the wagon.
+     * Initialise the wagon.
      * @param wagon the wagon
      */
     public void initialiseWagon(Wagon wagon) {
@@ -259,7 +246,7 @@ public class Isometric {
         this.interactiveObjects = interactiveObjects;
     }
     /**
-     * Sets the player.
+     * Set the player.
      * @param player the player
      */
     public void setPlayer(Player player) {
@@ -272,7 +259,7 @@ public class Isometric {
         updatePlayerDeltaY(0);
     }
     /**
-     * Resets the player.
+     * Reset the player.
      */
     public void resetPlayer() {
         grid.getChildren().remove(player.getEntityView());
@@ -280,20 +267,21 @@ public class Isometric {
         grid.getChildren().remove(player.getAttackRange());
 
         player.setHealth(Constants.PLAYER_MAX_HEALTH);
+        player.setHunger(Constants.PLAYER_MAX_HUNGER);
         player.setPositionX(player.getStartPositionX());
         player.setPositionY(player.getStartPositionY());
         player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), player.getHitBoxSize()));
         player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), 1));
     }
     /**
-     * Gets the player.
+     * Get the player.
      * @return the player
      */
     public Player getPlayer() {
         return player;
     }
     /**
-     * Sets the entities.
+     * Set the entities.
      * @param entities the entities
      */
     public void setEntities(List<Entity> entities) {
@@ -307,11 +295,15 @@ public class Isometric {
         }
     }
 
+    /**
+     * Add the entity.
+     * @param entity the entity
+     */
     public void addEntity(Entity entity) {
         entities.add(entity);
     }
     /**
-     * Resets the entities.
+     * Reset the entities.
      */
     public void resetEntities() {
         for (Entity entity : entities) {
@@ -329,14 +321,14 @@ public class Isometric {
         }
     }
     /**
-     * Gets the entities.
+     * Get the entities.
      * @return the entities
      */
     public List<Entity> getEntities() {
         return entities;
     }
     /**
-     * Updates the label with the specified text.
+     * Update the label with the specified text.
      * @param text the text to display
      */
     public void updateHint(String text, int x, int y) {
@@ -347,37 +339,29 @@ public class Isometric {
         hint.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
         grid.getChildren().add(hint);
     }
-    private void updateHealthLabel(String text, int x, int y) {
-        grid.getChildren().remove(healthLabel);
-        healthLabel.setText(text);
-        healthLabel.setLayoutX(x);
-        healthLabel.setLayoutY(y);
-        healthLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-        grid.getChildren().add(healthLabel);
-    }
     /**
-     * Updates the player's delta x.
+     * Update the player's delta x.
      * @param deltaX the player's delta x
      */
     public void updatePlayerDeltaX(int deltaX) {
         this.playerDeltaX = deltaX;
     }
     /**
-     * Updates the player's delta y.
+     * Update the player's delta y.
      * @param deltaY the player's delta y
      */
     public void updatePlayerDeltaY(int deltaY) {
         this.playerDeltaY = deltaY;
     }
     /**
-     * Updates the player's position.
+     * Update the player's position.
      * If the player's hitbox collides with the walls, the player's position is not updated.
      */
     public void updatePlayerPosition() {
         updateEntityPosition(player, playerDeltaX, playerDeltaY, Constants.PLAYER_BASIC_SPEED_X, Constants.PLAYER_BASIC_SPEED_Y);
     }
     /**
-     * Updates the position of the entity.
+     * Update the position of the entity.
      * @param entity the entity
      * @param deltaX the delta x
      * @param deltaY the delta y
@@ -444,7 +428,7 @@ public class Isometric {
     }
 
     /**
-     * Checks if the entity can move to the specified position.
+     * Check if the entity can move to the specified position.
      * @param entity the entity
      * @param deltaX the delta x
      * @param deltaY the delta y
@@ -464,7 +448,7 @@ public class Isometric {
         return !checkCollision(entity.getHitbox(), walls);
     }
     /**
-     * Moves the entities towards the player.
+     * Move the entities towards the player.
      */
     public void moveEntities() {
         if (entities != null) {
@@ -485,7 +469,7 @@ public class Isometric {
     }
 
     /**
-     * Checks if the player can attack the entities.
+     * Check if the player can attack the entities.
      * If the entities are in attack range, the player attacks the entities.
      * If the entity is neutral, the entity's behaviour is set to enemy.
      */
@@ -502,7 +486,7 @@ public class Isometric {
         }
     }
     /**
-     * Updates all the objects in the game.
+     * Update all the objects in the game.
      */
     public void updateAll() {
         grid.getChildren().clear();
@@ -512,7 +496,7 @@ public class Isometric {
         placeWalls();
     }
     /**
-     * Moves the grid by the specified delta x and delta y.
+     * Move the grid by the specified delta x and delta y.
      * If there is a collision with the player hitbox and the walls, the delta x and delta y are adjusted.
      * @param deltaX the delta x
      * @param deltaY the delta y
@@ -528,7 +512,7 @@ public class Isometric {
         updateAll();
     }
     /**
-     * Updates the walls.
+     * Update the walls.
      */
     public void updateWalls() {
         grid.getChildren().remove(player.getEntityView());
@@ -541,6 +525,8 @@ public class Isometric {
                     grid.getChildren().remove(entity.getEntityView());
                     grid.getChildren().remove(entity.getHitbox());
                     grid.getChildren().remove(entity.getAttackRange());
+                    //remove all rectangles (health bars)
+                    grid.getChildren().removeIf(node -> node instanceof Rectangle);
                 }
             }
         }
@@ -583,7 +569,7 @@ public class Isometric {
         }
     }
     /**
-     * Checks if the map is valid.
+     * Check if the map is valid.
      * @param map the map as a string
      * @return true if the map is valid, false otherwise
      */
@@ -619,7 +605,7 @@ public class Isometric {
         }
     }
     /**
-     * Draws the map and the player.
+     * Draw the map and the player.
      */
     private void placeMap() {
         placeFloor();
@@ -628,7 +614,7 @@ public class Isometric {
         placeWalls();
     }
     /**
-     * Places the floor.
+     * Place/draw the floor.
      */
     private void placeFloor() {
         for (int i = 0; i < objectsToDraw.length; i++) {
@@ -653,7 +639,7 @@ public class Isometric {
         }
     }
     /**
-     * Places the walls.
+     * Place/draw the walls.
      */
     private void placeWalls() {
         boolean playerDrawn = false;
@@ -709,7 +695,7 @@ public class Isometric {
         }
     }
     /**
-     * Draws the entity.
+     * Draw the entity.
      */
     private void drawEntity(Entity entity) {
         entity.setEntityView(new ImageView(entity.getTexturePath()));
@@ -719,26 +705,50 @@ public class Isometric {
         entity.getEntityView().setX(entity.getPositionX());
         entity.getEntityView().setY(entity.getPositionY());
         grid.getChildren().add(entity.getEntityView());
+        //add health bar
+        drawBars(entity);
     }
 
-    public Scene previewWagon(Wagon wagon) {
-        if (wagon == null) {
-            return null;
-        }
-        setMap(wagon.getSeed());
-        setObjectsToDraw(wagon.getObjectsArray());
-        setInteractiveObjects(wagon.getInteractiveObjects());
-        setEntities(wagon.getEntities());
-        grid.setPrefSize(1000, 1000);
-        grid.setStyle("-fx-background-color: #000000;");
-        placeMap();
-        isoScene = mainStage.getScene();
-        mainStage.setResizable(false);
-        mainStage.show();
-        return isoScene;
-    }
     /**
-     * Places the polygons for object hitboxes.
+     * Draw the bars for the entity.
+     * @param entity the entity
+     */
+    private void drawBars(Entity entity) {
+        int maxHealth = entity.getMaxHealth();
+        int health = entity.getHealth();
+
+        int barWidth = TILE_WIDTH * 2;
+        int barHeight = 10;
+        int barGap = 20;
+        //add background for health bar
+        Rectangle healthBarBackground = new Rectangle(entity.getPositionX(), entity.getPositionY() - barGap, barWidth, barHeight);
+        healthBarBackground.setStyle("-fx-fill: #313131;");
+        //add health bar
+        Rectangle healthBar = new Rectangle(entity.getPositionX(), entity.getPositionY() - barGap, barWidth, barHeight);
+        healthBar.setStyle("-fx-fill: #af0303;");
+        healthBar.setWidth((double) (barWidth * health) / maxHealth);
+        //if player, move health bar up and add hunger bar
+        if (entity == player) {
+            healthBarBackground.setLayoutY(healthBarBackground.getLayoutY() - barGap);
+            healthBar.setLayoutY(healthBar.getLayoutY() - barGap);
+            healthBar.setStyle("-fx-fill: #217e21;");
+            //add background for hunger bar
+            Rectangle hungerBarBackground = new Rectangle(entity.getPositionX(), entity.getPositionY() - barGap, barWidth, barHeight);
+            hungerBarBackground.setStyle("-fx-fill: #313131;");
+            //add hunger bar
+            Rectangle hungerBar = new Rectangle(entity.getPositionX(), entity.getPositionY() - barGap, barWidth, barHeight);
+            hungerBar.setStyle("-fx-fill: #d07e00;");
+            hungerBar.setWidth((double) (barWidth * player.getHunger()) / player.getMaxHunger());
+            grid.getChildren().add(hungerBarBackground);
+            grid.getChildren().add(hungerBar);
+        }
+        //add bars to grid
+        grid.getChildren().add(healthBarBackground);
+        grid.getChildren().add(healthBar);
+    }
+
+    /**
+     * Place the polygons for object hitboxes.
      */
     private void placePolygons() {
         for (int i = 0; i < objectsToDraw.length; i++) {
@@ -753,7 +763,7 @@ public class Isometric {
         }
     }
     /**
-     * Merges the object hitboxes to create one solid shape.
+     * Merge the object hitboxes to create one solid shape.
      */
     private void mergeObjectHitboxes() {
         Shape shape = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
@@ -771,7 +781,7 @@ public class Isometric {
         grid.getChildren().add(shape);
     }
     /**
-     * Gets the entity hitbox.
+     * Get the entity hitbox.
      * @param cartX the entity's x position
      * @param cartY the entity's y position
      * @param objectWidth the entity's width
@@ -789,7 +799,7 @@ public class Isometric {
         return circle;
     }
     /**
-     * Gets the entity attack range.
+     * Get the entity attack range.
      * @param cartX the entity's x position
      * @param cartY the entity's y position
      * @param objectWidth the entity's width
@@ -808,7 +818,7 @@ public class Isometric {
         return circle;
     }
     /**
-     * Gets the object hitbox.
+     * Get the object hitbox.
      * @param cartX the object's x position
      * @param cartY the object's y position
      * @param objectWidth the object's width
@@ -833,7 +843,7 @@ public class Isometric {
         return parallelogram;
     }
     /**
-     * Checks if there is a collision between two shapes.
+     * Check if there is a collision between two shapes.
      * @param hitbox1 the first hitbox
      * @param hitbox2 the second hitbox
      * @return true if there is a collision, false otherwise
@@ -843,7 +853,7 @@ public class Isometric {
         return !intersect.getBoundsInParent().isEmpty();
     }
     /**
-     * Checks if the x position of the object is within the player's range (constant).
+     * Check if the x position of the object is within the player's range (constant).
      * @param objectIsoXY the object's isometric x and y position
      * @return true if the x position of the object is within the player's range, false otherwise
      */
@@ -851,7 +861,7 @@ public class Isometric {
         return (objectIsoXY[0] > entity.getPositionX() - TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * TILE_WIDTH);
     }
     /**
-     * Checks if the y position of the object is lower than the player's y position.
+     * Check if the y position of the object is lower than the player's y position.
      * @param objectIsoXY the object's isometric x and y position
      * @param objectTexture the object's texture
      * @return true if the y position of the object is lower than the player's y position, false otherwise
@@ -860,7 +870,7 @@ public class Isometric {
         return (entity.getPositionY() + (double) TILE_HEIGHT / 2 + entity.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight()));
     }
     /**
-     * Converts the cartesian x and y position to isometric x and y position.
+     * Convert the cartesian x and y position to isometric x and y position.
      * @param cartX the cartesian x position
      * @param cartY the cartesian y position
      * @return the isometric x and y position
@@ -872,7 +882,7 @@ public class Isometric {
         return isoXY;
     }
     /**
-     * Places the isometric tile with the specified texture.
+     * Place the isometric tile with the specified texture.
      * @param img the image view
      * @param cartX the cartesian x position
      * @param cartY the cartesian y position
