@@ -13,6 +13,8 @@ public class Object {
     private int height;
     private int cartX;
     private int cartY;
+    private double isoX;
+    private double isoY;
     private int gridPositionX;
     private int gridPositionY;
     private boolean isSolid;
@@ -96,6 +98,22 @@ public class Object {
 
     public void setCartY(int cartY) {
         this.cartY = cartY;
+    }
+
+    public void setIsoX(double isoX) {
+        this.isoX = isoX;
+    }
+
+    public double getIsoX() {
+        return isoX;
+    }
+
+    public void setIsoY(double isoY) {
+        this.isoY = isoY;
+    }
+
+    public double getIsoY() {
+        return isoY;
     }
 
     public int getCartY() {
