@@ -1,26 +1,42 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 public class Door extends Object {
-    private int[] targetId_teleportX_teleportY;
+    private int targetId;
+    private Object teleport;
     private boolean isLocked;
-    public Door(int id, String name, String texturePath, int[] targetId_teleportX_teleportY, boolean isLocked) {
+    public Door(int id, String name, String texturePath, int targetId, Object teleport, boolean isLocked) {
         super(id, name, texturePath);
         super.setTwoLetterId(Constants.WAGON_DOOR);
         super.setObjectInventory(null);
         super.setIsSolid(true);
-        this.targetId_teleportX_teleportY = targetId_teleportX_teleportY;
+        this.targetId = targetId;
+        this.teleport = teleport;
         this.isLocked = isLocked;
     }
 
-    public int[] getTargetId_teleportX_teleportY() {
-        return targetId_teleportX_teleportY;
+    public int getTargetId() {
+        return targetId;
     }
 
-    public void setTargetId_teleportX_teleportY(int[] targetId_teleportX_teleportY) {
-        this.targetId_teleportX_teleportY = targetId_teleportX_teleportY;
+    public void setTargetId(int targetId) {
+        this.targetId = targetId;
+    }
+
+    public Object getTeleport() {
+        return teleport;
+    }
+
+    public void setTeleport(Object teleport) {
+        this.teleport = teleport;
     }
 
     public void teleport(Entity entity) {
-        //teleport entity to targetId
+        double objectIsoX = teleport.getIsoX();
+        double objectIsoY = teleport.getIsoY();
+        int height = entity.getHeight();
+        System.out.println("Teleporting to " + objectIsoX + " " + objectIsoY);
+        entity.setPositionX((int) objectIsoX);
+        entity.setPositionY((int) objectIsoY - height * 32);
+        System.out.println("Teleporting to " + objectIsoX + " " + objectIsoY);
     }
 
     public void lock() {
