@@ -14,6 +14,7 @@ public class Train {
     public void addWagon(Wagon wagon) {
         for (int i = 0; i < wagonsArray.length; i++) {
             if (wagonsArray[i] == null) {
+                System.out.println("Wagon " + wagon.getId() + " added to the train.");
                 wagonsArray[i] = wagon;
                 return;
             }
@@ -44,7 +45,7 @@ public class Train {
     public int findMaxWagonId() {
         int maxId = wagonsArray[0].getId();
         for (int i = 1; i < wagonsArray.length; i++) {
-            if (wagonsArray[i].getId() > maxId) {
+            if (wagonsArray[i] != null && wagonsArray[i].getId() > maxId) {
                 maxId = wagonsArray[i].getId();
             }
         }
