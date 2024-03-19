@@ -10,6 +10,8 @@ public class Wagon {
     private String texturePath;
     private Door doorLeft;
     private Door doorRight;
+    private Object doorLeftTarget;
+    private Object doorRightTarget;
     private List<Entity> entities = new ArrayList<>();
     private Object[][] objectsArray;
     private Object[] interactiveObjects;
@@ -64,6 +66,22 @@ public class Wagon {
     public void setDoorRight(Door doorRight) {
         this.doorRight = doorRight;
     }
+
+    public Door getDoorLeft() {
+        return doorLeft;
+    }
+
+    public Door getDoorRight() {
+        return doorRight;
+    }
+
+    public Object getDoorLeftTarget() {
+        return doorLeftTarget;
+    }
+
+    public Object getDoorRightTarget() {
+        return doorRightTarget;
+    }
     public void setEntities(List<Entity> entities) {
         this.entities = entities;
     }
@@ -102,6 +120,31 @@ public class Wagon {
         String path = "maps/common/" + type + "_wagon.txt";
         String seed = load(path);
         parseMap(seed);
+    }
+    public void generateNextWagon(Wagon wagon, boolean leftWagon) {//wagon - current wagon; leftWagon - if next wagon will be on the left side of the current wagon
+        String path = "maps/common/" + type + "_wagon.txt";
+        String seed = load(path);
+        parseMap(seed);
+
+        System.out.println(wagon.getDoorLeftTarget().getIsoX() + " " + wagon.getDoorLeftTarget().getIsoY());
+        System.out.println(wagon.getDoorRightTarget().getIsoX() + " " + wagon.getDoorRightTarget().getIsoY());
+
+        if (!leftWagon) {
+            this.doorLeft.setTargetId(wagon.getId());//set the targetId(wagon) of the door
+            this.doorLeft.setTeleport(wagon.getDoorRightTarget());//set the teleport object of the door (where player will be teleported in next wagon)
+            System.out.println("Next wagon door target: " + wagon.getDoorRightTarget());
+            System.out.println(doorLeft.getTeleport().getIsoX() + " " + doorLeft.getTeleport().getIsoY());
+            wagon.getDoorRight().setTargetId(this.id);
+            wagon.getDoorRight().setTeleport(this.doorLeftTarget);
+            System.out.println("This wagon door target: " + this.doorLeftTarget);
+            System.out.println(wagon.getDoorRight().getTeleport().getIsoX() + " " + wagon.getDoorRight().getTeleport().getIsoY());
+            System.out.println("Wagon " + this.id + " is connected to wagon " + wagon.getId() + " on the right side.");
+        } else {
+            this.doorRight.setTargetId(wagon.getId());
+            this.doorRight.setTeleport(wagon.getDoorLeftTarget());
+            wagon.getDoorLeft().setTargetId(this.id);
+            wagon.getDoorLeft().setTeleport(this.doorRightTarget);
+        }
     }
     public void setWagonMap(String path) {
         String seed = load(path);
@@ -146,15 +189,16 @@ public class Wagon {
                         if (chance > generate) {
                             if (subRows[j].charAt(1) == '1') {
                                 // Generate the chest
-                                String chest = "21CO";
+                                //generate random number from 1 to 9
+                                int random = (int) (Math.random() * 9 + 1);
+                                String chest = "2" + random + "CO";
+                                System.out.println(chest);
                                 subRows[j] = chest;
-                            }
-                            if (subRows[j].charAt(1) == '2') {
+                            } else if (subRows[j].charAt(1) == '2') {
                                 // Generate the trap
                                 String trap = "00TR";
                                 subRows[j] = trap;
-                            }
-                            if (subRows[j].charAt(1) == '3') {
+                            } else if (subRows[j].charAt(1) == '3') {
                                 // Generate the enemy
                                 String enemy = "00EN";
                                 subRows[j] = enemy;
@@ -198,6 +242,15 @@ public class Wagon {
                 String texture = Constants.OBJECT_IDS.get(subRows[j].substring(2, 4));
                 String letterID = subRows[j].substring(2, 4);
 
+//                int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + Constants.ISO_DELTA_X * Constants.TILE_WIDTH;
+//                int y = i * Constants.TILE_HEIGHT + Constants.ISO_DELTA_Y * Constants.TILE_HEIGHT;
+//                int cartX = (int) (x + 2 * TILE_WIDTH - objectTexture.getHeight())
+//                int cartY = (int) (y + TILE_HEIGHT - objectTexture.getHeight());
+
+//                double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
+//                objectsToDraw[i][j].setIsoX(objectIsoXY[0]);
+//                objectsToDraw[i][j].setIsoY(objectIsoXY[1]);
+
                 if (subRows[j].charAt(0) == Constants.FLOOR) {
 
                     if (letterID.equals(Constants.TRAP)) {
@@ -227,15 +280,30 @@ public class Wagon {
                     }
                     if (letterID.equals(Constants.WAGON_DOOR)) {
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
-                        Door wagonDoor = new Door(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, new int[]{-1, 0, 0}, false);
+                        Door wagonDoor = new Door(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, Constants.NULL_WAGON_ID, null, false);
                         wagonDoor.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
                         wagonDoor.setTwoLetterId(letterID);//without this, the door's twoLetterId is null
+
                         objectsArray[i][j] = wagonDoor;
                     }
                     continue;
                 }
                 Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.OBJECT_NAMES.get(letterID), texture, letterID, Character.getNumericValue(subRows[j].charAt(1)), 0, 0, true);
                 objectsArray[i][j] = object;
+            }
+        }
+        //set door targets (tile near the door)
+        for (Object[] objects : objectsArray) {
+            for (int j = 0; j < objects.length; j++) {
+                if (Objects.equals(objects[j].getTwoLetterId(), "WD")) {
+                    if (j == 0) {
+                        doorLeft = (Door) objects[j];
+                        doorLeftTarget = objects[j + 1];
+                    } else if (j == objects.length - 1) {
+                        doorRight = (Door) objects[j];
+                        doorRightTarget = objects[j - 2];
+                    }
+                }
             }
         }
 
