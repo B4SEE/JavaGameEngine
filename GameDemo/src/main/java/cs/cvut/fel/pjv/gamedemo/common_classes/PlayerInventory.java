@@ -8,6 +8,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * Represents player's inventory, extends Inventory class.
+ * It has additional slots for main hand, crafting table and result slot and shows player's money and ammo.
+ */
 public class PlayerInventory extends Inventory {
     private Item mainHandItem;
     private Item firstCraftingItem;

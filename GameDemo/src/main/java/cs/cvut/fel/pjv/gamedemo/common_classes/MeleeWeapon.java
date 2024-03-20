@@ -1,4 +1,8 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+/**
+ * Represents a melee weapon, which is a subclass of Item. Used by the player to attack enemies.
+ */
 public class MeleeWeapon extends Item {
     private int damage;
     private final int attackSpeed;

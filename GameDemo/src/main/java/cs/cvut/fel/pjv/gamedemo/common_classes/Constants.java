@@ -3,12 +3,18 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Provide a single source of truth for all constants used in the game.
+ */
 public class Constants {
+
+    public static final int TILE_WIDTH = 32;
+    public static final int TILE_HEIGHT = 32;
     public static final int NULL_WAGON_ID = -1;
     public static final int PLAYER_START_POS_X = 0;
     public static final int PLAYER_START_POS_Y = 0;
-    public static final int PLAYER_BASIC_SPEED_X = 7;
-    public static final int PLAYER_BASIC_SPEED_Y = 7;
+    public static final int PLAYER_BASIC_SPEED_X = 4;
+    public static final int PLAYER_BASIC_SPEED_Y = 4;
     public static final int PLAYER_BASIC_DAMAGE = 5;
     public static final int PLAYER_HITBOX = 1;
     public static final int PLAYER_MAX_HEALTH = 100;//100
@@ -20,9 +26,9 @@ public class Constants {
     public static final int ENEMY_BASIC_MAX_HEALTH_MIN = 70;
     public static final int ENEMY_BASIC_MAX_HEALTH_MAX = 230;
     public static final int ENEMY_BASIC_HEIGHT = 2;
-    public static final int ENEMY_BASIC_SPEED_X_MAX = 3;
+    public static final int ENEMY_BASIC_SPEED_X_MAX = PLAYER_BASIC_SPEED_X - 1;
     public static final int ENEMY_BASIC_SPEED_X_MIN = ENTITY_BASIC_SPEED_X;
-    public static final int ENEMY_BASIC_SPEED_Y_MAX = 3;
+    public static final int ENEMY_BASIC_SPEED_Y_MAX = PLAYER_BASIC_SPEED_Y - 1;
     public static final int ENEMY_BASIC_SPEED_Y_MIN = ENTITY_BASIC_SPEED_Y;
     public static final int ENEMY_BASIC_HITBOX = 1;
     public static final int ENEMY_BASIC_ATTACK_RANGE = 1;
@@ -67,10 +73,10 @@ public class Constants {
 
     public static final int SLOT_SIZE = 64;
     public static final int SLOT_GAP = 20;
+
+    public static final String[] WAGON_TYPES = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
     //consider enum
     public static final Map <String, String> OBJECT_IDS = Map.ofEntries(
-            Map.entry("BB", "0.png"),
-            Map.entry("BG", "0.png"),
             Map.entry("TF", "tile_floor.png"),
             Map.entry("BW", "0.png"),
             Map.entry("SW", "1h_wall.png"),
@@ -83,8 +89,6 @@ public class Constants {
     );
 
     public static final Map <String, String> OBJECT_NAMES = Map.ofEntries(
-            Map.entry("BB", "blank_0"),
-            Map.entry("BG", "blank_gap_0"),
             Map.entry("TF", "floor_0"),
             Map.entry("BW", "blank_wall_3"),
             Map.entry("SW", "1h_wall"),
@@ -120,4 +124,18 @@ public class Constants {
             Map.entry("seat", "seat_1.png"),
             Map.entry("box", "chest_object_1.png")
     );
+    public static final Map <String, Integer> GAME_STATES = Map.ofEntries(
+            Map.entry("default", 0),
+            Map.entry("inventory", 1),
+            Map.entry("dialogue", 2),
+            Map.entry("trap", 3),
+            Map.entry("loop", 4),
+            Map.entry("silence", 5)
+    );
+
+//    public static final Map<Integer, Item> LOOT_TABLE_STANDARD = Map.ofEntries(
+//            Map.entry(0, new Food("orange", "orange.png", 15)),
+//            Map.entry(1, new MeleeWeapon("knife", "knife.png", 20, 1)),
+//            Map.entry(2, new Item("box", "chest_object_1.png"))
+//    );//luckily will be moved to .txt file
 }

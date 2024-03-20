@@ -2,6 +2,9 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import java.util.List;
 
+/**
+ * Represents a craft of two items, responsible for crafting logic.
+ */
 public class Craft {
     private Item firstItem;
     private Item secondItem;
@@ -9,11 +12,6 @@ public class Craft {
     public Craft() {
         this.firstItem = null;
         this.secondItem = null;
-    }
-
-    public Craft(Item firstItem, Item secondItem) {
-        this.firstItem = firstItem;
-        this.secondItem = secondItem;
     }
 
     public void setFirstItem(Item firstItem) {
@@ -32,8 +30,13 @@ public class Craft {
         return secondItem;
     }
 
+    /**
+     * Returns a new item if the combination of two items is in Constants.CRAFT_RECIPES; does not depend on the order of the items.
+     * @param firstItem first item to craft
+     * @param secondItem second item to craft
+     * @return result item
+     */
     public Item craft(Item firstItem, Item secondItem) {
-//        String[] craftItems = {firstItem.getName(), secondItem.getName()};
         List<String> craftItems = List.of(firstItem.getName(), secondItem.getName());
         //check if in Constants.CRAFT_RECIPES
         String name = Constants.CRAFT_RECIPES.get(craftItems);

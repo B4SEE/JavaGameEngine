@@ -13,6 +13,11 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for inventory, responsible for adding, removing, taking items, and showing inventory.
+ * Mainly used for chest and vendor inventories. For player inventory, see PlayerInventory class.
+ * @see PlayerInventory
+ */
 public class Inventory {
     public final int inventorySize;
     protected Item[] itemsArray;
@@ -32,6 +37,27 @@ public class Inventory {
     public void setVendor(boolean vendor) {
         this.vendor = vendor;
     }
+
+    /**
+     * Fill inventory with random items from dictionary
+     * @param lootTable loot table
+     * @param chance chance to get random item
+     * <br>
+     * Note: chance defines the probability of getting a random item from the dictionary;
+     * there is no way to get a specific item from the dictionary
+     */
+    public void fillWithRandomItems(Item[] lootTable, int chance) {
+        itemsArray = new Item[inventorySize];
+        for (int i = 0; i < inventorySize; i++) {
+            if (Math.random() * 100 < chance) {
+                int randomIndex = (int) (Math.random() * lootTable.length);
+                itemsArray[i] = lootTable[randomIndex];
+            } else {
+                itemsArray[i] = null;
+            }
+        }
+    }
+
     /**
      * Open inventory and set basic handler
      * @return scene

@@ -1,4 +1,8 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+/**
+ * Represents an item in the game.
+ */
 public class Item {
     private final String name;
     private final String texturePath;

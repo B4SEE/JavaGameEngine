@@ -3,6 +3,7 @@ package cs.cvut.fel.pjv.gamedemo;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Wagon;
+import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
 import cs.cvut.fel.pjv.gamedemo.engine.Isometric;
 import javafx.application.Application;
@@ -27,6 +28,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+/**
+ * Class for loading custom maps.
+ */
 public class CustomMapLoader extends Application {
 
     private File file;
@@ -103,7 +107,7 @@ public class CustomMapLoader extends Application {
         EventHandler<ActionEvent> loadEvent = e -> {
             if (file != null) {
                 if (file.getName().endsWith(".png")) {
-                    if (parseMapPNG(file)) {
+                    if (parseMapPng(file)) {
                         label.setText(successMsg);
                         label.setStyle(successMsgStyle);
                         grid.getChildren().add(previewButton);
@@ -112,7 +116,7 @@ public class CustomMapLoader extends Application {
                         label.setStyle("-fx-text-fill: #8c1313;");
                     }
                 } else if (file.getName().endsWith(".txt")) {
-                    if (parseMapTXT(file)) {
+                    if (parseMapTxt(file)) {
                         label.setText(successMsg);
                         label.setStyle(successMsgStyle);
                         grid.getChildren().add(previewButton);
@@ -254,7 +258,7 @@ public class CustomMapLoader extends Application {
     //use the same colour for the same object
     //if colour is not defined, the object will be replaced with a blank space
     //blank space uses black colour, for better visibility in map preview (map preview is not implemented yet)
-    private boolean parseMapPNG(File file) {
+    private boolean parseMapPng(File file) {
         //parse the map file
         return true;
     }
@@ -262,7 +266,7 @@ public class CustomMapLoader extends Application {
     //maximum number of unique two-letter codes is 26*26=676; map parsers might be modified to allow more codes, but now it's limited to 676
     //this means that the map can have only 676 unique objects/textures; this is more than enough for most maps
     //custom constants could be used in maps, but that function was removed; use png for better map readability
-    private boolean parseMapTXT(File file) {
+    private boolean parseMapTxt(File file) {
         //basic validation of the map file
         if (file == null) {
             return false;
@@ -279,83 +283,27 @@ public class CustomMapLoader extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        //first line is wagon type
         String[] lines = sb.toString().split("\n");
-
-        System.out.println(Arrays.toString(lines));
+        String wagonType = lines[0];
+        String filename = wagonType + "_wagon.txt";
+        //check if wagon type is in String[] WAGON_TYPES
+        if (!Arrays.asList(Constants.WAGON_TYPES).contains(wagonType)) {
+            return false;
+        } else {
+            //remove wagon type from the map
+            sb.delete(0, lines[0].length() + 1);
+        }
         //check if the map is valid
-        return checkAndLoadTXTmap(lines, file.getName());
+        return loadTxtMap(sb.toString(), filename);
     }
 
-    private boolean checkAndLoadTXTmap(String[] lines, String filename) {
-        //if map is only one line long, check if it uses separator for rows
-
-        if (lines.length == 1) {
-            if (lines[0].contains(Constants.MAP_ROW_SEPARATOR)) {
-                lines = lines[0].split(Constants.MAP_ROW_SEPARATOR);
-            }
-        }
-
+    private boolean loadTxtMap(String map, String filename) {
         //check if the map is valid
-
-        //check if all map lines are the same length
-        int lineLength = lines[0].length();
-        for (String line : lines) {
-            if (line.length() != lineLength) {
-                return false;
-            }
+        Checker checker = new Checker();
+        if (!checker.checkMap(map)) {
+            return false;
         }
-
-        //check if all map codes have the same number of characters (4)
-        for (String row : lines) {
-            String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
-            for (String code : subRows) {
-                if (code.length() != 4) {
-                    System.out.println("first");
-                    return false;
-                }
-            }
-        }
-
-        //check if all map codes are valid (are in Constant dictionaries)
-        for (String row : lines) {
-            String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
-            for (String subRow : subRows) {
-                if (!List.of(Constants.ALLOWED_CODES).contains(subRow.charAt(0))) {
-                    System.out.println(subRow.charAt(0));
-                    System.out.println("second");
-                    return false;
-                }
-                if (!List.of(Constants.ALLOWED_HEIGHTS).contains(subRow.charAt(1))) {
-                    if (subRow.charAt(0) != Constants.INTERACTIVE_OBJECT) {
-                        System.out.println(subRow.charAt(1) + " " + subRow);
-                        System.out.println("third");
-                        return false;
-                    }
-                }
-                if (!Character.isLetter(subRow.charAt(2))) {
-                    System.out.println("fourth");
-                    return false;
-                }
-                if (!Character.isLetter(subRow.charAt(3))) {
-                    System.out.println("fifth");
-                    return false;
-                }
-                if (!Constants.OBJECT_IDS.containsKey(subRow.substring(2, 4)) && !Constants.INTERACTIVE_OBJECTS.containsKey(subRow.substring(2, 4))) {
-                    System.out.println("sixth");
-                    return false;
-                }
-            }
-        }
-
-        //create map lines, and load the map
-        StringBuilder sb = new StringBuilder();
-        for (String row : lines) {
-            sb.append(row);
-            sb.append("\n");
-        }
-        String map = sb.toString();
-
         //load the map
         String path = "maps/custom_maps/" + filename;
 
@@ -368,7 +316,6 @@ public class CustomMapLoader extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return true;
     }
     private void setFile(File file) {

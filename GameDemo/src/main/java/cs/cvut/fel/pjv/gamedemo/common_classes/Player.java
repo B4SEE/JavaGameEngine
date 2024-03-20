@@ -2,6 +2,9 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import java.util.List;
 
+/**
+ * Represents a player in the game.
+ */
 public class Player extends Entity {
     private int hunger;
     private final int maxHunger;

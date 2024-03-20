@@ -17,14 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 //consider bitmap
+
+/**
+ * Class for isometric graphics logic.
+ */
 public class Isometric {//Note: need to implement A* algorithm for entity movement
-    private final int TILE_WIDTH = 32;
-    private final int TILE_HEIGHT = 32;
+    private final Checker checker = new Checker();
     private int deltaX = 10;
     private int deltaY = 0;
     private String map = "";
     private Object[][] objectsToDraw;
-    private Object[] interactiveObjects;
     private Shape walls;
     private Player player;
     private List<Entity> entities;
@@ -32,16 +34,12 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     private int playerDeltaX = 0;
     private int playerDeltaY = 0;
     protected Stage mainStage;
-    private Pane grid = new Pane();
+    private final Pane grid = new Pane();
     private Label hint = new Label();
     private long time;
     private Scene isoScene;
     public Isometric() {
     }
-    public Isometric(Stage stage) {
-        initialiseStage(stage);
-    }
-
     /**
      * Update the time.
      * @param time the current time (in seconds)
@@ -73,36 +71,11 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     }
 
     /**
-     * Check if the player can interact with the objects.
-     * @return the object the player can interact with, null otherwise
+     * Remove dead entities from the grid.
      */
-    public Object checkIfPlayerCanInteract() {
-        if (interactiveObjects == null) {
-            return null;
-        }
-        for (Object object : interactiveObjects) {
-            if (checkCollision(player.getAttackRange(), object.getObjectHitbox())) {
-//                updateLabel("Press E to interact", player.getPositionX() - 50, player.getPositionY() - 50);
-                return object;
-            }
-        }
-//        updateLabel("No interactive objects nearby", player.getPositionX() - 50, player.getPositionY() - 50);
-        return null;
-    }
-
-    /**
-     * Check if the entities and player are alive.
-     * Remove the entities from the grid if they are not alive.
-     * @return true if the player is not alive, false otherwise
-     * <br>
-     * <br>
-     * Used for player death handling.
-     */
-    public boolean checkEntities() {
+    public void removeDeadEntities() {
         if (!player.isAlive()) {
             grid.getChildren().remove(hint);
-
-            return true;
         }
         if (entities != null) {
             for (Entity entity : entities) {
@@ -115,7 +88,6 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
                 }
             }
         }
-        return false;
     }
 
     /**
@@ -143,7 +115,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
             System.out.println("Exiting the program");
             System.exit(1);
         }
-        if (!checkStringMapValidity(map)) {
+        if (!checker.checkMap(map)) {
             System.out.println("Map string is not valid");
             System.out.println("Exiting the program");
             System.exit(1);
@@ -218,7 +190,6 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         }
         setMap(wagon.getSeed());
         setObjectsToDraw(wagon.getObjectsArray());
-        setInteractiveObjects(wagon.getInteractiveObjects());
         setEntities(wagon.getEntities());
     }
     public void setMap(String map) {
@@ -227,17 +198,14 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     public void setObjectsToDraw(Object[][] objectsToDraw) {
         this.objectsToDraw = objectsToDraw;
     }
-    public void setInteractiveObjects(Object[] interactiveObjects) {
-        this.interactiveObjects = interactiveObjects;
-    }
     /**
      * Set the player.
      * @param player the player
      */
     public void setPlayer(Player player) {
         this.player = player;
-        player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), player.getHitBoxSize()));
-        player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), 1));
+        player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), player.getHeight(), player.getHitBoxSize()));
+        player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), player.getHeight(), 1));
         player.setStartPositionX(player.getPositionX());
         player.setStartPositionY(player.getPositionY());
         updatePlayerDeltaX(0);
@@ -255,8 +223,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         player.setHunger(Constants.PLAYER_MAX_HUNGER);
         player.setPositionX(player.getStartPositionX());
         player.setPositionY(player.getStartPositionY());
-        player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), player.getHitBoxSize()));
-        player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), 64, player.getHeight(), 1));
+        player.setHitbox(getEntityHitBox(player.getPositionX(), player.getPositionY(), player.getHeight(), player.getHitBoxSize()));
+        player.setAttackRange(getEntityAttackRange(player.getPositionX(), player.getPositionY(), player.getHeight(), 1));
     }
     /**
      * Get the player.
@@ -273,8 +241,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         this.entities = entities;
         drawnEntities = new ArrayList<>();
         for (Entity entity : this.entities) {
-            entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
-            entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
+            entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
+            entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), entity.getHeight(), 1));
             entity.setStartPositionX(entity.getPositionX());
             entity.setStartPositionY(entity.getPositionY());
         }
@@ -300,8 +268,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
             entity.setHealth(entity.getMaxHealth());
             entity.setPositionX(entity.getStartPositionX());
             entity.setPositionY(entity.getStartPositionY());
-            entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), entity.getHitBoxSize()));
-            entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), 64, entity.getHeight(), 1));
+            entity.setHitbox(getEntityHitBox(entity.getPositionX(), entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
+            entity.setAttackRange(getEntityAttackRange(entity.getPositionX(), entity.getPositionY(), entity.getHeight(), entity.getAttackRangeSize()));
             entity.setBehaviour(entity.getInitialBehaviour());
         }
     }
@@ -406,14 +374,14 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         //normalise the vector for diagonal movement
         double mag = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-        deltaX = (int) (deltaX / mag * speedX / 2);
-        deltaY = (int) (deltaY / mag * speedY / 2);
+        deltaX = (int) (deltaX / mag * speedX);
+        deltaY = (int) (deltaY / mag * speedY);
         entity.setPositionX(entity.getPositionX() + deltaX);
         entity.setPositionY(entity.getPositionY() + deltaY);
     }
 
     /**
-     * Check if the entity can move to the specified position.
+     * Move the entity to the specified position.
      * @param entity the entity
      * @param deltaX the delta x
      * @param deltaY the delta y
@@ -430,7 +398,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         entity.getAttackRange().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
         entity.getAttackRange().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
 
-        return !checkCollision(entity.getHitbox(), walls);
+        return !checker.checkCollision(entity.getHitbox(), walls);
     }
     /**
      * Move the entities towards the player.
@@ -470,7 +438,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
      * @param deltaY the delta y
      */
     public void moveGrid(int deltaX, int deltaY) {
-        if (checkCollision(player.getHitbox(), walls)) {
+        if (checker.checkCollision(player.getHitbox(), walls)) {
             this.deltaX -= deltaX;
             this.deltaY -= deltaY;
             return;
@@ -504,71 +472,12 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
                     Image objectTexture = new Image(object.getTexturePath());
                     double[] objectIsoXY = cartesianToIsometric(object.getCartX(), object.getCartY());
                     grid.getChildren().remove(object.getTexture());
-                    if (checkX(player, objectIsoXY) && checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
-                        drawEntity(player);
-                        playerDrawn = true;
-                    }
-                    if (entities != null) {
-                        for (Entity entity : entities) {
-                            if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
-                                if (checkX(entity, objectIsoXY) && checkY(entity, objectIsoXY, objectTexture)) {
-                                    drawEntity(entity);
-                                    drawnEntities.add(entity);
-                                }
-                            }
-                        }
-                    }
+                    playerDrawn = isEntitiesDrawn(playerDrawn, objectTexture, objectIsoXY);
                     placeIsometricTileWithTexture(object.getTexture(), object.getCartX(), object.getCartY());
                 }
             }
         }
-        if (!playerDrawn) {
-            drawEntity(player);
-        }
-        if (entities != null) {
-            for (Entity entity : entities) {
-                if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
-                    drawEntity(entity);
-                    drawnEntities.add(entity);
-                }
-            }
-        }
-    }
-    /**
-     * Check if the map is valid.
-     * @param map the map as a string
-     * @return true if the map is valid, false otherwise
-     */
-    private boolean checkStringMapValidity(String map) {
-        try {
-            String[] rows = map.split(Constants.MAP_ROW_SEPARATOR);
-            String[] subRows = rows[0].split(Constants.MAP_COLUMN_SEPARATOR);
-
-            for (String subRow : subRows) {
-                if (subRow.length() != subRows[0].length()) {
-                    return false;
-                }
-                //check if not in Constants.ALLOWED_CODES
-                if (!List.of(Constants.ALLOWED_CODES).contains(subRow.charAt(0))) {
-                    return false;
-                }
-                if (!List.of(Constants.ALLOWED_HEIGHTS).contains(subRow.charAt(1))) {
-                    return false;
-                }
-                if (!Character.isLetter(subRow.charAt(2))) {
-                    return false;
-                }
-                if (!Character.isLetter(subRow.charAt(3))) {
-                    return false;
-                }
-                if (!Constants.OBJECT_IDS.containsKey(subRow.substring(2, 4)) && !Constants.INTERACTIVE_OBJECTS.containsKey(subRow.substring(2, 4))) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        drawEntitiesAbove(playerDrawn);
     }
     /**
      * Draw the map and the player.
@@ -586,14 +495,14 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
 
-                int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
-                int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
+                int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + deltaX * Constants.TILE_WIDTH;
+                int y = i * Constants.TILE_HEIGHT + deltaY * Constants.TILE_HEIGHT;
 
                 if (objectsToDraw[i][j].getHeight() == 0) {
                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
-                    objectsToDraw[i][j].setCartX((int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()));
-                    objectsToDraw[i][j].setCartY((int) (y + TILE_HEIGHT - objectTexture.getHeight()));
+                    objectsToDraw[i][j].setCartX((int) (x + 2 * Constants.TILE_WIDTH - objectTexture.getHeight()));
+                    objectsToDraw[i][j].setCartY((int) (y + Constants.TILE_HEIGHT - objectTexture.getHeight()));
                     double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
                     objectsToDraw[i][j].setIsoX(objectIsoXY[0]);
                     objectsToDraw[i][j].setIsoY(objectIsoXY[1]);
@@ -611,20 +520,19 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
      */
     private void placeWalls() {
         boolean playerDrawn = false;
-        int count = 0;
 
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
                 if (objectsToDraw[i][j].getHeight() > 0) {
-                    int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
-                    int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
+                    int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + deltaX * Constants.TILE_WIDTH;
+                    int y = i * Constants.TILE_HEIGHT + deltaY * Constants.TILE_HEIGHT;
 
                     //get texture
 
                     Image objectTexture = new Image(objectsToDraw[i][j].getTexturePath());
 
-                    objectsToDraw[i][j].setCartX((int) (x + 2 * TILE_WIDTH - objectTexture.getHeight()));
-                    objectsToDraw[i][j].setCartY((int) (y + TILE_HEIGHT - objectTexture.getHeight()));
+                    objectsToDraw[i][j].setCartX((int) (x + 2 * Constants.TILE_WIDTH - objectTexture.getHeight()));
+                    objectsToDraw[i][j].setCartY((int) (y + Constants.TILE_HEIGHT - objectTexture.getHeight()));
 
                     ImageView object = new ImageView(objectTexture);
                     objectsToDraw[i][j].setTexture(object);
@@ -633,26 +541,17 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
                     objectsToDraw[i][j].setIsoY(objectIsoXY[1]);
 //                    System.out.println("Drawing object at " + objectsToDraw[i][j].getIsoX() + " " + objectsToDraw[i][j].getIsoY());
 
-                    if (checkX(player, objectIsoXY) && checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
-                        drawEntity(player);
-                        playerDrawn = true;
-                    }
-                    if (entities != null) {
-                        for (Entity entity : entities) {
-                            if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
-                                if (checkX(entity, objectIsoXY) && checkY(entity, objectIsoXY, objectTexture)) {
-                                    drawEntity(entity);
-                                    drawnEntities.add(entity);
-                                }
-                            }
-                        }
-                    }
+                    playerDrawn = isEntitiesDrawn(playerDrawn, objectTexture, objectIsoXY);
 
                     placeIsometricTileWithTexture(objectsToDraw[i][j].getTexture(), objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
 
                 }
             }
         }
+        drawEntitiesAbove(playerDrawn);
+    }
+
+    private void drawEntitiesAbove(boolean playerDrawn) {
         if (!playerDrawn) {
             drawEntity(player);
         }
@@ -665,6 +564,25 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
             }
         }
     }
+
+    private boolean isEntitiesDrawn(boolean playerDrawn, Image objectTexture, double[] objectIsoXY) {
+        if (checker.checkX(player, objectIsoXY) && checker.checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
+            drawEntity(player);
+            playerDrawn = true;
+        }
+        if (entities != null) {
+            for (Entity entity : entities) {
+                if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
+                    if (checker.checkX(entity, objectIsoXY) && checker.checkY(entity, objectIsoXY, objectTexture)) {
+                        drawEntity(entity);
+                        drawnEntities.add(entity);
+                    }
+                }
+            }
+        }
+        return playerDrawn;
+    }
+
     /**
      * Draw the entity.
      */
@@ -689,7 +607,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         int maxHealth = entity.getMaxHealth();
         int health = entity.getHealth();
 
-        int barWidth = TILE_WIDTH * 2;
+        int barWidth = Constants.TILE_WIDTH * 2;
         int barHeight = 10;
         int barGap = 20;
         //add background for health bar
@@ -726,9 +644,9 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
                 if (objectsToDraw[i][j].getHeight() > 0 || objectsToDraw[i][j].isSolid()) {
-                    int x = TILE_WIDTH + j * TILE_WIDTH + deltaX * TILE_WIDTH;
-                    int y = i * TILE_HEIGHT + deltaY * TILE_HEIGHT;
-                    Polygon parallelogram = getObjectHitBox(x, y, TILE_WIDTH, 0);
+                    int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + deltaX * Constants.TILE_WIDTH;
+                    int y = i * Constants.TILE_HEIGHT + deltaY * Constants.TILE_HEIGHT;
+                    Polygon parallelogram = getObjectHitBox(x, y);
                     objectsToDraw[i][j].setObjectHitbox(parallelogram);
                 }
             }
@@ -754,19 +672,19 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     }
     /**
      * Get the entity hitbox.
-     * @param cartX the entity's x position
-     * @param cartY the entity's y position
-     * @param objectWidth the entity's width
+     *
+     * @param cartX  the entity's x position
+     * @param cartY  the entity's y position
      * @param height the entity's height
      * @return the entity hitbox
      */
-    private Circle getEntityHitBox(int cartX, int cartY, int objectWidth, int height, int hitBoxSize) {
+    private Circle getEntityHitBox(int cartX, int cartY, int height, int hitBoxSize) {
         Circle circle = new Circle();
-        cartX += objectWidth / 2;
-        cartY += TILE_HEIGHT / 2 + height * TILE_HEIGHT;
-        circle.setCenterX(cartX);
-        circle.setCenterY(cartY);
-        circle.setRadius((double) (hitBoxSize * TILE_WIDTH) / 4);
+        int circleCenterX = cartX + Constants.TILE_WIDTH;
+        int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
+        circle.setCenterX(circleCenterX);
+        circle.setCenterY(circleCenterY);
+        circle.setRadius((double) (hitBoxSize * Constants.TILE_WIDTH) / 4);
         circle.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
         return circle;
     }
@@ -774,72 +692,41 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
      * Get the entity attack range.
      * @param cartX the entity's x position
      * @param cartY the entity's y position
-     * @param objectWidth the entity's width
      * @param height the entity's height
      * @param attackRange the entity's attack range
      * @return the entity attack range
      */
-    private Circle getEntityAttackRange(int cartX, int cartY, int objectWidth, int height, int attackRange) {
+    private Circle getEntityAttackRange(int cartX, int cartY, int height, int attackRange) {
         Circle circle = new Circle();
-        cartX += objectWidth / 2;
-        cartY += TILE_HEIGHT / 2 + height * TILE_HEIGHT;
-        circle.setCenterX(cartX);
-        circle.setCenterY(cartY);
-        circle.setRadius(attackRange * TILE_WIDTH);
+        int circleCenterX = cartX + Constants.TILE_WIDTH;
+        int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
+        circle.setCenterX(circleCenterX);
+        circle.setCenterY(circleCenterY);
+        circle.setRadius(attackRange * Constants.TILE_WIDTH);
         circle.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 2; -fx-fill: #ff0000; -fx-opacity: 0.5;");
         return circle;
     }
     /**
      * Get the object hitbox.
+     *
      * @param cartX the object's x position
      * @param cartY the object's y position
-     * @param objectWidth the object's width
-     * @param deltaHeight the object's height
      * @return the object hitbox
      */
-    private Polygon getObjectHitBox(int cartX, int cartY, int objectWidth, int deltaHeight) {
+    private Polygon getObjectHitBox(int cartX, int cartY) {
         Polygon parallelogram = new Polygon();
         double[] isoXY1 = cartesianToIsometric(cartX, cartY);
-        double[] isoXY2 = cartesianToIsometric(cartX + objectWidth, cartY);
-        double[] isoXY3 = cartesianToIsometric(cartX + objectWidth, cartY + 32 + deltaHeight);
-        double[] isoXY4 = cartesianToIsometric(cartX, cartY + TILE_WIDTH + deltaHeight);
+        double[] isoXY2 = cartesianToIsometric(cartX + Constants.TILE_WIDTH, cartY);
+        double[] isoXY3 = cartesianToIsometric(cartX + Constants.TILE_WIDTH, cartY + Constants.TILE_HEIGHT);
+        double[] isoXY4 = cartesianToIsometric(cartX, cartY + Constants.TILE_WIDTH);
 
-        parallelogram.getPoints().addAll(new Double[]{
-                isoXY1[0] + TILE_WIDTH, isoXY1[1],
-                isoXY2[0] + TILE_WIDTH, isoXY2[1],
-                isoXY3[0] + TILE_WIDTH, isoXY3[1],
-                isoXY4[0] + TILE_WIDTH, isoXY4[1]
-        });
+        parallelogram.getPoints().addAll(isoXY1[0] + Constants.TILE_WIDTH, isoXY1[1],
+                isoXY2[0] + Constants.TILE_WIDTH, isoXY2[1],
+                isoXY3[0] + Constants.TILE_WIDTH, isoXY3[1],
+                isoXY4[0] + Constants.TILE_WIDTH, isoXY4[1]);
         parallelogram.setStyle("-fx-opacity: 0");
 
         return parallelogram;
-    }
-    /**
-     * Check if there is a collision between two shapes.
-     * @param hitbox1 the first hitbox
-     * @param hitbox2 the second hitbox
-     * @return true if there is a collision, false otherwise
-     */
-    private boolean checkCollision(Shape hitbox1, Shape hitbox2) {
-        Shape intersect = Shape.intersect(hitbox1, hitbox2);
-        return !intersect.getBoundsInParent().isEmpty();
-    }
-    /**
-     * Check if the x position of the object is within the player's range (constant).
-     * @param objectIsoXY the object's isometric x and y position
-     * @return true if the x position of the object is within the player's range, false otherwise
-     */
-    private boolean checkX(Entity entity, double[] objectIsoXY) {
-        return (objectIsoXY[0] > entity.getPositionX() - TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * TILE_WIDTH);
-    }
-    /**
-     * Check if the y position of the object is lower than the player's y position.
-     * @param objectIsoXY the object's isometric x and y position
-     * @param objectTexture the object's texture
-     * @return true if the y position of the object is lower than the player's y position, false otherwise
-     */
-    private boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
-        return (entity.getPositionY() + (double) TILE_HEIGHT / 2 + entity.getHeight() * TILE_HEIGHT < (objectIsoXY[1] - TILE_HEIGHT + objectTexture.getHeight()));
     }
     /**
      * Convert the cartesian x and y position to isometric x and y position.
@@ -861,20 +748,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
      */
     private void placeIsometricTileWithTexture(ImageView img, int cartX, int cartY) {
         double[] isoXY = cartesianToIsometric(cartX, cartY);
-        img.setX(isoXY[0] - TILE_WIDTH);
-        img.setY(isoXY[1] - (double) TILE_HEIGHT / 2);
+        img.setX(isoXY[0] - Constants.TILE_WIDTH);
+        img.setY(isoXY[1] - (double) Constants.TILE_HEIGHT / 2);
         grid.getChildren().add(img);
-    }
-
-    public Pane getIsoGrid() {//might be unnecessary
-        return grid;
-    }
-    public void updateWagonArray(Wagon wagon) {//updates coordinates of objects in the wagon
-        if (wagon == null) {
-            return;
-        }
-        wagon.setObjectsArray(objectsToDraw);
-        wagon.setEntities(entities);
-        wagon.setInteractiveObjects(interactiveObjects);
     }
 }

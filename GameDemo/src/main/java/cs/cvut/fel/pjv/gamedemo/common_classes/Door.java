@@ -1,4 +1,8 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+/**
+ * Object child class representing a door, which functions as a teleport to another wagon.
+ */
 public class Door extends Object {
     private int targetId;
     private Object teleport;
@@ -29,6 +33,10 @@ public class Door extends Object {
         this.teleport = teleport;
     }
 
+    /**
+     * Teleports the entity to the position of the teleport object.
+     * @param entity - entity to be teleported
+     */
     public void teleport(Entity entity) {
         double objectIsoX = teleport.getIsoX();
         double objectIsoY = teleport.getIsoY();
@@ -38,11 +46,15 @@ public class Door extends Object {
         entity.setPositionY((int) objectIsoY - height * 32);
         System.out.println("Teleporting to " + objectIsoX + " " + objectIsoY);
     }
-
+    /**
+     * Locks the door.
+     */
     public void lock() {
         isLocked = true;
     }
-
+    /**
+     * Unlocks the door.
+     */
     public void unlock() {
         isLocked = false;
     }

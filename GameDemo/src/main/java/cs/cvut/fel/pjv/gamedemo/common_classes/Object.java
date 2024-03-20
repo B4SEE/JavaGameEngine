@@ -3,6 +3,9 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Polygon;
 
+/**
+ * Represents an object in the game.
+ */
 public class Object {
     private final int id;
 

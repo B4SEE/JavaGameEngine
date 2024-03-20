@@ -1,9 +1,14 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Class representing the wagon, holds all the objects, interactive objects and entities that are in the wagon at the moment.
+ */
 public class Wagon {
     private int id;
     private String type;
@@ -223,7 +228,9 @@ public class Wagon {
     public void initWagon() {
         // Initialize the wagon
 
-        if (!checkStringMapValidity(seed)) {
+        Checker checker = new Checker();
+
+        if (!checker.checkMap(seed)) {
             System.out.println("Invalid seed");
             return;
         }
@@ -242,15 +249,6 @@ public class Wagon {
                 String texture = Constants.OBJECT_IDS.get(subRows[j].substring(2, 4));
                 String letterID = subRows[j].substring(2, 4);
 
-//                int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + Constants.ISO_DELTA_X * Constants.TILE_WIDTH;
-//                int y = i * Constants.TILE_HEIGHT + Constants.ISO_DELTA_Y * Constants.TILE_HEIGHT;
-//                int cartX = (int) (x + 2 * TILE_WIDTH - objectTexture.getHeight())
-//                int cartY = (int) (y + TILE_HEIGHT - objectTexture.getHeight());
-
-//                double[] objectIsoXY = cartesianToIsometric(objectsToDraw[i][j].getCartX(), objectsToDraw[i][j].getCartY());
-//                objectsToDraw[i][j].setIsoX(objectIsoXY[0]);
-//                objectsToDraw[i][j].setIsoY(objectIsoXY[1]);
-
                 if (subRows[j].charAt(0) == Constants.FLOOR) {
 
                     if (letterID.equals(Constants.TRAP)) {
@@ -266,9 +264,12 @@ public class Wagon {
                 if (subRows[j].charAt(0) == Constants.INTERACTIVE_OBJECT) {
                     interactiveObjectsCount++;
                     if (letterID.equals(Constants.CHEST_OBJECT)) {
+//                        texture = setRandomTexture(Constants.INTERACTIVE_OBJECTS.get(letterID));
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
                         Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
                         object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
+                        int chance = (int) (Math.random() * 100);
+//                        object.getObjectInventory().fillWithRandomItems(Constants.LOOT_TABLE_STANDARD, chance);//fill the chest with random items, with random chance
                         object.setHeight(1);
                         objectsArray[i][j] = object;
                     }
@@ -295,7 +296,7 @@ public class Wagon {
         //set door targets (tile near the door)
         for (Object[] objects : objectsArray) {
             for (int j = 0; j < objects.length; j++) {
-                if (Objects.equals(objects[j].getTwoLetterId(), "WD")) {
+                if (Objects.equals(objects[j].getTwoLetterId(), Constants.WAGON_DOOR)) {
                     if (j == 0) {
                         doorLeft = (Door) objects[j];
                         doorLeftTarget = objects[j + 1];
@@ -341,56 +342,15 @@ public class Wagon {
         }
     }
 
-    /**
-     * Check if the map is valid
-     * @param map - the map
-     * @return - true if the map is valid, false otherwise
-     * <br>
-     * <br>
-     * Note: This method luckily will be moved to the other class
-     */
-    public boolean checkStringMapValidity(String map) {
-        try {
-            String[] rows = map.split(Constants.MAP_ROW_SEPARATOR);
-            String[] subRows = rows[0].split(Constants.MAP_COLUMN_SEPARATOR);
-
-            for (String subRow : subRows) {
-                if (subRow.length() != subRows[0].length()) {
-                    return false;
-                }
-                //check if not in Constants.ALLOWED_CODES
-                if (!List.of(Constants.ALLOWED_CODES).contains(subRow.charAt(0))) {
-                    return false;
-                }
-                if (!List.of(Constants.ALLOWED_HEIGHTS).contains(subRow.charAt(1))) {
-                    return false;
-                }
-                if (!Character.isLetter(subRow.charAt(2))) {
-                    return false;
-                }
-                if (!Character.isLetter(subRow.charAt(3))) {
-                    return false;
-                }
-                if (!Constants.OBJECT_IDS.containsKey(subRow.substring(2, 4)) && !Constants.INTERACTIVE_OBJECTS.containsKey(subRow.substring(2, 4))) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-//    private String setRandomTexture(String path) {//not implemented yet
-////        path = "src/main/resources/" + path;
-////
-////        getResourceAsStream(path);
-//
-////        String[] textures = new File(path).list();
-////        System.out.println(Arrays.toString(textures));
-////        if (textures != null) {
-////            return textures[(int) (Math.random() * textures.length)];
-////        }
-////        return null;
-////    }
+//    private String setRandomTexture(String path) {
+//        File resourceDir = new File("default/");
+//        File[] files = resourceDir.listFiles();
+//        List<String> textures = new ArrayList<>();
+//        for (File file : files) {
+//            if (file.getName().contains(path)) {
+//                textures.add(file.getName());
+//            }
+//        }
+//        return textures.get((int) (Math.random() * textures.size()));
+//    }
 }

@@ -13,8 +13,13 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+/**
+ * Class with the main game logic, handles the game state, player input and game events.
+ */
 public class GameLogic {
-    private Isometric isometric;
+    private final Checker checker = new Checker();
+    private final Isometric isometric;
     //test
     private boolean added = false;
     private Stage stage;
@@ -22,6 +27,7 @@ public class GameLogic {
     private Player player;
     private Wagon wagon;
     private Train train;
+    private int gameState = 0;
     private AnimationTimer timer = new AnimationTimer() {
         final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
@@ -44,7 +50,9 @@ public class GameLogic {
 
                 updatePlayer();
 
-                if (isometric.checkEntities()) {
+                isometric.removeDeadEntities();
+
+                if (!player.isAlive()) {
                     isometric.setHandleToNull();
                     stopGame();
                 }
@@ -55,8 +63,8 @@ public class GameLogic {
         isometric.updatePlayerPosition();
         player.heal(time);
         player.starve(time);
-        if (isometric.checkIfPlayerCanInteract() != null) {
-            isometric.updateHint("Press E to interact", player.getPositionX(), player.getPositionY() - 25);
+        if (checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects()) != null) {
+            isometric.updateHint("Press E to open", player.getPositionX(), player.getPositionY() - 25);
         } else {
             isometric.updateHint("", player.getPositionX(), player.getPositionY() - 25);
         }
@@ -174,14 +182,15 @@ public class GameLogic {
                     setPlayerInventoryHandle();
                     break;
                 case E:
-                    if (isometric.checkIfPlayerCanInteract() != null) {
-                        Object object = isometric.checkIfPlayerCanInteract();
-                        if (Objects.equals(object.getTwoLetterId(), "WD")) {
+                    if (checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects()) != null) {
+                        Object object = checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects());
+                        if (Objects.equals(object.getTwoLetterId(), "WD") && gameState != Constants.GAME_STATES.get("trap")) {
                             openWagonDoor((Door) object);
                         }
                         if (Objects.equals(object.getTwoLetterId(), "CO")) {
                             setInventoryHandle(object.getObjectInventory());
-                        } else if (Objects.equals(object.getTwoLetterId(),"LD")) {
+                        }
+                        if (Objects.equals(object.getTwoLetterId(),"LD")) {
                             useLockableDoor(object);
                             isometric.updateAll();
                         }
@@ -194,7 +203,7 @@ public class GameLogic {
     private void openWagonDoor(Door door) {
         if (door.getTargetId() == -1) {
 //            String[] wagonTypes = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
-            String[] wagonTypes = {"CARGO", "DEFAULT"};
+            String[] wagonTypes = {"CARGO"};
             //select random wagon type
             String wagonType = wagonTypes[(int) (Math.random() * wagonTypes.length)];
             Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType, "wall_3.png");
@@ -285,21 +294,21 @@ public class GameLogic {
     private void setInventoryHandle(Inventory inventory) {
         if (inventory != null) {
 
-            //for testing purposes
-            if (inventory.inventorySize >= 3 && !added) {
-//                inventory.setVendor(true);
-                Food item = new Food("orange", "orange.png", 15);
-                item.setValue(10);
-                Item item2 = new Item("seat", "seat_1.png");
-                item2.setValue(20);
-                Item item3 = new Item("box", "chest_object_1.png");
-                item3.setValue(30);
-                inventory.addItem(item);
-                inventory.addItem(item2);
-                inventory.addItem(item3);
-                added = true;
-            }
-            //
+//            //for testing purposes
+//            if (inventory.inventorySize >= 3 && !added) {
+////                inventory.setVendor(true);
+//                Food item = new Food("orange", "orange.png", 15);
+//                item.setValue(10);
+//                Item item2 = new Item("seat", "seat_1.png");
+//                item2.setValue(20);
+//                Item item3 = new Item("box", "chest_object_1.png");
+//                item3.setValue(30);
+//                inventory.addItem(item);
+//                inventory.addItem(item2);
+//                inventory.addItem(item3);
+//                added = true;
+//            }
+//            //
 
             Scene scene = stage.getScene();
             scene.setOnKeyReleased(null);

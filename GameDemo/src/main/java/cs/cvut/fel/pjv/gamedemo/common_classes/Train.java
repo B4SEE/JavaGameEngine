@@ -1,5 +1,11 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+/**
+ * Represents a train with wagons.
+ * Stores an array of wagons.
+ * Can add or remove wagons.
+ * Needed for the game to store wagons, their connections and contents.
+ */
 public class Train {
     public final Wagon[] wagonsArray;
 
@@ -24,12 +30,15 @@ public class Train {
         addWagon(wagon);
     }
 
-    public void removeWagon(Wagon wagon) {
+    public void removeWagon(Wagon wagon) {//when wagon deleted, other wagon door that leads to it will have empty targetId (will behave as locked, new wagon will not generate)
+                                            //it could be solved, but it is not necessary for the game (player will not be able to enter the wagon behind the conductor (removed wagon))
         for (int i = 0; i < wagonsArray.length; i++) {
             if (wagonsArray[i] == wagon) {
                 wagonsArray[i] = null;
             }
         }
+        //TODO
+        //if there is conductor in the wagon, move him to the nearest wagon (next with the lowest id)
     }
 
     private int findMinWagonId() {

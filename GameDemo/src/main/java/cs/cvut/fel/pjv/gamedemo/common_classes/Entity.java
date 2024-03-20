@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents an entity in the game, such as the player, enemies, NPCs, etc.
+ */
 public class Entity {
     private int id;//might be unnecessary
     private String name;
@@ -297,12 +300,6 @@ public class Entity {
             target.setBehaviour("ENEMY");
         }
     }
-
-    public void move(int deltaX, int deltaY) {//might be unnecessary
-        positionX += deltaX;
-        positionY += deltaY;
-    }
-
     /**
      * Checks if the entity is alive.
      * @return true if the entity is alive, false otherwise
