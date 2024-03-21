@@ -18,7 +18,7 @@ public class Main extends Application {
     }
 
     private Player createPlayer() {
-        Player player = new Player(0, "PLAYER_NAME", "player_front.png", 400, 0);
+        Player player = new Player(0, "PLAYER_NAME", "player_front.png", 400, 200);
 
         player.setHitBoxSize(1);
         player.setAttackRangeSize(1);
