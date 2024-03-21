@@ -8,6 +8,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ public class GameLogic {
 
                 isometric.updateWalls();
 
-                isometric.updateEntities();
+                updateEntities();
 
                 updatePlayer();
 
@@ -64,9 +66,9 @@ public class GameLogic {
         player.heal(time);
         player.starve(time);
         if (checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects()) != null) {
-            isometric.updateHint("Press E to open", player.getPositionX(), player.getPositionY() - 25);
+            isometric.updateHint("Press E to open", (int) player.getPositionX(), (int) player.getPositionY() - 25);
         } else {
-            isometric.updateHint("", player.getPositionX(), player.getPositionY() - 25);
+            isometric.updateHint("", (int) player.getPositionX(), (int) player.getPositionY() - 25);
         }
     }
     public GameLogic(Stage stage) {
@@ -278,10 +280,10 @@ public class GameLogic {
     private void useLockableDoor(Object object) {
         if (object.isSolid()) {
             object.setIsSolid(false);
-            object.setTexturePath("lockable_door_opened.png");
+            object.setTexturePath("default/objects/interactive_objects/lockable_door/lockable_door_1_opened.png");
         } else {
             object.setIsSolid(true);
-            object.setTexturePath("lockable_door_closed.png");
+            object.setTexturePath("default/objects/interactive_objects/lockable_door/lockable_door_1_closed.png");
         }
     }
 
@@ -449,5 +451,115 @@ public class GameLogic {
         });
         exitButton.setStyle("-fx-font-size: 20; -fx-text-fill: #e31111;");
         grid.add(exitButton, 0, 1);
+    }
+    /**
+     * Update the entities.
+     */
+    public void updateEntities() {
+        if (wagon.getEntities() == null) {
+            return;
+        }
+        for (Entity entity : wagon.getEntities()) {
+            if (entity != null && entity.isAlive()) {
+                if (Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
+                    return;
+                }
+                moveEntities();
+                entity.tryAttack(entity, List.of(player), time);
+            }
+        }
+    }
+    /**
+     * Move the entities towards the player.
+     */
+    public void moveEntities() {
+        //clear the lines
+        isometric.getPane().getChildren().removeIf(node -> node instanceof Line);
+        if (wagon.getEntities() != null) {
+            for (Entity entity : wagon.getEntities()) {
+                if (entity != null && entity.isAlive()) {
+//
+                    int[][] map = wagon.getMapForPathFinder();
+
+                    int[][] path = entity.findPath(map, wagon.getObjectsArray(), player);
+
+                    //check if player in attack range
+                    if (checker.checkCollision(entity.getAttackRange(), player.getAttackRange())) {
+                        double deltaX = entity.getPositionX() - player.getPositionX();
+                        double deltaY = entity.getPositionY() - player.getPositionY();
+
+                        deltaX = deltaX > 0 ? -1 : 1;
+                        deltaY = deltaY > 0 ? -1 : 1;
+
+                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                    } else {
+                        //take the last element of the path
+                        int[] deltaXY;
+                        if (path == null) {
+                            return;
+                        } else if (path.length >= 2) {
+                            deltaXY = path[path.length - 2];
+                        } else if (path.length == 1) {
+                            deltaXY = path[0];
+                        } else {
+                            return;
+                        }
+
+                        int map_x = deltaXY[0];
+                        int map_y = deltaXY[1];
+
+                        System.out.println("the next position is: " + map_x + " " + map_y);
+
+                        int x = (int) wagon.getObjectsArray()[map_x][map_y].getIsoX();
+                        int y = (int) wagon.getObjectsArray()[map_x][map_y].getIsoY();
+
+                        double deltaX = ((entity.getPositionX() + 32) - x);
+                        double deltaY = ((entity.getPositionY() + 64) - y);
+
+                        //calculate the direction: deltaX and deltaY
+                        deltaX = deltaX > 0 ? -1 : 1;
+                        deltaY = deltaY > 0 ? -1 : 1;
+
+                        //A* algorithm needed
+
+                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 64) + " target " + x + " " + y);
+                        //create a line with the path
+                        Line line = new Line(entity.getPositionX() + 32, entity.getPositionY() + 64, x, y);
+                        line.setStrokeWidth(2);
+                        line.setStroke(javafx.scene.paint.Color.RED);
+                        isometric.getPane().getChildren().add(line);
+                    }
+//                        int map_x = deltaXY[0];
+//                        int map_y = deltaXY[1];
+//
+//                        int x = (int) wagon.getObjectsArray()[map_x][map_y].getIsoX();
+//                        int y = (int) wagon.getObjectsArray()[map_x][map_y].getIsoY();
+//
+////                        entity.setPositionX(x);
+////                        entity.setPositionY(y);
+//
+////                        updateEntities();
+//
+//                        int deltaX = x;
+//                        int deltaY = y;
+
+//                        deltaX = deltaX > 0 ? -1 : 1;
+//                        deltaY = deltaY > 0 ? -1 : 1;
+//
+//                        //A* algorithm needed
+//
+//                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+
+//                    int deltaX = (int) (entity.getHitbox().getLayoutX() - player.getHitbox().getLayoutX());
+//                    int deltaY = (int) (entity.getHitbox().getLayoutY() - player.getHitbox().getLayoutY());
+//
+//                    deltaX = deltaX > 0 ? -1 : 1;
+//                    deltaY = deltaY > 0 ? -1 : 1;
+//
+//                    isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                }
+            }
+        }
     }
 }
