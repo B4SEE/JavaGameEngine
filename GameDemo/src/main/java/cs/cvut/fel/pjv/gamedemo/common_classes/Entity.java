@@ -1,6 +1,10 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
 import java.util.ArrayList;
@@ -17,10 +21,10 @@ public class Entity {
     private String type;
     private String initialBehaviour;
     private String behaviour;
-    private int startPositionX;
-    private int startPositionY;
-    private int positionX;
-    private int positionY;
+    private double startPositionX;
+    private double startPositionY;
+    private double positionX;
+    private double positionY;
     private int height;
     private int speed_x;
     private int speed_y;
@@ -35,7 +39,6 @@ public class Entity {
     private int cooldown;
     private boolean canAttack = true;
     private long whenAttacked;
-    //
     private ImageView entityView;
 
     private Wagon currentWagon;
@@ -144,34 +147,34 @@ public class Entity {
         return behaviour;
     }
 
-    public void setStartPositionX(int startPositionX) {
+    public void setStartPositionX(double startPositionX) {
         this.startPositionX = startPositionX;
     }
 
-    public int getStartPositionX() {
+    public double getStartPositionX() {
         return startPositionX;
     }
 
-    public void setStartPositionY(int startPositionY) {
+    public void setStartPositionY(double startPositionY) {
         this.startPositionY = startPositionY;
     }
 
-    public int getStartPositionY() {
+    public double getStartPositionY() {
         return startPositionY;
     }
-    public void setPositionX(int positionX) {
+    public void setPositionX(double positionX) {
         this.positionX = positionX;
     }
 
-    public int getPositionX() {
+    public double getPositionX() {
         return positionX;
     }
 
-    public void setPositionY(int positionY) {
+    public void setPositionY(double positionY) {
         this.positionY = positionY;
     }
 
-    public int getPositionY() {
+    public double getPositionY() {
         return positionY;
     }
 
@@ -314,12 +317,13 @@ public class Entity {
      * @return list of entities in the attack range of the entity
      */
     public List<Entity> inAttackRange(List<Entity> entities) {
+        Checker checker = new Checker();
         List<Entity> inRange = new ArrayList<>();
         int i = 0;
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity != this) {
-                    if (entity.isAlive() && checkIntersection(attackRange, entity.getHitbox())) {
+                    if (entity.isAlive() && checker.checkCollision(attackRange, entity.getHitbox())) {
                         inRange.add(entity);
                         i++;
                     }
@@ -327,15 +331,6 @@ public class Entity {
             }
         }
         return inRange;
-    }
-    /**
-     * Checks if the entity's attack range intersects with the hitbox of another entity.
-     * @param shape1 attack range of the entity
-     * @param shape2 hitbox of another entity
-     * @return true if the attack range intersects with the hitbox of another entity, false otherwise
-     */
-    private boolean checkIntersection(Shape shape1, Shape shape2) {
-        return shape1.getBoundsInParent().intersects(shape2.getBoundsInParent());
     }
 
     /**
@@ -363,5 +358,48 @@ public class Entity {
             entity.setCanAttack(true);
             entity.setWhenAttacked(0);
         }
+    }
+    public int[][] findPath(int[][] map, Object[][] objectsArray, Entity target) {
+        int[][] path;
+        int[] startPosition = findOnWhatObject(this, objectsArray);
+        System.out.println("start position: " + startPosition[0] + " " + startPosition[1]);
+        int[] targetPosition = findOnWhatObject(target, objectsArray);
+        System.out.println("target position: " + targetPosition[0] + " " + targetPosition[1]);
+
+        if (startPosition == null || targetPosition == null) {
+            return null;
+        }
+        PathFinder.Pair src = new PathFinder.Pair(startPosition[0], startPosition[1]);
+        PathFinder.Pair dest = new PathFinder.Pair(targetPosition[0], targetPosition[1]);
+
+        PathFinder pathFinder = new PathFinder();
+        path = pathFinder.aStarSearch(map, map.length, map[0].length, src, dest);
+
+        return path;
+    }
+    public int[] findOnWhatObject(Entity target, Object[][] objectsArray) {
+//        Polygon objectHitbox = objectsArray[target.getPositionY() / Constants.TILE_HEIGHT][target.getPositionX() / Constants.TILE_WIDTH].getObjectHitbox();
+        Checker checker = new Checker();
+        for (int i = 0; i < objectsArray.length; i++) {
+            for (int j = 0; j < objectsArray[0].length; j++) {
+                if (objectsArray[i][j] != null) {
+                    Circle targetHitbox = (Circle) target.getHitbox();
+                    targetHitbox.setRadius(3);
+                    if (checker.checkCollision(targetHitbox, objectsArray[i][j].getObjectHitbox())) {
+                        int[] result = new int[2];
+                        result[0] = i;
+                        result[1] = j;
+                        return result;
+                    }
+                }
+            }
+        }
+        return new int[]{0, 0};
+    }
+    private double[] cartesianToIsometric(int cartX, int cartY) {
+        double[] isoXY = new double[2];
+        isoXY[0] = (cartX - cartY);
+        isoXY[1] = (double) (cartX + cartY) / 2;
+        return isoXY;
     }
 }
