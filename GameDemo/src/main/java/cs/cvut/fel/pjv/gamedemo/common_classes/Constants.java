@@ -13,8 +13,8 @@ public class Constants {
     public static final int NULL_WAGON_ID = -1;
     public static final int PLAYER_START_POS_X = 0;
     public static final int PLAYER_START_POS_Y = 0;
-    public static final int PLAYER_BASIC_SPEED_X = 4;
-    public static final int PLAYER_BASIC_SPEED_Y = 4;
+    public static final int PLAYER_BASIC_SPEED_X = 7;
+    public static final int PLAYER_BASIC_SPEED_Y = 7;
     public static final int PLAYER_BASIC_DAMAGE = 5;
     public static final int PLAYER_HITBOX = 1;
     public static final int PLAYER_MAX_HEALTH = 100;//100
@@ -32,14 +32,14 @@ public class Constants {
     public static final int ENEMY_BASIC_SPEED_Y_MIN = ENTITY_BASIC_SPEED_Y;
     public static final int ENEMY_BASIC_HITBOX = 1;
     public static final int ENEMY_BASIC_ATTACK_RANGE = 1;
-    public static final int ENEMY_BASIC_DAMAGE = 13;
+    public static final int ENEMY_BASIC_DAMAGE = 5;
     public static final int ENEMY_BASIC_COOLDOWN = 2;
     public static final int TRAIN_WAGONS = 10;
     public static final int INVENTORY_MAX_WIDTH = 10;
     public static final int WINDOW_WIDTH = 1600;
     public static final int WINDOW_HEIGHT = 800;
-    public static final int SLIP_X = 10;
-    public static final int SLIP_Y = 10;
+    public static final int SLIP_X = 5;
+    public static final int SLIP_Y = 5;
 
     //!!! should consider creating a map editor, maybe with color coding
 
@@ -100,9 +100,9 @@ public class Constants {
             Map.entry(TRAP, "trap")
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.ofEntries(
-            Map.entry(WAGON_DOOR, "wagon_door.png"),
-            Map.entry(LOCKABLE_DOOR, "lockable_door_closed.png"),
-            Map.entry(CHEST_OBJECT, "chest_object_1.png")
+            Map.entry(WAGON_DOOR, "default/objects/interactive_objects/wagon_door/wagon_door_1.png"),
+            Map.entry(LOCKABLE_DOOR, "default/objects/interactive_objects/lockable_door/lockable_door_1_closed.png"),
+            Map.entry(CHEST_OBJECT, "default/objects/interactive_objects/chest_object/chest_object_1.png")
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.ofEntries(
             Map.entry(WAGON_DOOR, "wagon_door"),
