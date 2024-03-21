@@ -32,7 +32,7 @@ public class Checker {
         if (!checkMapCodes(lines)) {
             return false;
         }
-        return checkHowManyDoors(map);
+        return checkHowManyDoors(lines);
     }
     private boolean checkLinesLength(String[] lines) {
         //check if all map lines are the same length
@@ -45,6 +45,7 @@ public class Checker {
                 return false;
             }
         }
+        System.out.println("lines checked");
         return true;
     }
     private boolean checkMapCodes(String[] lines) {
@@ -93,19 +94,20 @@ public class Checker {
         }
         return true;
     }
-    private boolean checkHowManyDoors(String map) {
-        String[] lines = map.split("\n");
+    private boolean checkHowManyDoors(String[] lines) {
         int doors = 0;
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
             for (String subRow : subRows) {
                 if (subRow.charAt(0) == Constants.INTERACTIVE_OBJECT) {
-                    if (subRow.startsWith(Constants.WAGON_DOOR, 2)) {
+                    if (subRow.substring(2, 4).equals(Constants.WAGON_DOOR)) {
                         doors++;
                     }
                 }
             }
         }
+        System.out.println("doors: " + doors);
+        System.out.println(lines.length);
         return doors == 2;
     }
     /**
