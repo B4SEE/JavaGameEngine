@@ -483,6 +483,14 @@ public class GameLogic {
 
                     int[][] path = entity.findPath(map, wagon.getObjectsArray(), player);
 
+                    if (path.length == 0) {
+                        double deltaX = entity.getPositionX() - entity.getStartPositionX();
+                        double deltaY = entity.getPositionY() - entity.getStartPositionY();
+                        deltaX = deltaX > 0 ? -1 : 1;
+                        deltaY = deltaY > 0 ? -1 : 1;
+                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                    }
+
                     //check if player in attack range
                     if (checker.checkCollision(entity.getAttackRange(), player.getAttackRange())) {
                         double deltaX = entity.getPositionX() - player.getPositionX();
@@ -496,12 +504,14 @@ public class GameLogic {
                         //take the last element of the path
                         int[] deltaXY;
                         if (path == null) {
+                            System.out.println("path is null");
                             return;
                         } else if (path.length >= 2) {
                             deltaXY = path[path.length - 2];
                         } else if (path.length == 1) {
                             deltaXY = path[0];
                         } else {
+                            System.out.println("path is empty");
                             return;
                         }
 
@@ -514,7 +524,7 @@ public class GameLogic {
                         int y = (int) wagon.getObjectsArray()[map_x][map_y].getIsoY();
 
                         double deltaX = ((entity.getPositionX() + 32) - x);
-                        double deltaY = ((entity.getPositionY() + 64) - y);
+                        double deltaY = ((entity.getPositionY() + 72) - y);
 
                         //calculate the direction: deltaX and deltaY
                         deltaX = deltaX > 0 ? -1 : 1;
@@ -523,9 +533,9 @@ public class GameLogic {
                         //A* algorithm needed
 
                         isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
-                        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 64) + " target " + x + " " + y);
+                        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 72) + " target " + x + " " + y);
                         //create a line with the path
-                        Line line = new Line(entity.getPositionX() + 32, entity.getPositionY() + 64, x, y);
+                        Line line = new Line(entity.getPositionX() + 32, entity.getPositionY() + 72, x, y);
                         line.setStrokeWidth(2);
                         line.setStroke(javafx.scene.paint.Color.RED);
                         isometric.getPane().getChildren().add(line);
