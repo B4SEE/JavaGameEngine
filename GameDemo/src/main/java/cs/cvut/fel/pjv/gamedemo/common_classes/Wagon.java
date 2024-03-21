@@ -332,14 +332,34 @@ public class Wagon {
                         enemy.setCurrentWagon(this);
 
                         enemy.setAsDefaultEnemy();
-                        enemy.setPositionX(enemy.getHealth());
-//                        enemy.setPositionY(enemy.getHealth());
+                        enemy.setPositionX(300);
+                        enemy.setPositionY(240);
 
                         entities.add(enemy);
                     }
                 }
             }
         }
+    }
+    public int[][] getMapForPathFinder() {
+        int[][] map = new int[objectsArray.length][objectsArray[0].length];
+        for (int i = 0; i < objectsArray.length; i++) {
+            for (int j = 0; j < objectsArray[i].length; j++) {
+                if (objectsArray[i][j] == null || !objectsArray[i][j].isSolid()) {
+                    map[i][j] = 1;
+                } else {
+                    map[i][j] = 0;
+                }
+            }
+        }
+        //print the map
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                System.out.print(map[i][j] + " ");
+            }
+            System.out.println();
+        }
+        return map;
     }
 
 //    private String setRandomTexture(String path) {
