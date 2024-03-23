@@ -17,6 +17,7 @@ public class Constants {
     public static final int PLAYER_BASIC_SPEED_Y = 7;
     public static final int PLAYER_BASIC_DAMAGE = 5;
     public static final int PLAYER_HITBOX = 1;
+    public static final int PLAYER_ATTACK_RANGE = 1;
     public static final int PLAYER_MAX_HEALTH = 100;//100
     public static final int PLAYER_MAX_HUNGER = 100;
     public static final int PLAYER_INVENTORY_SIZE = 20;
@@ -48,6 +49,7 @@ public class Constants {
     public static final String LOCKABLE_DOOR = "LD";
     public static final String CHEST_OBJECT = "CO";
     public static final String ENEMY_SPAWN = "EN";
+    public static final String NPC_SPAWN = "NP";
     public static final String TRAP = "TR";
     //string constants for wagon types
     //string constants for entity's behaviour
@@ -73,8 +75,12 @@ public class Constants {
 
     public static final int SLOT_SIZE = 64;
     public static final int SLOT_GAP = 20;
-
+    //item types
+    public static final String VALID_TICKET = "VALID_TICKET";
     public static final String[] WAGON_TYPES = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
+    public static final int MAX_PREV_POS_LIST_SIZE = 10;
+
+    public static final int MAX_COUNTER = 5;
     //consider enum
     public static final Map <String, String> OBJECT_IDS = Map.ofEntries(
             Map.entry("TF", "tile_floor.png"),
@@ -84,7 +90,8 @@ public class Constants {
             Map.entry("WW", "3h_block.png"),
             Map.entry("SS", "seat_1.png"),
             Map.entry("CA", "carpet_1.png"),
-            Map.entry(ENEMY_SPAWN, "block_wall.png"),
+            Map.entry(ENEMY_SPAWN, "tile_floor.png"),
+            Map.entry(NPC_SPAWN, "tile_floor.png"),
             Map.entry(TRAP, "block_wall.png")
     );
 
@@ -97,6 +104,7 @@ public class Constants {
             Map.entry("SS", "seat"),
             Map.entry("CA", "carpet_1"),
             Map.entry(ENEMY_SPAWN, "enemy_spawn"),
+            Map.entry(NPC_SPAWN, "npc_spawn"),
             Map.entry(TRAP, "trap")
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.ofEntries(
@@ -109,9 +117,15 @@ public class Constants {
             Map.entry(LOCKABLE_DOOR, "lockable_door"),
             Map.entry(CHEST_OBJECT, "chest_object")
     );
-    public static final Map <String, String[]> WAGON_TYPE_ENTITIES = Map.ofEntries(
+    public static final Map <String, String[]> WAGON_TYPE_ENEMIES = Map.ofEntries(
             Map.entry("DEFAULT", new String[]{"zombie"}),
             Map.entry("COMPARTMENT", new String[]{"zombie", "robot", "bully"}),
+            Map.entry("RESTAURANT", new String[]{"gentleman"})
+    );
+
+    public static final Map <String, String[]> WAGON_TYPE_NPC = Map.ofEntries(
+            Map.entry("DEFAULT", new String[]{"gentleman"}),
+            Map.entry("COMPARTMENT", new String[]{"gentleman", "lady", "child"}),
             Map.entry("RESTAURANT", new String[]{"gentleman"})
     );
 
