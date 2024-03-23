@@ -1,0 +1,43 @@
+{
+  "dialogues": [
+    {
+      "id": "dialogue1",
+      "text": "First text",
+      "options": [
+        {
+          "text": "Option 1",
+          "subOptions": [
+            {
+              "text": "Suboption 1.1",
+              "nextDialogue": "dialogue2"
+            },
+            {
+              "text": "Suboption 1.2",
+              "subOptions": [
+                {
+                  "text": "Suboption 1.2.1"
+                },
+                {
+                  "text": "Suboption 1.2.2",
+                  "nextDialogue": "dialogue2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "text": "Option 2"
+        }
+      ]
+    },
+    {
+      "id": "dialogue2",
+      "text": "Second text",
+      "options": [
+        {
+          "text": "Option 3"
+        }
+      ]
+    }
+  ]
+}
