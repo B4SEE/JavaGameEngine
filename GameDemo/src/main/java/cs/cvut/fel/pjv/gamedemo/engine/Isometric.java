@@ -20,13 +20,14 @@ import java.util.List;
 /**
  * Class for isometric graphics logic.
  */
-public class Isometric {//Note: need to implement A* algorithm for entity movement
+public class Isometric {
     private final Checker checker = new Checker();
     private int deltaX = 10;
     private int deltaY = 0;
     private String map = "";
     private Object[][] objectsToDraw;
     private Shape walls;
+    private Shape twoAndTallerWalls;
     private Player player;
     private List<Entity> entities;
     private List<Entity> drawnEntities;
@@ -65,6 +66,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
                     if (!entity.isAlive()) {
                         grid.getChildren().remove(entity.getEntityView());
                         grid.getChildren().remove(entity.getHitbox());
+                        grid.getChildren().remove(entity.getTrackPoint());
                         grid.getChildren().remove(entity.getAttackRange());
                     }
                 }
@@ -143,6 +145,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         objectsToDraw = null;
         map = "";
         walls = null;
+        twoAndTallerWalls = null;
         player = null;
         entities = null;
         drawnEntities = null;
@@ -187,7 +190,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     public void setPlayer(Player player) {
         this.player = player;
         player.setHitbox(getEntityHitBox((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getHitBoxSize()));
-        player.setAttackRange(getEntityAttackRange((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), 1));
+        player.setTrackPoint(getEntityTrackPoint((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight()));
+        player.setAttackRange(getEntityAttackRange((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getAttackRangeSize()));
         player.setStartPositionX(player.getPositionX());
         player.setStartPositionY(player.getPositionY());
         updatePlayerDeltaX(0);
@@ -199,6 +203,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     public void resetPlayer() {
         grid.getChildren().remove(player.getEntityView());
         grid.getChildren().remove(player.getHitbox());
+        grid.getChildren().remove(player.getTrackPoint());
         grid.getChildren().remove(player.getAttackRange());
 
         player.setHealth(Constants.PLAYER_MAX_HEALTH);
@@ -206,7 +211,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         player.setPositionX(player.getStartPositionX());
         player.setPositionY(player.getStartPositionY());
         player.setHitbox(getEntityHitBox((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getHitBoxSize()));
-        player.setAttackRange(getEntityAttackRange((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), 1));
+        player.setTrackPoint(getEntityTrackPoint((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight()));
+        player.setAttackRange(getEntityAttackRange((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getAttackRangeSize()));
     }
     /**
      * Get the player.
@@ -224,6 +230,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         drawnEntities = new ArrayList<>();
         for (Entity entity : this.entities) {
             entity.setHitbox(getEntityHitBox((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
+            entity.setTrackPoint(getEntityTrackPoint((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight()));
             entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), 1));
             entity.setStartPositionX(entity.getPositionX());
             entity.setStartPositionY(entity.getPositionY());
@@ -244,6 +251,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         for (Entity entity : entities) {
             grid.getChildren().remove(entity.getEntityView());
             grid.getChildren().remove(entity.getHitbox());
+            grid.getChildren().remove(entity.getTrackPoint());
             grid.getChildren().remove(entity.getAttackRange());
             drawnEntities = new ArrayList<>();
 
@@ -251,6 +259,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
             entity.setPositionX(entity.getStartPositionX());
             entity.setPositionY(entity.getStartPositionY());
             entity.setHitbox(getEntityHitBox((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
+            entity.setTrackPoint(getEntityTrackPoint((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight()));
             entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getAttackRangeSize()));
             entity.setBehaviour(entity.getInitialBehaviour());
         }
@@ -377,6 +386,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     private boolean tryToMove(Entity entity, double deltaX, double deltaY) {
         entity.getHitbox().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
         entity.getHitbox().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
+        entity.getTrackPoint().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
+        entity.getTrackPoint().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
         entity.getAttackRange().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
         entity.getAttackRange().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
 
@@ -414,6 +425,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
     public void updateWalls() {
         grid.getChildren().remove(player.getEntityView());
         grid.getChildren().remove(player.getHitbox());
+        grid.getChildren().remove(player.getTrackPoint());
         grid.getChildren().remove(player.getAttackRange());
         grid.getChildren().removeIf(node -> node instanceof Rectangle);
         if (entities != null) {
@@ -422,6 +434,7 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
                 if (entity != null) {
                     grid.getChildren().remove(entity.getEntityView());
                     grid.getChildren().remove(entity.getHitbox());
+                    grid.getChildren().remove(entity.getTrackPoint());
                     grid.getChildren().remove(entity.getAttackRange());
                 }
             }
@@ -615,22 +628,37 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
      * Merge the object hitboxes to create one solid shape.
      */
     private void mergeObjectHitboxes() {
-        Shape shape = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
+        walls = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
         grid.getChildren().remove(objectsToDraw[0][0].getObjectHitbox());
         grid.getChildren().remove(objectsToDraw[0][1].getObjectHitbox());
         for (Object[] objects : objectsToDraw) {
             for (Object object : objects) {
                 if (object.isSolid()) {
-                    shape = Shape.union(shape, object.getObjectHitbox());
+                    walls = Shape.union(walls, object.getObjectHitbox());
                 }
             }
         }
-        shape.setStyle("-fx-fill: #ff00af; -fx-opacity: 0;");
-        walls = shape;
-        grid.getChildren().add(shape);
+        walls.setStyle("-fx-opacity: 0;");
+        //get walls that are two or taller
+        twoAndTallerWalls = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
+        for (Object[] objects : objectsToDraw) {
+            for (Object object : objects) {
+                if (object.getHeight() >= 2) {
+                    object.getObjectHitbox().scaleXProperty().set(1);
+                    object.getObjectHitbox().scaleYProperty().set(1);
+//                    object.getObjectHitbox().setTranslateY(-Constants.TILE_HEIGHT * object.getHeight());
+                    twoAndTallerWalls = Shape.union(twoAndTallerWalls, object.getObjectHitbox());
+                    object.getObjectHitbox().scaleXProperty().set(0.8);
+                    object.getObjectHitbox().scaleYProperty().set(0.8);
+                }
+            }
+        }
+        twoAndTallerWalls.setStyle("-fx-opacity: 0;");
+        grid.getChildren().add(walls);
+        grid.getChildren().add(twoAndTallerWalls);
     }
     /**
-     * Get the entity hitbox.
+     * Get the entity hitbox. The hitbox is used for fighting, if entity's hitbox collides with enemy's attack range, the entity is damaged.
      *
      * @param cartX  the entity's x position
      * @param cartY  the entity's y position
@@ -643,12 +671,30 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
         int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
-        circle.setRadius((double) (hitBoxSize * Constants.TILE_WIDTH) / 4);
+        circle.setRadius((double) (hitBoxSize * Constants.TILE_WIDTH) / 4 + 2);
         circle.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
         return circle;
     }
     /**
-     * Get the entity attack range.
+     * Get the entity track point. The track point is used for entity movement, pathfinding, and collision detection.
+     *
+     * @param cartX  the entity's x position
+     * @param cartY  the entity's y position
+     * @param height the entity's height
+     * @return the entity track point
+     */
+    private Circle getEntityTrackPoint(int cartX, int cartY, int height) {
+        Circle circle = new Circle();
+        int circleCenterX = cartX + Constants.TILE_WIDTH;
+        int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
+        circle.setCenterX(circleCenterX);
+        circle.setCenterY(circleCenterY);
+        circle.setRadius(4);
+        circle.setStyle("-fx-stroke: #48ff00; -fx-stroke-width: 2; -fx-fill: #83ff00;");
+        return circle;
+    }
+    /**
+     * Get the entity attack range. The attack range is used for entity fighting, if entity's attack range collides with enemy's hitbox, the enemy is damaged.
      * @param cartX the entity's x position
      * @param cartY the entity's y position
      * @param height the entity's height
@@ -685,6 +731,9 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
                 isoXY4[0] + Constants.TILE_WIDTH, isoXY4[1]);
         parallelogram.setStyle("-fx-opacity: 0");
 
+        parallelogram.setScaleX(0.8);
+        parallelogram.setScaleY(0.8);
+
         return parallelogram;
     }
     /**
@@ -714,5 +763,8 @@ public class Isometric {//Note: need to implement A* algorithm for entity moveme
 
     public Pane getPane() {
         return grid;
+    }
+    public Shape getTwoAndTallerWalls() {
+        return twoAndTallerWalls;
     }
 }
