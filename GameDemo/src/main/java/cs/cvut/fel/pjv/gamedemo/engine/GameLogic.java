@@ -1,15 +1,16 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
+import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -22,8 +23,6 @@ import java.util.Objects;
 public class GameLogic {
     private final Checker checker = new Checker();
     private final Isometric isometric;
-    //test
-    private boolean added = false;
     private Stage stage;
     private long time;
     private Player player;
@@ -58,6 +57,17 @@ public class GameLogic {
                     isometric.setHandleToNull();
                     stopGame();
                 }
+
+                //update entity's previous positions and counter
+                if (time % 5 == 0) {
+                    for (Entity entity : wagon.getEntities()) {
+                        if (entity != null && entity.isAlive()) {
+                            entity.setCounter(0);
+                            entity.getPreviousPositions().clear();
+                        }
+                    }
+
+                }
             }
         }
     };
@@ -65,8 +75,10 @@ public class GameLogic {
         isometric.updatePlayerPosition();
         player.heal(time);
         player.starve(time);
-        if (checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects()) != null) {
+        if (checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
             isometric.updateHint("Press E to open", (int) player.getPositionX(), (int) player.getPositionY() - 25);
+        } else if (checker.checkIfPlayerCanSpeak(player, wagon.getEntities()) != null) {
+            isometric.updateHint("Press E to speak", (int) player.getPositionX(), (int) player.getPositionY() - 25);
         } else {
             isometric.updateHint("", (int) player.getPositionX(), (int) player.getPositionY() - 25);
         }
@@ -184,8 +196,8 @@ public class GameLogic {
                     setPlayerInventoryHandle();
                     break;
                 case E:
-                    if (checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects()) != null) {
-                        Object object = checker.checkIfPlayerCanInteract(player, wagon.getInteractiveObjects());
+                    if (checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
+                        Object object = checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
                         if (Objects.equals(object.getTwoLetterId(), "WD") && gameState != Constants.GAME_STATES.get("trap")) {
                             openWagonDoor((Door) object);
                         }
@@ -197,9 +209,83 @@ public class GameLogic {
                             isometric.updateAll();
                         }
                     }
+                    if (checker.checkIfPlayerCanSpeak(player, wagon.getEntities()) != null) {
+                        Entity entity = checker.checkIfPlayerCanSpeak(player, wagon.getEntities());
+                        openDialogue(entity);
+                    }
             }
             isometric.updateWalls();
         });
+    }
+    private void openDialogue(Entity entity) {
+        Dialogue dialogue = new Dialogue(entity.getName());
+        //TODO selectRandomDialogue(entity.getName())
+        dialogue.setEntity(entity);
+        setDialogueHandle(dialogue, entity);
+    }
+    private void setDialogueHandle(Dialogue dialogue, Entity dialogueEntity) {
+        Scene scene = stage.getScene();
+
+        scene.setOnKeyReleased(null);
+        scene.setOnKeyPressed(null);
+
+        pauseGame();
+
+        Scene dialogueScene = dialogue.openDialogue();
+
+        stage.setScene(dialogueScene);
+
+        dialogueScene.setOnKeyPressed(keyEvent -> {
+            if (dialogue.getAction() != null) {//work only from the second option
+                handleDialogueAction(dialogue.getAction(), dialogueEntity);
+                dialogue.setAction(null);
+            }
+            if (Objects.equals(dialogueEntity.getBehaviour(), Constants.AGGRESSIVE)) {
+                dialogue.closeDialogue();
+                stage.setScene(scene);
+                setPlayerHandle();
+                resumeGame();
+                return;
+            }
+            if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.TAB) {
+                dialogue.closeDialogue();
+                stage.setScene(scene);
+                setPlayerHandle();
+                resumeGame();
+                return;
+            }
+            if (Objects.equals(dialogue.getAction(), "trade")) {
+                dialogue.closeDialogue();
+                stage.setScene(scene);
+                dialogue.setAction(null);
+                //TODO implement trade
+                return;
+            }
+        });
+
+    }
+    private void handleDialogueAction(String action, Entity dialogueEntity) {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - check ticket
+        System.out.println(action);
+        if (Objects.equals(action, "negative")) {
+            dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
+            if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
+                dialogueEntity.setBehaviour(Constants.AGGRESSIVE);
+            }
+            System.out.println(dialogueEntity.getNegativeCount());
+        }
+        if (Objects.equals(action, "fight")) {
+            dialogueEntity.setBehaviour(Constants.AGGRESSIVE);
+        }
+        if (Objects.equals(action, "check ticket")) {
+            if (checker.checkIfPlayerHasTicket(player.getPlayerInventory().getItemsArray())) {
+                dialogueEntity.setBehaviour(Constants.NEUTRAL);
+            } else {
+                dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
+                if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
+                    dialogueEntity.setBehaviour(Constants.AGGRESSIVE);
+                }
+            }
+        }
     }
 
     private void openWagonDoor(Door door) {
@@ -266,7 +352,7 @@ public class GameLogic {
      */
     private void playerUseHand() {
         if (player.getHandItem() == null) {
-            player.tryAttack(player, isometric.getEntities(), time);
+            player.tryAttack(player, wagon.getEntities(), time);
         }
         if (player.getHandItem() != null) {
             player.useHandItem(time);
@@ -295,22 +381,6 @@ public class GameLogic {
      */
     private void setInventoryHandle(Inventory inventory) {
         if (inventory != null) {
-
-//            //for testing purposes
-//            if (inventory.inventorySize >= 3 && !added) {
-////                inventory.setVendor(true);
-//                Food item = new Food("orange", "orange.png", 15);
-//                item.setValue(10);
-//                Item item2 = new Item("seat", "seat_1.png");
-//                item2.setValue(20);
-//                Item item3 = new Item("box", "chest_object_1.png");
-//                item3.setValue(30);
-//                inventory.addItem(item);
-//                inventory.addItem(item2);
-//                inventory.addItem(item3);
-//                added = true;
-//            }
-//            //
 
             Scene scene = stage.getScene();
             scene.setOnKeyReleased(null);
@@ -423,9 +493,6 @@ public class GameLogic {
         System.out.println(wagon.getSeed());
         isometric.initialiseWagon(wagon);
         setPlayerHandle();
-//        System.out.println("------------");
-//        System.out.println(train.wagonsArray[0].getSeed());
-//        System.out.println("------------");
     }
     /**
      * Save the game.
@@ -471,105 +538,159 @@ public class GameLogic {
     }
     /**
      * Move the entities towards the player.
+     * Handle the entities' intelligence.
+     * Check if the entity is stuck.
+     * @see #intelligenceZeroPursue(Entity, Entity)
+     * @see #intelligenceOnePursue(Entity, Entity)
+     * @see #intelligenceTwoPursue(Entity, Entity)
+     * @see #moveEntity(Entity, int[])
      */
     public void moveEntities() {
-        //clear the lines
-        isometric.getPane().getChildren().removeIf(node -> node instanceof Line);
         if (wagon.getEntities() != null) {
             for (Entity entity : wagon.getEntities()) {
-                if (entity != null && entity.isAlive()) {
-//
-                    int[][] map = wagon.getMapForPathFinder();
-
-                    int[][] path = entity.findPath(map, wagon.getObjectsArray(), player);
-
-                    if (path.length == 0) {
-                        double deltaX = entity.getPositionX() - entity.getStartPositionX();
-                        double deltaY = entity.getPositionY() - entity.getStartPositionY();
-                        deltaX = deltaX > 0 ? -1 : 1;
-                        deltaY = deltaY > 0 ? -1 : 1;
-                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                if (entity != null && entity.isAlive() && Objects.equals(entity.getBehaviour(), Constants.AGGRESSIVE)) {
+                    //check if the entity can see the player
+                    if (!checker.checkIfEntityCanSee(entity, player, isometric.getTwoAndTallerWalls(), time)) {
+                        returnToStart(wagon.getMapForPathFinder(false), entity);
+                        return;
                     }
 
-                    //check if player in attack range
-                    if (checker.checkCollision(entity.getAttackRange(), player.getAttackRange())) {
-                        double deltaX = entity.getPositionX() - player.getPositionX();
-                        double deltaY = entity.getPositionY() - player.getPositionY();
-
-                        deltaX = deltaX > 0 ? -1 : 1;
-                        deltaY = deltaY > 0 ? -1 : 1;
-
-                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                    //move the entity with appropriate intelligence
+                    if (entity.getIntelligence() == 0) {
+                        intelligenceZeroPursue(entity, player);
+                    } else if (entity.getIntelligence() == 1) {
+                        intelligenceOnePursue(entity, player);
+                    } else if (entity.getIntelligence() == 2) {
+                        intelligenceTwoPursue(entity, player);
                     } else {
-                        //take the last element of the path
-                        int[] deltaXY;
-                        if (path == null) {
-                            System.out.println("path is null");
-                            return;
-                        } else if (path.length >= 2) {
-                            deltaXY = path[path.length - 2];
-                        } else if (path.length == 1) {
-                            deltaXY = path[0];
-                        } else {
-                            System.out.println("path is empty");
-                            return;
-                        }
-
-                        int map_x = deltaXY[0];
-                        int map_y = deltaXY[1];
-
-                        System.out.println("the next position is: " + map_x + " " + map_y);
-
-                        int x = (int) wagon.getObjectsArray()[map_x][map_y].getIsoX();
-                        int y = (int) wagon.getObjectsArray()[map_x][map_y].getIsoY();
-
-                        double deltaX = ((entity.getPositionX() + 32) - x);
-                        double deltaY = ((entity.getPositionY() + 72) - y);
-
-                        //calculate the direction: deltaX and deltaY
-                        deltaX = deltaX > 0 ? -1 : 1;
-                        deltaY = deltaY > 0 ? -1 : 1;
-
-                        //A* algorithm needed
-
-                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
-                        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 72) + " target " + x + " " + y);
-                        //create a line with the path
-                        Line line = new Line(entity.getPositionX() + 32, entity.getPositionY() + 72, x, y);
-                        line.setStrokeWidth(2);
-                        line.setStroke(javafx.scene.paint.Color.RED);
-                        isometric.getPane().getChildren().add(line);
+                        return;
                     }
-//                        int map_x = deltaXY[0];
-//                        int map_y = deltaXY[1];
-//
-//                        int x = (int) wagon.getObjectsArray()[map_x][map_y].getIsoX();
-//                        int y = (int) wagon.getObjectsArray()[map_x][map_y].getIsoY();
-//
-////                        entity.setPositionX(x);
-////                        entity.setPositionY(y);
-//
-////                        updateEntities();
-//
-//                        int deltaX = x;
-//                        int deltaY = y;
 
-//                        deltaX = deltaX > 0 ? -1 : 1;
-//                        deltaY = deltaY > 0 ? -1 : 1;
-//
-//                        //A* algorithm needed
-//
-//                        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
-
-//                    int deltaX = (int) (entity.getHitbox().getLayoutX() - player.getHitbox().getLayoutX());
-//                    int deltaY = (int) (entity.getHitbox().getLayoutY() - player.getHitbox().getLayoutY());
-//
-//                    deltaX = deltaX > 0 ? -1 : 1;
-//                    deltaY = deltaY > 0 ? -1 : 1;
-//
-//                    isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+                    //check if the entity is stuck
+                    if (checker.checkIfEntityStuck(entity)) {
+                        //use intelligence 0 to move the entity if entity is stuck;
+                        //intelligence 0 is the simplest but has the advantage of not getting stuck (if slipping is big enough)
+                        intelligenceZeroPursue(entity, player);
+                        return;
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Move the entity towards the target with intelligence 0. The entity moves towards the target in a straight line and does not avoid obstacles.
+     * @param entity entity to be moved
+     * @param target target to be followed
+     */
+    private void intelligenceZeroPursue(Entity entity, Entity target) {
+        double deltaX = entity.getPositionX() - target.getPositionX();
+        double deltaY = entity.getPositionY() - target.getPositionY();
+
+        deltaX = deltaX > 0 ? -1 : 1;
+        deltaY = deltaY > 0 ? -1 : 1;
+
+        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+    }
+
+    /**
+     * Move the entity towards the target with intelligence 1. The entity moves towards the target and avoids obstacles.
+     * @param entity entity to be moved
+     * @param target target to be followed
+     */
+    private void intelligenceOnePursue(Entity entity, Entity target) {
+        int[][] map = wagon.getMapForPathFinder(false);
+        int[][] path = entity.findPath(map, wagon.getObjectsArray(), target, false);
+        pursue(entity, target, map, path);
+    }
+
+    /**
+     * Move the entity towards the target with intelligence 2. The entity moves towards the target, avoids obstacles and opens the door if the entity is near.
+     * @param entity entity to be moved
+     * @param target target to be followed
+     */
+    private void intelligenceTwoPursue(Entity entity, Entity target) {
+        int[][] map = wagon.getMapForPathFinder(true);
+        int[][] path = entity.findPath(map, wagon.getObjectsArray(), target, false);
+        //open the door if the entity is near
+        if (checker.checkIfCanInteract(entity, wagon.getInteractiveObjects()) != null) {
+            Object object = checker.checkIfCanInteract(entity, wagon.getInteractiveObjects());
+            if (Objects.equals(object.getTwoLetterId(),Constants.LOCKABLE_DOOR) && object.isSolid()) {
+                useLockableDoor(object);
+                isometric.updateAll();
+            }
+        }
+        pursue(entity, target, map, path);
+    }
+
+    /**
+     * Move the entity towards the target.
+     * @param entity entity to be moved
+     * @param target target to be followed
+     * @param map map for the returnToStart() method
+     * @param path path to be followed
+     * @see #returnToStart(int[][], Entity)
+     */
+    private void pursue(Entity entity, Entity target, int[][] map, int[][] path) {
+        if (checker.checkCollision(entity.getAttackRange(), target.getAttackRange())) {
+            intelligenceZeroPursue(entity, target);
+        } else {
+            //take the last element of the path
+            int[] deltaXY = new int[0];
+            if (path.length >= 2) {
+                deltaXY = path[path.length - 2];
+            } else if (path.length == 1) {
+                deltaXY = path[0];
+            } else {
+                returnToStart(map, entity);
+            }
+
+            moveEntity(entity, deltaXY);
+        }
+    }
+
+    /**
+     * Move the entity back to the start position.
+     * @param map map for the pathfinder
+     * @param entity entity to be moved
+     */
+    private void returnToStart(int[][] map, Entity entity) {
+        if (entity.getPositionX() == entity.getStartPositionX() && entity.getPositionY() == entity.getStartPositionY()) {
+            return;
+        }
+        int[][] path = entity.findPath(map, wagon.getObjectsArray(), entity, true);
+        if (path.length == 0) {
+            return;
+        }
+        int[] deltaXY;
+        if (path.length >= 2) {
+            deltaXY = path[path.length - 2];
+        } else {
+            deltaXY = path[0];
+        }
+        moveEntity(entity, deltaXY);
+    }
+
+    /**
+     * Move the entity.
+     * @param entity entity to be moved
+     * @param index index of the next position found by the pathfinder
+     */
+    private void moveEntity(Entity entity, int[] index) {
+        if (index == null || index.length == 0) {
+            return;
+        }
+//        System.out.println("the next position is: " + map_x + " " + map_y);
+        int x = (int) wagon.getObjectsArray()[index[0]][index[1]].getIsoX();
+        int y = (int) wagon.getObjectsArray()[index[0]][index[1]].getIsoY();
+
+        double deltaX = ((entity.getPositionX() + 32) - x);
+        double deltaY = ((entity.getPositionY() + 80) - y);
+
+        deltaX = deltaX > 0 ? -1 : 1;
+        deltaY = deltaY > 0 ? -1 : 1;
+
+        isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+//        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 72) + " target " + x + " " + y);
     }
 }
