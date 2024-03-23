@@ -1,6 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
+import cs.cvut.fel.pjv.gamedemo.engine.Dialogue;
 import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -18,7 +19,7 @@ public class Main extends Application {
     }
 
     private Player createPlayer() {
-        Player player = new Player(0, "PLAYER_NAME", "player_front.png", 400, 200);
+        Player player = new Player("PLAYER_NAME", "player_front.png", 350, 200);
 
         player.setHitBoxSize(1);
         player.setAttackRangeSize(1);
