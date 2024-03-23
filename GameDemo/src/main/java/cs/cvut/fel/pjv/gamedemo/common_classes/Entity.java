@@ -2,6 +2,8 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
@@ -15,14 +17,20 @@ import java.util.Objects;
  * Represents an entity in the game, such as the player, enemies, NPCs, etc.
  */
 public class Entity {
-    private int id;//might be unnecessary
     private String name;
     private String texturePath;
     private String type;
     private String initialBehaviour;
     private String behaviour;
+    private int intelligence = 2;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
+    private int negativeThreshold = 2;
+    private int negativeCount = 0;
     private double startPositionX;
     private double startPositionY;
+    private int[] startIndex;
+    private List<Point2D> previousPositions = new ArrayList<>();
+    private int counter = 0;
+    private int[] lastKnownPosition = new int[]{0, 0};
     private double positionX;
     private double positionY;
     private int height;
@@ -30,6 +38,7 @@ public class Entity {
     private int speed_y;
     private int hitBoxSize;
     private Shape hitbox;
+    private Shape trackPoint;
     private Shape attackRange;
     private int attackRangeSize;
     private int health;
@@ -39,6 +48,7 @@ public class Entity {
     private int cooldown;
     private boolean canAttack = true;
     private long whenAttacked;
+    private long whenStartedPursuing = 0;
     private ImageView entityView;
 
     private Wagon currentWagon;
@@ -49,8 +59,7 @@ public class Entity {
         this.maxHealth = Constants.ENTITY_BASIC_MAX_HEALTH;
     }
 
-    public Entity(int id, String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage, Wagon currentWagon) {
-        this.id = id;
+    public Entity(String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage, Wagon currentWagon) {
         this.name = name;
         this.texturePath = texturePath;
         this.type = type;
@@ -61,6 +70,18 @@ public class Entity {
         this.maxHealth = health;
         this.damage = damage;
         this.currentWagon = currentWagon;
+    }
+    public void setNegativeThreshold(int negativeThreshold) {
+        this.negativeThreshold = negativeThreshold;
+    }
+    public int getNegativeThreshold() {
+        return negativeThreshold;
+    }
+    public void setNegativeCount(int negativeCount) {
+        this.negativeCount = negativeCount;
+    }
+    public int getNegativeCount() {
+        return negativeCount;
     }
 
     /**
@@ -102,14 +123,15 @@ public class Entity {
         setBehaviour(Constants.NEUTRAL);
         setInitialBehaviour(getBehaviour());
         setHeight(Constants.ENEMY_BASIC_HEIGHT);
+        speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
+        System.out.println(speed_x);
+        speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
+        System.out.println(speed_y);
         setHitBoxSize(Constants.ENEMY_BASIC_HITBOX);
         setAttackRangeSize(Constants.ENEMY_BASIC_ATTACK_RANGE);
         setDamage(Constants.ENEMY_BASIC_DAMAGE);
         setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
         setHealth(maxHealth);
-    }
-    public int getId() {
-        return id;
     }
     public String getName() {
         return name;
@@ -147,6 +169,14 @@ public class Entity {
         return behaviour;
     }
 
+    public void setIntelligence(int intelligence) {
+        this.intelligence = intelligence;
+    }
+
+    public int getIntelligence() {
+        return intelligence;
+    }
+
     public void setStartPositionX(double startPositionX) {
         this.startPositionX = startPositionX;
     }
@@ -161,6 +191,14 @@ public class Entity {
 
     public double getStartPositionY() {
         return startPositionY;
+    }
+
+    public void setStartIndex(int[] startIndex) {
+        this.startIndex = startIndex;
+    }
+
+    public int[] getStartIndex() {
+        return startIndex;
     }
     public void setPositionX(double positionX) {
         this.positionX = positionX;
@@ -210,6 +248,12 @@ public class Entity {
     }
     public Shape getHitbox() {
         return hitbox;
+    }
+    public void setTrackPoint(Shape trackPoint) {
+        this.trackPoint = trackPoint;
+    }
+    public Shape getTrackPoint() {
+        return trackPoint;
     }
     public void setAttackRange(Shape attackRange) {
         this.attackRange = attackRange;
@@ -267,6 +311,14 @@ public class Entity {
         return whenAttacked;
     }
 
+    public void setWhenStartedPursuing(long whenStartedPursuing) {
+        this.whenStartedPursuing = whenStartedPursuing;
+    }
+
+    public long getWhenStartedPursuing() {
+        return whenStartedPursuing;
+    }
+
     public void setEntityView(ImageView entityView) {
         this.entityView = entityView;
     }
@@ -299,8 +351,8 @@ public class Entity {
      */
     public void attack(Entity target) {
         target.takeDamage(damage);
-        if (Objects.equals(target.getBehaviour(), "NEUTRAL")) {
-            target.setBehaviour("ENEMY");
+        if (Objects.equals(target.getBehaviour(), Constants.NEUTRAL)) {
+            target.setBehaviour(Constants.AGGRESSIVE);
         }
     }
     /**
@@ -359,16 +411,24 @@ public class Entity {
             entity.setWhenAttacked(0);
         }
     }
-    public int[][] findPath(int[][] map, Object[][] objectsArray, Entity target) {
+    public int[][] findPath(int[][] map, Object[][] objectsArray, Entity target, boolean returnToStart) {
+        if (startIndex == null) {
+            startIndex = findOnWhatObject(this, objectsArray);
+        }
+
         int[][] path;
+
         int[] startPosition = findOnWhatObject(this, objectsArray);
-        System.out.println("start position: " + startPosition[0] + " " + startPosition[1]);
         int[] targetPosition = findOnWhatObject(target, objectsArray);
-        System.out.println("target position: " + targetPosition[0] + " " + targetPosition[1]);
 
         if (startPosition == null || targetPosition == null) {
             return null;
         }
+
+        if (returnToStart) {
+            targetPosition = startIndex;
+        }
+
         PathFinder.Pair src = new PathFinder.Pair(startPosition[0], startPosition[1]);
         PathFinder.Pair dest = new PathFinder.Pair(targetPosition[0], targetPosition[1]);
 
@@ -378,28 +438,32 @@ public class Entity {
         return path;
     }
     public int[] findOnWhatObject(Entity target, Object[][] objectsArray) {
-//        Polygon objectHitbox = objectsArray[target.getPositionY() / Constants.TILE_HEIGHT][target.getPositionX() / Constants.TILE_WIDTH].getObjectHitbox();
         Checker checker = new Checker();
         for (int i = 0; i < objectsArray.length; i++) {
             for (int j = 0; j < objectsArray[0].length; j++) {
                 if (objectsArray[i][j] != null) {
-                    Circle targetHitbox = (Circle) target.getHitbox();
-                    targetHitbox.setRadius(3);
-                    if (checker.checkCollision(targetHitbox, objectsArray[i][j].getObjectHitbox())) {
+                    //reduce the hitbox size of the object to make it easier to find the object
+                    if (checker.checkCollision(target.getTrackPoint(), objectsArray[i][j].getObjectHitbox())) {
                         int[] result = new int[2];
                         result[0] = i;
                         result[1] = j;
+                        lastKnownPosition = result;
                         return result;
                     }
                 }
             }
         }
-        return new int[]{0, 0};
+        return lastKnownPosition;
     }
-    private double[] cartesianToIsometric(int cartX, int cartY) {
-        double[] isoXY = new double[2];
-        isoXY[0] = (cartX - cartY);
-        isoXY[1] = (double) (cartX + cartY) / 2;
-        return isoXY;
+    public List<Point2D> getPreviousPositions() {
+        return previousPositions;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
+    }
+
+    public int getCounter() {
+        return counter;
     }
 }
