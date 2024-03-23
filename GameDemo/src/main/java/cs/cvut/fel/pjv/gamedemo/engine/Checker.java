@@ -1,10 +1,11 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
+import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
+import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 import java.util.List;
@@ -114,18 +115,74 @@ public class Checker {
      * Check if the player can interact with the objects.
      * @return the object the player can interact with, null otherwise
      */
-    public Object checkIfPlayerCanInteract(Player player, Object[] interactiveObjects) {
+    public Object checkIfCanInteract(Entity entity, Object[] interactiveObjects) {
         if (interactiveObjects == null) {
             return null;
         }
         for (Object object : interactiveObjects) {
-            if (checkCollision(player.getAttackRange(), object.getObjectHitbox())) {
+            if (checkCollision(entity.getAttackRange(), object.getObjectHitbox())) {
 //                updateLabel("Press E to interact", player.getPositionX() - 50, player.getPositionY() - 50);
                 return object;
             }
         }
 //        updateLabel("No interactive objects nearby", player.getPositionX() - 50, player.getPositionY() - 50);
         return null;
+    }
+    public Entity checkIfPlayerCanSpeak(Player player, List<Entity> entities) {
+        if (entities == null) {
+            return null;
+        }
+        for (Entity entity : entities) {
+            if (entity != null) {
+                if (entity.isAlive()) {
+                    if (entity.getType().equals(Constants.NPC) && checkCollision(player.getAttackRange(), entity.getHitbox()) && entity.getBehaviour() == Constants.NEUTRAL) {
+                        return entity;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    public boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacle, long time) {
+        Line sightLine = new Line(entity.getPositionX() + 32, entity.getPositionY() + 80, target.getPositionX() + 32, target.getPositionY() + 80);
+        if (checkCollision(sightLine, obstacle)) {
+            if ((time - entity.getWhenStartedPursuing() != 0 && (time - entity.getWhenStartedPursuing()) % 13 == 0) || entity.getWhenStartedPursuing() == 0) {
+                entity.setWhenStartedPursuing(0);
+                return false;
+            }
+        } else {
+            entity.setWhenStartedPursuing(time);
+            return true;
+        }
+        return true;
+    }
+    public boolean checkIfEntityStuck(Entity entity) {
+        Point2D currentPosition = new Point2D(entity.getPositionX(), entity.getPositionY());
+        //check if the entity has already visited the current position
+        if (entity.getPreviousPositions().contains(currentPosition)) {
+            //increase the counter
+            entity.setCounter(entity.getCounter() + 1);
+//                        System.out.println("Entity revisited position: " + currentPosition);
+        } else {
+            //add the current position to the list of previous positions
+            entity.getPreviousPositions().add(currentPosition);
+        }
+        //remove the oldest position (so the list does not grow indefinitely)
+        if (entity.getPreviousPositions().size() > Constants.MAX_PREV_POS_LIST_SIZE) {
+            entity.getPreviousPositions().removeFirst(); // Remove the oldest position
+        }
+        //check if entity is stuck
+        return entity.getCounter() > Constants.MAX_COUNTER;
+    }
+    public boolean checkIfPlayerHasTicket(Item[] itemsArray) {
+        for (Item item : itemsArray) {
+            if (item != null) {
+                if (item.getType().equals(Constants.VALID_TICKET)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     /**
      * Check if there is a collision between two shapes.
