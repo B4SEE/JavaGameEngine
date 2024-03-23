@@ -325,7 +325,7 @@ public class Wagon {
                 if (object.getHeight() == 0) {
                     if (letterID.equals(Constants.ENEMY_SPAWN)) {
                         //pick random name from dictionary
-                        String[] names = Constants.WAGON_TYPE_ENTITIES.get(type);
+                        String[] names = Constants.WAGON_TYPE_ENEMIES.get(type);
                         String name = names[(int) (Math.random() * names.length)];
 
                         Entity enemy = new Entity(name, name + "_front.png");//works, but entities are all in the same position
@@ -337,27 +337,38 @@ public class Wagon {
 
                         entities.add(enemy);
                     }
+                    if (letterID.equals(Constants.NPC_SPAWN)) {
+                        //pick random name from dictionary
+                        String[] names = Constants.WAGON_TYPE_NPC.get(type);
+                        String name = names[(int) (Math.random() * names.length)];
+
+                        Entity npc = new Entity(name, name + "_front.png");
+                        npc.setCurrentWagon(this);
+
+                        npc.setAsDefaultNPC();
+                        npc.setPositionX(300);
+                        npc.setPositionY(240);
+
+                        entities.add(npc);
+                    }
                 }
             }
         }
     }
-    public int[][] getMapForPathFinder() {
+    public int[][] getMapForPathFinder(boolean doorIsWalkable) {
         int[][] map = new int[objectsArray.length][objectsArray[0].length];
         for (int i = 0; i < objectsArray.length; i++) {
             for (int j = 0; j < objectsArray[i].length; j++) {
                 if (objectsArray[i][j] == null || !objectsArray[i][j].isSolid()) {
                     map[i][j] = 1;
                 } else {
-                    map[i][j] = 0;
+                    if ((doorIsWalkable && objectsArray[i][j].getTwoLetterId().equals(Constants.WAGON_DOOR)) || (doorIsWalkable && objectsArray[i][j].getTwoLetterId().equals(Constants.LOCKABLE_DOOR))) {
+                        map[i][j] = 1;
+                    } else {
+                        map[i][j] = 0;
+                    }
                 }
             }
-        }
-        //print the map
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                System.out.print(map[i][j] + " ");
-            }
-            System.out.println();
         }
         return map;
     }
