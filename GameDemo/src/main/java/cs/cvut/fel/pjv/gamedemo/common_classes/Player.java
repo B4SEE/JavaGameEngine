@@ -15,8 +15,8 @@ public class Player extends Entity {
     private long whenHealed;
     private long whenStarved;
 
-    public Player(int id, String name, String texturePath, int positionX, int positionY) {
-        super(id, name, texturePath, "PLAYER", positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
+    public Player(String name, String texturePath, int positionX, int positionY) {
+        super(name, texturePath, "PLAYER", positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
         super.setHeight(2);
         super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
@@ -25,7 +25,7 @@ public class Player extends Entity {
     }
 
     public Player(Wagon currentWagon) {
-        super(0, "PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
+        super("PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
         super.setHeight(2);
         super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
