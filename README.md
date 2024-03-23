@@ -55,7 +55,7 @@ the chosen topic, expected features and vision of the project
 from the document it should be possible to imagine what the work will look like.
 </details>
 
-**CP2 - Object design (by week 8 - 12 April, 23:59)** :construction:
+**CP2 - Object design (by week 8 - 12 April, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
 Documentation on the project Wiki from the user's perspective (e.g. manual)
@@ -94,7 +94,7 @@ Completed documentation from the user's perspective.
 - :heavy_check_mark: The hero will be able to use the collected materials to make a certain object (make a lamp out of a light bulb and a battery, make bread out of wheat, water and fire, etc.).
 
 
-- :construction: The game engine must be equipped with a GUI.
+- :heavy_check_mark: The game engine must be equipped with a GUI.
 </details>
 
 &nbsp;
