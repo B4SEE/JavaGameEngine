@@ -3,8 +3,6 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Inventory;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,7 +12,7 @@ import javafx.scene.text.Text;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Dialogue {//answer types: 0 - neutral, 1 - negative, 2 - fight, 3 - trade, 4 - check
+public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - check
     private String action;
     private String dialoguePath;
     private JsonNode dialoguesNode;
