@@ -3,7 +3,6 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.animation.AnimationTimer;
-import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,11 +10,13 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class with the main game logic, handles the game state, player input and game events.
@@ -162,6 +163,7 @@ public class GameLogic {
     private void setPlayerHandle() {
         Scene scene = stage.getScene();
         scene.setOnKeyReleased(keyEvent -> {
+            isometric.resetAimLine();
             switch (keyEvent.getCode()) {
                 case W, S:
                     isometric.updatePlayerDeltaY(0);
@@ -169,6 +171,20 @@ public class GameLogic {
                 case A, D:
                     isometric.updatePlayerDeltaX(0);
                     break;
+            }
+        });
+        scene.setOnMouseClicked(mouseEvent -> {
+            if (player.getHandItem() instanceof Firearm) {
+                player.shoot((Firearm) player.getHandItem(), wagon.getEntities(), (int) mouseEvent.getX(), (int) mouseEvent.getY(), time, isometric.getTwoAndTallerWalls());
+            } else {
+                isometric.resetAimLine();
+            }
+        });
+        scene.setOnMouseMoved(mouseEvent -> {
+            if (player.getHandItem() instanceof Firearm) {
+                isometric.drawPlayerFirearmAim((int) mouseEvent.getX(), (int) mouseEvent.getY());
+            } else {
+                isometric.resetAimLine();
             }
         });
         scene.setOnKeyPressed(keyEvent -> {
@@ -198,13 +214,13 @@ public class GameLogic {
                 case E:
                     if (checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
                         Object object = checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
-                        if (Objects.equals(object.getTwoLetterId(), "WD") && gameState != Constants.GAME_STATES.get("trap")) {
+                        if (Objects.equals(object.getTwoLetterId(), Constants.WAGON_DOOR) && gameState != Constants.GAME_STATES.get("trap")) {
                             openWagonDoor((Door) object);
                         }
-                        if (Objects.equals(object.getTwoLetterId(), "CO")) {
+                        if (Objects.equals(object.getTwoLetterId(), Constants.CHEST_OBJECT)) {
                             setInventoryHandle(object.getObjectInventory());
                         }
-                        if (Objects.equals(object.getTwoLetterId(),"LD")) {
+                        if (Objects.equals(object.getTwoLetterId(),Constants.LOCKABLE_DOOR)) {
                             useLockableDoor(object);
                             isometric.updateAll();
                         }
@@ -226,8 +242,7 @@ public class GameLogic {
     private void setDialogueHandle(Dialogue dialogue, Entity dialogueEntity) {
         Scene scene = stage.getScene();
 
-        scene.setOnKeyReleased(null);
-        scene.setOnKeyPressed(null);
+        resetSceneHandlers(scene);
 
         pauseGame();
 
@@ -353,10 +368,9 @@ public class GameLogic {
     private void playerUseHand() {
         if (player.getHandItem() == null) {
             player.tryAttack(player, wagon.getEntities(), time);
+            return;
         }
-        if (player.getHandItem() != null) {
-            player.useHandItem(time);
-        }
+        player.useHandItem(time);
     }
 
     /**
@@ -383,8 +397,7 @@ public class GameLogic {
         if (inventory != null) {
 
             Scene scene = stage.getScene();
-            scene.setOnKeyReleased(null);
-            scene.setOnKeyPressed(null);
+            resetSceneHandlers(scene);
 
             pauseGame();
 
@@ -453,8 +466,7 @@ public class GameLogic {
      */
     private void setPlayerInventoryHandle() {
         Scene scene = stage.getScene();
-        scene.setOnKeyReleased(null);
-        scene.setOnKeyPressed(null);
+        resetSceneHandlers(scene);
 
         pauseGame();
 
@@ -692,5 +704,11 @@ public class GameLogic {
 
         isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
 //        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 72) + " target " + x + " " + y);
+    }
+    private void resetSceneHandlers(Scene scene) {
+        scene.setOnKeyReleased(null);
+        scene.setOnMouseClicked(null);
+        scene.setOnMouseMoved(null);
+        scene.setOnKeyPressed(null);
     }
 }
