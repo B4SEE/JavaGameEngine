@@ -1,5 +1,9 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import javafx.scene.Scene;
+import javafx.scene.shape.Shape;
+
 import java.util.List;
 
 /**
@@ -118,17 +122,6 @@ public class Player extends Entity {
             shouldStarve = true;
         }
     }
-
-    /**
-     * Not functional yet
-     * @param firearm
-     */
-    public void shoot(Firearm firearm) {
-        if (firearm.getAmmo() > 0) {
-            firearm.setAmmo(firearm.getAmmo() - 1);
-        }
-    }
-
     /**
      * Method to use the player's hand item;
      * if the hand item is food, the player eats it;
@@ -143,8 +136,6 @@ public class Player extends Entity {
         if (playerInventory.getMainHandItem() instanceof Food) {
             eat((Food) playerInventory.getMainHandItem());
             playerInventory.setMainHandItem(null);
-        } else if (playerInventory.getMainHandItem() instanceof Firearm) {
-            shoot((Firearm) playerInventory.getMainHandItem());
         } else if (playerInventory.getMainHandItem() instanceof MeleeWeapon) {
             super.setDamage(super.getDamage() + ((MeleeWeapon) playerInventory.getMainHandItem()).getDamage());
             super.setCooldown(((MeleeWeapon) playerInventory.getMainHandItem()).getAttackSpeed());
@@ -152,6 +143,35 @@ public class Player extends Entity {
             tryAttack(this, targets, time);
             super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
             super.setCooldown(2);
+        } else if (playerInventory.getMainHandItem() instanceof Firearm) {
+            List<Entity> targets = super.getCurrentWagon().getEntities();
+            tryAttack(this, targets, time);
         }
+    }
+    /**
+     * Method to shoot a firearm at a target
+     * @param firearm firearm to be
+     * @param targets list of entities to shoot at
+     * @param aimX x-coordinate of the mouse cursor
+     * @param aimY y-coordinate of the mouse cursor
+     * @param time current time
+     * @param obstacles obstacles that the bullet can't pass through
+     */
+    public void shoot(Firearm firearm, List<Entity> targets, int aimX, int aimY, long time, Shape obstacles) {
+        Checker checker = new Checker();
+        System.out.println(playerInventory.getAmmo());
+        if (playerInventory.getAmmo() <= 0) {
+            //sound of no ammo
+            return;
+        }
+        playerInventory.setAmmo(playerInventory.getAmmo() - 1);
+        for (Entity target : targets) {
+            if (target != null && target.isAlive() && checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time, firearm.getShootingSpeed()) && playerInventory.getAmmo() >= 0) {
+                target.takeDamage(firearm.getDamage());
+                //sound of shooting
+                return;
+            }
+        }
+        //sound of missed shot
     }
 }
