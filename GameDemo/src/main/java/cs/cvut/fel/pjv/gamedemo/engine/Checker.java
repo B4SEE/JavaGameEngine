@@ -156,6 +156,29 @@ public class Checker {
         }
         return true;
     }
+    public boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time, int shootingSpeed) {
+        Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 80, aimX, aimY);
+        aimLine.setStrokeWidth(5);
+        System.out.println("aim line: " + aimLine.getStartX() + " " + aimLine.getStartY() + " " + aimLine.getEndX() + " " + aimLine.getEndY());
+        if (!checkCollision(aimLine, obstacles)) {
+            if (player.getCooldown() == 0) {
+                player.setCanAttack(true);
+                System.out.println("can attack");
+            }
+            if (player.getCanAttack()) {
+                player.setCanAttack(false);
+                player.setWhenAttacked(time);
+                System.out.println("attacked");
+                return checkCollision(aimLine, target.getHitbox());
+            }
+            if (!player.getCanAttack() && (time - player.getWhenAttacked() != 0) && (time - player.getWhenAttacked()) % player.getCooldown() == 0) {
+                System.out.println("can attack again");
+                player.setCanAttack(true);
+                player.setWhenAttacked(0);
+            }
+        }
+        return false;
+    }
     public boolean checkIfEntityStuck(Entity entity) {
         Point2D currentPosition = new Point2D(entity.getPositionX(), entity.getPositionY());
         //check if the entity has already visited the current position
@@ -193,6 +216,13 @@ public class Checker {
     public boolean checkCollision(Shape hitbox1, Shape hitbox2) {
         Shape intersect = Shape.intersect(hitbox1, hitbox2);
         return !intersect.getBoundsInParent().isEmpty();
+    }
+    public int[] getCollisionPoint(Shape hitbox1, Shape hitbox2) {
+        Shape intersect = Shape.intersect(hitbox1, hitbox2);
+        if (!intersect.getBoundsInParent().isEmpty()) {
+            return new int[]{(int) intersect.getBoundsInParent().getMinX(), (int) intersect.getBoundsInParent().getMinY()};
+        }
+        return null;
     }
 
     /**
