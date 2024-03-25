@@ -343,16 +343,8 @@ public class Entity {
     public void takeDamage(int damage) {
         System.out.println(name + " took " + damage + " damage.");
         health -= damage;
-    }
-
-    /**
-     * Attacks the target entity.
-     * @param target the target entity
-     */
-    public void attack(Entity target) {
-        target.takeDamage(damage);
-        if (Objects.equals(target.getBehaviour(), Constants.NEUTRAL)) {
-            target.setBehaviour(Constants.AGGRESSIVE);
+        if (Objects.equals(this.getBehaviour(), Constants.NEUTRAL)) {
+            this.setBehaviour(Constants.AGGRESSIVE);
         }
     }
     /**
@@ -399,7 +391,7 @@ public class Entity {
         if (entity.getCanAttack()) {
             for (Entity target : inAttackRange) {
                 if (target != null) {
-                    entity.attack(target);
+                    target.takeDamage(entity.getDamage());
                 }
             }
             entity.setCanAttack(false);
