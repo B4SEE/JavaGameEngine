@@ -7,10 +7,11 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.*;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class Isometric {
     protected Stage mainStage;
     private final Pane grid = new Pane();
     private Label hint = new Label();
+    private Line aimLine = new Line();
     private long time;
     private Scene isoScene;
     public Isometric() {
@@ -428,6 +430,7 @@ public class Isometric {
         grid.getChildren().remove(player.getTrackPoint());
         grid.getChildren().remove(player.getAttackRange());
         grid.getChildren().removeIf(node -> node instanceof Rectangle);
+        grid.getChildren().removeIf(node -> node instanceof Line);
         if (entities != null) {
             drawnEntities = new ArrayList<>();
             for (Entity entity : entities) {
@@ -605,6 +608,7 @@ public class Isometric {
             hungerBar.setWidth((double) (barWidth * player.getHunger()) / player.getMaxHunger());
             grid.getChildren().add(hungerBarBackground);
             grid.getChildren().add(hungerBar);
+            grid.getChildren().add(aimLine);
         }
         //add bars to grid
         grid.getChildren().add(healthBarBackground);
@@ -643,7 +647,7 @@ public class Isometric {
         twoAndTallerWalls = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
         for (Object[] objects : objectsToDraw) {
             for (Object object : objects) {
-                if (object.getHeight() >= 2) {
+                if (object.getHeight() >= 2 && object.isSolid()) {
                     object.getObjectHitbox().scaleXProperty().set(1);
                     object.getObjectHitbox().scaleYProperty().set(1);
 //                    object.getObjectHitbox().setTranslateY(-Constants.TILE_HEIGHT * object.getHeight());
@@ -672,7 +676,8 @@ public class Isometric {
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
         circle.setRadius((double) (hitBoxSize * Constants.TILE_WIDTH) / 4 + 2);
-        circle.setStyle("-fx-stroke: #563131; -fx-stroke-width: 2; -fx-fill: #ff00af;");
+        circle.setStyle("-fx-opacity: 0");
+//        circle.setStyle("-fx-stroke: #693131; -fx-stroke-width: 2; -fx-fill: #693131; -fx-opacity: 1");
         return circle;
     }
     /**
@@ -690,7 +695,7 @@ public class Isometric {
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
         circle.setRadius(4);
-        circle.setStyle("-fx-stroke: #48ff00; -fx-stroke-width: 2; -fx-fill: #83ff00;");
+//        circle.setStyle("-fx-stroke: #48ff00; -fx-stroke-width: 2; -fx-fill: #83ff00;");
         return circle;
     }
     /**
@@ -708,7 +713,7 @@ public class Isometric {
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
         circle.setRadius(attackRange * Constants.TILE_WIDTH);
-        circle.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 2; -fx-fill: #ff0000; -fx-opacity: 0.5;");
+        circle.setStyle("-fx-stroke: #814141; -fx-stroke-width: 2; -fx-fill: #814141; -fx-opacity: 0.3;");
         return circle;
     }
     /**
@@ -760,10 +765,38 @@ public class Isometric {
         img.setY(isoXY[1] - (double) Constants.TILE_HEIGHT / 2);
         grid.getChildren().add(img);
     }
+    /**
+     * Draw the player's firearm aim. The aim is a line from the player to the mouse position.
+     * If the aim collides with the walls, the aim line changes colour to indicate the collision.
+     * @param mouseX the mouse x position
+     * @param mouseY the mouse y position
+     */
+    public void drawPlayerFirearmAim(double mouseX, double mouseY) {
+        Line bulletHitbox = new Line(player.getPositionX() + 32, player.getPositionY() + 64, mouseX, mouseY);
+        bulletHitbox.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 1;");
 
-    public Pane getPane() {
-        return grid;
+        //cut line to player aim radius (100)
+        double mag = Math.sqrt(Math.pow(mouseX - player.getPositionX() - 32, 2) + Math.pow(mouseY - player.getPositionY() - 64, 2));
+        double ratio = 100 / mag;
+        bulletHitbox.setEndX(player.getPositionX() + 32 + (mouseX - player.getPositionX() - 32) * ratio);
+        bulletHitbox.setEndY(player.getPositionY() + 64 + (mouseY - player.getPositionY() - 64) * ratio);
+
+        //if collision with walls, set end of line to the point of collision
+        if (checker.checkCollision(bulletHitbox, twoAndTallerWalls)) {
+            int[] collisionPoint = checker.getCollisionPoint(bulletHitbox, twoAndTallerWalls);
+            bulletHitbox = new Line(player.getPositionX() + 32, player.getPositionY() + 64, collisionPoint[0], collisionPoint[1]);
+            bulletHitbox.setStyle("-fx-stroke: #0095ff; -fx-stroke-width: 1;");
+        }
+        aimLine = bulletHitbox;
     }
+    public void resetAimLine() {
+        aimLine = new Line();
+    }
+
+    /**
+     * Get the walls/obstacles with height 2 or taller.
+     * @return Shape of the walls with height 2 or taller
+     */
     public Shape getTwoAndTallerWalls() {
         return twoAndTallerWalls;
     }
