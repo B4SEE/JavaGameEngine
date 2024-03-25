@@ -1,24 +1,28 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
+
+import java.util.List;
+
 public class Firearm extends Item {
-    private int ammo;
-    public final int shootingSpeed;
+    private int damage = 40;
+    private int shootingSpeed;
 
     public Firearm(String name, String texturePath, int shootingSpeed) {
         super(name, texturePath, "WEAPON");
         this.shootingSpeed = shootingSpeed;
     }
 
-    public Firearm(String name, String texturePath, int ammo, int shootingSpeed) {
-        super(name, texturePath, "WEAPON");
-        this.ammo = ammo;
+    public int getDamage() {
+        return damage;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+    public int getShootingSpeed() {
+        return shootingSpeed;
+    }
+
+    public void setShootingSpeed(int shootingSpeed) {
         this.shootingSpeed = shootingSpeed;
-    }
-
-    public void setAmmo(int ammo) {
-        this.ammo = ammo;
-    }
-
-    public int getAmmo() {
-        return ammo;
     }
 }
