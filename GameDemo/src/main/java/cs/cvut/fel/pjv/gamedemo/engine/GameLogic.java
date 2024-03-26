@@ -3,10 +3,12 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.animation.AnimationTimer;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -250,34 +252,84 @@ public class GameLogic {
 
         stage.setScene(dialogueScene);
 
-        dialogueScene.setOnKeyPressed(keyEvent -> {
+        //add other onKeyReleased handlers
+        EventHandler<? super KeyEvent> prev_handle = dialogueScene.getOnKeyReleased();
+        dialogueScene.setOnKeyReleased(keyEvent -> {
+            prev_handle.handle(keyEvent);
+            if (Objects.equals(dialogue.getAction(), "trade")) {
+                System.out.println("**trade**");
+                dialogue.closeDialogue();
+                stage.setScene(scene);
+                dialogue.setAction(null);
+                openTradeWindow((Vendor) dialogueEntity);
+                return;
+            }
             if (dialogue.getAction() != null) {//work only from the second option
                 handleDialogueAction(dialogue.getAction(), dialogueEntity);
                 dialogue.setAction(null);
-            }
-            if (Objects.equals(dialogueEntity.getBehaviour(), Constants.AGGRESSIVE)) {
-                dialogue.closeDialogue();
-                stage.setScene(scene);
-                setPlayerHandle();
-                resumeGame();
-                return;
+                if (Objects.equals(dialogueEntity.getBehaviour(), Constants.AGGRESSIVE)) {
+                    dialogue.closeDialogue();
+                    stage.setScene(scene);
+                    setPlayerHandle();
+                    resumeGame();
+                    return;
+                }
             }
             if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.TAB) {
                 dialogue.closeDialogue();
                 stage.setScene(scene);
                 setPlayerHandle();
                 resumeGame();
-                return;
-            }
-            if (Objects.equals(dialogue.getAction(), "trade")) {
-                dialogue.closeDialogue();
-                stage.setScene(scene);
-                dialogue.setAction(null);
-                //TODO implement trade
-                return;
             }
         });
+    }
+    private void openTradeWindow(Vendor vendor) {
+        Inventory inventory = vendor.getVendorInventory();
+        if (inventory != null) {
 
+            Scene scene = stage.getScene();
+            resetSceneHandlers(scene);
+            Scene vendorInventoryScene = inventory.openInventory();
+
+            stage.setScene(vendorInventoryScene);
+
+            vendorInventoryScene.setOnKeyPressed(keyEvent -> {
+                if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.TAB) {
+                    if (!inventory.getTakenItems().isEmpty()) {
+                        List<Item> takenItems = inventory.getTakenItems();
+                        List<Item> itemsToRemove = new ArrayList<>(takenItems);
+                        List<Item> addedItems = new ArrayList<>();
+                        for (Item item : itemsToRemove) {
+                            if (player.getPlayerInventory().getMoney() >= item.getValue()) {
+                                System.out.println("Enough money");
+                                if (player.getPlayerInventory().addItem(item)) {
+                                    inventory.removeTakenItem(item);
+                                    player.getPlayerInventory().setMoney(player.getPlayerInventory().getMoney() - item.getValue());
+                                    addedItems.add(item);
+                                    inventory.removeTakenItem(item);
+                                } else {
+                                    //vendor will not be angry if the player does not have enough space in the inventory
+                                    returnItems(addedItems, itemsToRemove, inventory);
+                                    break;
+                                }
+                            } else {
+                                //if the player does not have enough money, the vendor gets negative points
+                                System.out.println("Not enough money");
+                                vendor.setNegativeCount(vendor.getNegativeCount() + 1);
+                                System.out.println(vendor.getNegativeCount());
+                                System.out.println(vendor.getNegativeThreshold());
+                                returnItems(addedItems, itemsToRemove, inventory);
+                                break;
+                            }
+                        }
+                    }
+                    inventory.closeInventory(stage);
+                    stage.setScene(scene);
+                    setPlayerHandle();
+                    resumeGame();
+                }
+            });
+        }
     }
     private void handleDialogueAction(String action, Entity dialogueEntity) {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - check ticket
         System.out.println(action);
@@ -314,29 +366,20 @@ public class GameLogic {
                 nextWagon.generateNextWagon(wagon, true);
 
                 train.addWagon(nextWagon);
-
                 isometric.initialiseWagon(nextWagon);
-
                 isometric.updateAll();
-
                 wagon.getDoorLeft().teleport(player);
-
                 this.wagon = nextWagon;
-
                 player.setCurrentWagon(wagon);
+
             } else if (door == wagon.getDoorRight()) {
                 nextWagon.generateNextWagon(wagon, false);
 
                 train.addWagon(nextWagon);
-
                 isometric.initialiseWagon(nextWagon);
-
                 isometric.updateAll();
-
                 wagon.getDoorRight().teleport(player);
-
                 this.wagon = nextWagon;
-
                 player.setCurrentWagon(wagon);
             }
         } else {
@@ -395,12 +438,9 @@ public class GameLogic {
      */
     private void setInventoryHandle(Inventory inventory) {
         if (inventory != null) {
-
             Scene scene = stage.getScene();
             resetSceneHandlers(scene);
-
             pauseGame();
-
             Scene objectInventoryScene = inventory.openInventory();
 
             stage.setScene(objectInventoryScene);
@@ -411,28 +451,14 @@ public class GameLogic {
                         List<Item> takenItems = inventory.getTakenItems();
                         List<Item> itemsToRemove = new ArrayList<>(takenItems);
                         List<Item> addedItems = new ArrayList<>();
-                        if (inventory.isVendor()) {
-                            for (Item item : itemsToRemove) {
-                                if (player.getPlayerInventory().addItem(item) && player.getPlayerInventory().getMoney() >= item.getValue()) {
-                                    inventory.removeTakenItem(item);
-                                    player.getPlayerInventory().setMoney(player.getPlayerInventory().getMoney() - item.getValue());
-                                    addedItems.add(item);
-                                    inventory.removeTakenItem(item);
-                                } else {
-                                    returnItems(addedItems, itemsToRemove, inventory);
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (Item item : itemsToRemove) {
-                                if (player.getPlayerInventory().addItem(item)) {
-                                    inventory.removeTakenItem(item);
-                                    addedItems.add(item);
-                                    inventory.removeTakenItem(item);
-                                } else {
-                                    returnItems(addedItems, itemsToRemove, inventory);
-                                    break;
-                                }
+                        for (Item item : itemsToRemove) {
+                            if (player.getPlayerInventory().addItem(item)) {
+                                inventory.removeTakenItem(item);
+                                addedItems.add(item);
+                                inventory.removeTakenItem(item);
+                            } else {
+                                returnItems(addedItems, itemsToRemove, inventory);
+                                break;
                             }
                         }
                     }
@@ -501,7 +527,6 @@ public class GameLogic {
 
         isometric.initialiseStage(stage);
         isometric.setPlayer(player);
-        wagon.generateWagon();
         System.out.println(wagon.getSeed());
         isometric.initialiseWagon(wagon);
         setPlayerHandle();
@@ -540,8 +565,11 @@ public class GameLogic {
         }
         for (Entity entity : wagon.getEntities()) {
             if (entity != null && entity.isAlive()) {
+                if (entity.getNegativeCount() >= entity.getNegativeThreshold()) {
+                    entity.setBehaviour(Constants.AGGRESSIVE);
+                }
                 if (Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
-                    return;
+                    continue;
                 }
                 moveEntities();
                 entity.tryAttack(entity, List.of(player), time);
@@ -647,7 +675,6 @@ public class GameLogic {
         if (checker.checkCollision(entity.getAttackRange(), target.getAttackRange())) {
             intelligenceZeroPursue(entity, target);
         } else {
-            //take the last element of the path
             int[] deltaXY = new int[0];
             if (path.length >= 2) {
                 deltaXY = path[path.length - 2];
@@ -656,7 +683,6 @@ public class GameLogic {
             } else {
                 returnToStart(map, entity);
             }
-
             moveEntity(entity, deltaXY);
         }
     }
@@ -692,7 +718,7 @@ public class GameLogic {
         if (index == null || index.length == 0) {
             return;
         }
-//        System.out.println("the next position is: " + map_x + " " + map_y);
+
         int x = (int) wagon.getObjectsArray()[index[0]][index[1]].getIsoX();
         int y = (int) wagon.getObjectsArray()[index[0]][index[1]].getIsoY();
 
@@ -703,7 +729,6 @@ public class GameLogic {
         deltaY = deltaY > 0 ? -1 : 1;
 
         isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
-//        System.out.println("entity: " + (entity.getPositionX() + 32) + " " + (entity.getPositionY() + 72) + " target " + x + " " + y);
     }
     private void resetSceneHandlers(Scene scene) {
         scene.setOnKeyReleased(null);
