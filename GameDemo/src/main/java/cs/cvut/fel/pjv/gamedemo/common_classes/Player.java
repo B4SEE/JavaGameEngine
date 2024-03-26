@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.shape.Shape;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a player in the game.
@@ -142,7 +143,7 @@ public class Player extends Entity {
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
             super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
-            super.setCooldown(2);
+            super.setCooldown(2);//entities will not judge player's attack with knife, because they "can't see" the knife.
         } else if (playerInventory.getMainHandItem() instanceof Firearm) {
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
@@ -164,10 +165,17 @@ public class Player extends Entity {
             //sound of no ammo
             return;
         }
+        System.out.println("Shooting");
         playerInventory.setAmmo(playerInventory.getAmmo() - 1);
         for (Entity target : targets) {
-            if (target != null && target.isAlive() && checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time, firearm.getShootingSpeed()) && playerInventory.getAmmo() >= 0) {
+            if (target != null && target.isAlive() && checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time) && playerInventory.getAmmo() >= 0) {
                 target.takeDamage(firearm.getDamage());
+                System.out.println("Target health: " + target.getHealth());
+                for (Entity entity : targets) {
+                    if (checker.checkIfEntityCanSee(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
+                        entity.setBehaviour(Constants.AGGRESSIVE);
+                    }
+                }
                 //sound of shooting
                 return;
             }
