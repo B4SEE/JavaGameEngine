@@ -676,8 +676,8 @@ public class Isometric {
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
         circle.setRadius((double) (hitBoxSize * Constants.TILE_WIDTH) / 4 + 2);
-        circle.setStyle("-fx-opacity: 0");
-//        circle.setStyle("-fx-stroke: #693131; -fx-stroke-width: 2; -fx-fill: #693131; -fx-opacity: 1");
+//        circle.setStyle("-fx-opacity: 0");
+        circle.setStyle("-fx-stroke: #693131; -fx-stroke-width: 2; -fx-fill: #693131; -fx-opacity: 1");
         return circle;
     }
     /**
@@ -773,7 +773,7 @@ public class Isometric {
      */
     public void drawPlayerFirearmAim(double mouseX, double mouseY) {
         Line bulletHitbox = new Line(player.getPositionX() + 32, player.getPositionY() + 64, mouseX, mouseY);
-        bulletHitbox.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 1;");
+        bulletHitbox.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 1; -fx-opacity: 0.5;");
 
         //cut line to player aim radius (100)
         double mag = Math.sqrt(Math.pow(mouseX - player.getPositionX() - 32, 2) + Math.pow(mouseY - player.getPositionY() - 64, 2));
@@ -785,7 +785,7 @@ public class Isometric {
         if (checker.checkCollision(bulletHitbox, twoAndTallerWalls)) {
             int[] collisionPoint = checker.getCollisionPoint(bulletHitbox, twoAndTallerWalls);
             bulletHitbox = new Line(player.getPositionX() + 32, player.getPositionY() + 64, collisionPoint[0], collisionPoint[1]);
-            bulletHitbox.setStyle("-fx-stroke: #0095ff; -fx-stroke-width: 1;");
+            bulletHitbox.setStyle("-fx-stroke: #0095ff; -fx-stroke-width: 1; -fx-opacity: 0.5;");
         }
         aimLine = bulletHitbox;
     }
