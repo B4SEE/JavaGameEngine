@@ -346,7 +346,7 @@ public class Wagon {
                         npc.setCurrentWagon(this);
 
                         npc.setAsDefaultNPC();
-                        npc.setPositionX(300);
+                        npc.setPositionX(500);
                         npc.setPositionY(240);
 
                         entities.add(npc);
@@ -371,6 +371,11 @@ public class Wagon {
             }
         }
         return map;
+    }
+    public void addEntity(Entity entity) {
+        entities.add(entity);
+        System.out.println("Entity added to wagon " + id);
+        System.out.println(java.util.Arrays.toString(entities.toArray()));
     }
 
 //    private String setRandomTexture(String path) {
