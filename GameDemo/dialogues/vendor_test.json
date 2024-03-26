@@ -1,0 +1,42 @@
+{
+  "dialogues": [
+    {
+      "id": "dialogue1",
+      "text": "Hi there!",
+      "options": [
+        {
+          "text": "Do you sell any products?",
+            "nextDialogue": "dialogue2"
+        },
+        {
+          "text": "Nothing, thanks.",
+            "nextDialogue": "dialogue3"
+        }
+        ]
+    },
+    {
+      "id": "dialogue2",
+      "text": "Yes, we sell a variety of products. Let me show you what we have.",
+      "options": [
+        {
+          "text": "Thank you.",
+            "action": "trade"
+        },
+        {
+          "text": "I've changed my mind.",
+            "nextDialogue": "dialogue4"
+        }
+        ]
+    },
+    {
+      "id": "dialogue3",
+      "text": "Alright, have a great day!",
+      "options": []
+    },
+    {
+      "id": "dialogue4",
+      "text": "Bye!",
+      "options": []
+    }
+    ]
+}
