@@ -24,6 +24,8 @@ public class Inventory {
     protected final Label itemNameLabel = new Label();
     protected Scene scene;
     protected Pane grid = new Pane();
+
+    private Label inventoryLabel = new Label();
     private boolean vendor;
     private Item selectedItem;
     private List<Item> takenItems = new ArrayList<>();
@@ -74,7 +76,6 @@ public class Inventory {
     public void updateInventory() {
         grid.getChildren().clear();
         drawInventory();
-        Label inventoryLabel = new Label("Chest");
         inventoryLabel.setLayoutX(0);
         inventoryLabel.setLayoutY(0);
         inventoryLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
@@ -162,7 +163,7 @@ public class Inventory {
 
             if (index >= 0) {
                 if (index < inventorySize && itemsArray[index] != null) {
-                    itemNameLabel.setText(itemsArray[index].getName() + "| value: " + itemsArray[index].getValue());
+                    itemNameLabel.setText(" | " + itemsArray[index].getName() + " | value: " + itemsArray[index].getValue() + " | ");
                 } else {
                     itemNameLabel.setText("Empty");
                 }
@@ -370,5 +371,8 @@ public class Inventory {
         //set round borders
         rectangle.setArcHeight(10);
         rectangle.setArcWidth(10);
+    }
+    public void setInventoryLabel(String text) {
+        inventoryLabel.setText(text);
     }
 }
