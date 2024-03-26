@@ -5,6 +5,7 @@ import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
@@ -121,11 +122,9 @@ public class Checker {
         }
         for (Object object : interactiveObjects) {
             if (checkCollision(entity.getAttackRange(), object.getObjectHitbox())) {
-//                updateLabel("Press E to interact", player.getPositionX() - 50, player.getPositionY() - 50);
                 return object;
             }
         }
-//        updateLabel("No interactive objects nearby", player.getPositionX() - 50, player.getPositionY() - 50);
         return null;
     }
     public Entity checkIfPlayerCanSpeak(Player player, List<Entity> entities) {
@@ -156,9 +155,15 @@ public class Checker {
         }
         return true;
     }
-    public boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time, int shootingSpeed) {
+    public boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
         Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 80, aimX, aimY);
-        aimLine.setStrokeWidth(5);
+        aimLine.setStrokeWidth(7);
+        Circle shootHitbox = (Circle) target.getHitbox();
+        shootHitbox.setStroke(Color.RED);
+        shootHitbox.setStrokeWidth(7);
+        shootHitbox.setRadius(12);
+        System.out.println(shootHitbox.getRadius());
+        System.out.println(((Circle) target.getHitbox()).getRadius());
         System.out.println("aim line: " + aimLine.getStartX() + " " + aimLine.getStartY() + " " + aimLine.getEndX() + " " + aimLine.getEndY());
         if (!checkCollision(aimLine, obstacles)) {
             if (player.getCooldown() == 0) {
@@ -169,7 +174,7 @@ public class Checker {
                 player.setCanAttack(false);
                 player.setWhenAttacked(time);
                 System.out.println("attacked");
-                return checkCollision(aimLine, target.getHitbox());
+                return checkCollision(aimLine, shootHitbox);
             }
             if (!player.getCanAttack() && (time - player.getWhenAttacked() != 0) && (time - player.getWhenAttacked()) % player.getCooldown() == 0) {
                 System.out.println("can attack again");
