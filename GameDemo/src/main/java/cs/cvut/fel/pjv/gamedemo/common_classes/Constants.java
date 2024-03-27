@@ -50,6 +50,8 @@ public class Constants {
     public static final String CHEST_OBJECT = "CO";
     public static final String ENEMY_SPAWN = "EN";
     public static final String NPC_SPAWN = "NP";
+    public static final String VENDOR_SPAWN = "VE";
+    public static final String QUEST_SPAWN = "QU";
     public static final String TRAP = "TR";
     //string constants for wagon types
     //string constants for entity's behaviour
@@ -92,6 +94,8 @@ public class Constants {
             Map.entry("CA", "carpet_1.png"),
             Map.entry(ENEMY_SPAWN, "tile_floor.png"),
             Map.entry(NPC_SPAWN, "tile_floor.png"),
+            Map.entry(VENDOR_SPAWN, "tile_floor.png"),
+            Map.entry(QUEST_SPAWN, "tile_floor.png"),
             Map.entry(TRAP, "block_wall.png")
     );
 
@@ -105,6 +109,8 @@ public class Constants {
             Map.entry("CA", "carpet_1"),
             Map.entry(ENEMY_SPAWN, "enemy_spawn"),
             Map.entry(NPC_SPAWN, "npc_spawn"),
+            Map.entry(VENDOR_SPAWN, "vendor_spawn"),
+            Map.entry(QUEST_SPAWN, "quest_spawn"),
             Map.entry(TRAP, "trap")
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.ofEntries(
