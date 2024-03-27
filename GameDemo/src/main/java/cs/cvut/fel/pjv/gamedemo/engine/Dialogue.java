@@ -160,7 +160,7 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
         }
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            byte[] jsonData = Files.readAllBytes(Paths.get("dialogues/" + dialoguePath + ".json"));
+            byte[] jsonData = Files.readAllBytes(Paths.get("dialogues/" + dialoguePath));
             JsonNode rootNode = objectMapper.readTree(jsonData);
             dialoguesNode = rootNode.get("dialogues");
             currentDialogueNode = dialoguesNode.get(0);
