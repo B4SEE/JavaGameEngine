@@ -6,6 +6,7 @@ import cs.cvut.fel.pjv.gamedemo.common_classes.Wagon;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
 import cs.cvut.fel.pjv.gamedemo.engine.Isometric;
+import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -23,6 +24,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -77,6 +81,7 @@ public class CustomMapLoader extends Application {
             grid.getChildren().add(fileChooserButton);
             grid.getChildren().add(loadButton);
             grid.getChildren().add(exitButton);
+            grid.getChildren().add(removeButton());
 
             // create a scene
             Scene scene = new Scene(grid, 800, 500);
@@ -185,6 +190,82 @@ public class CustomMapLoader extends Application {
         button.setOnAction(event);
 
         return button;
+    }
+
+    private Button removeButton() {
+        Button removeButton = new Button("Remove all invalid maps");
+        removeButton.setPrefWidth(buttonWidth);
+        removeButton.setLayoutX(100);
+        removeButton.setLayoutY(500);
+        //set style: grey button with white text, on hover: red button with white text
+        removeButton.setStyle("-fx-background-color: #808080; -fx-text-fill: #ffffff;");
+        removeButton.setOnMouseEntered(e -> removeButton.setStyle("-fx-background-color: #ff0000; -fx-text-fill: #ffffff;"));
+        removeButton.setOnMouseExited(e -> removeButton.setStyle("-fx-background-color: #808080; -fx-text-fill: #ffffff;"));
+        final int[] count = {0};
+        EventHandler<ActionEvent> removeEvent = e -> {
+            MapLoader mapLoader = new MapLoader();
+            Checker checker = new Checker();
+            File folder = new File("maps/common");
+            File[] listOfFiles = folder.listFiles();
+            List<File> filesToMove;
+            filesToMove = getInvalidMaps(count, mapLoader, checker, listOfFiles);
+            folder = new File("maps/custom");
+            listOfFiles = folder.listFiles();
+            filesToMove.addAll(getInvalidMaps(count, mapLoader, checker, listOfFiles));
+            for (File f : filesToMove) {
+                try {
+                    //create a copy of the file and move it to the invalid maps folder
+                    if (!new File("maps/invalid").exists()) {
+                        Files.createDirectory(new File("maps/invalid").toPath());
+                    }
+                    if (!new File("maps/invalid/" + f.getName()).exists()) {
+                        Files.copy(f.toPath(), new File("maps/invalid/" + f.getName()).toPath());
+                    } else {
+                        //delete the copy if it already exists
+                        Files.deleteIfExists(new File("maps/invalid/" + f.getName()).toPath());
+                        Files.copy(f.toPath(), new File("maps/invalid/" + f.getName()).toPath());
+                    }
+                    //delete the original file
+                    Files.deleteIfExists(new File(f.getPath()).toPath());
+                    System.out.println("Invalid map removed: " + f.getPath());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+            if (count[0] == 0) {
+                label.setText("No invalid maps found");
+                label.setStyle("-fx-text-fill: #548c33;");
+            } else {
+                if (count[0] == 1) {
+                    label.setText("1 invalid map removed");
+                } else {
+                    label.setText(count[0] + " invalid maps removed");
+                }
+                label.setStyle("-fx-text-fill: #d07e00;");
+            }
+            count[0] = 0;
+        };
+
+        removeButton.setOnAction(removeEvent);
+
+        return removeButton;
+    }
+
+    private List<File> getInvalidMaps(int[] count, MapLoader mapLoader, Checker checker, File[] listOfFiles) {
+        List<File> filesToMove = new java.util.ArrayList<>();
+        if (listOfFiles != null) {
+            for (File f : listOfFiles) {
+                if (f.isFile()) {
+                    String unparsedSeed = mapLoader.load(f.getPath());
+                    String parsedSeed = mapLoader.parseMap(unparsedSeed);
+                    if (!checker.checkMap(parsedSeed)) {
+                        filesToMove.add(f);
+                        count[0]++;
+                    }
+                }
+            }
+        }
+        return filesToMove;
     }
 
     private Button exitButton() {
