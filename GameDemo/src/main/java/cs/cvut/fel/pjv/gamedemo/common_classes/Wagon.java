@@ -1,6 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -122,12 +123,14 @@ public class Wagon {
      */
     public void generateWagon() {
         // Generate the wagon
-        String path = "maps/common/" + type + "_wagon.txt";
+        RandomHandler randomHandler = new RandomHandler();
+        String path = randomHandler.getRandomWagonTypeLayout(type);
         String seed = load(path);
         parseMap(seed);
     }
     public void generateNextWagon(Wagon wagon, boolean leftWagon) {//wagon - current wagon; leftWagon - if next wagon will be on the left side of the current wagon
-        String path = "maps/common/" + type + "_wagon.txt";
+        RandomHandler randomHandler = new RandomHandler();
+        String path = randomHandler.getRandomWagonTypeLayout(type);
         String seed = load(path);
         parseMap(seed);
 
@@ -346,10 +349,28 @@ public class Wagon {
                         npc.setCurrentWagon(this);
 
                         npc.setAsDefaultNPC();
+
                         npc.setPositionX(500);
                         npc.setPositionY(240);
 
                         entities.add(npc);
+                    }
+                    if (letterID.equals(Constants.VENDOR_SPAWN)) {
+                        String[] names = Constants.WAGON_TYPE_NPC.get(type);
+                        String name = names[(int) (Math.random() * names.length)];
+
+                        int randomInventorySize = (int) (Math.random() * 20 + 1);
+
+                        int randomIntelligence = (int) (Math.random() * 2);
+
+                        int randomNegativeThreshold = (int) (Math.random() * 10 + 1);
+
+                        Vendor vendor = new Vendor("vendor" + name, "vendor" + name + "_front.png", randomInventorySize);
+                        vendor.setCurrentWagon(this);
+                        vendor.setIntelligence(randomIntelligence);
+                        vendor.setNegativeThreshold(randomNegativeThreshold);
+
+                        entities.add(vendor);
                     }
                 }
             }
