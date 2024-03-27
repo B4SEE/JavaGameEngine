@@ -1,0 +1,34 @@
+{
+  "food_items": [
+    {
+      "name": "Orange",
+      "texturePath": "orange.png",
+      "value": 10.00,
+      "nourishment": 5.00
+    },
+    {
+      "name": "Apple",
+      "texturePath": "orange.png",
+      "value": 15.00,
+      "nourishment": 10.00
+    },
+    {
+      "name": "Chocolate Bar",
+      "texturePath": "orange.png",
+      "value": 12.00,
+      "nourishment": 8.00
+    },
+    {
+      "name": "Sandwich",
+      "texturePath": "orange.png",
+      "value": 8.00,
+      "nourishment": 6.00
+    },
+    {
+      "name": "Pear",
+      "texturePath": "orange.png",
+      "value": 6.00,
+      "nourishment": 4.00
+    }
+  ]
+}

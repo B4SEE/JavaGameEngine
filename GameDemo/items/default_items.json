@@ -1,0 +1,29 @@
+{
+  "default_items": [
+    {
+      "name": "Lighter",
+      "texturePath": "orange.png",
+      "value": 10.00
+    },
+    {
+      "name": "Pen",
+      "texturePath": "orange.png",
+      "value": 15.00
+    },
+    {
+      "name": "Golden ring",
+      "texturePath": "orange.png",
+      "value": 12.00
+    },
+    {
+      "name": "Watch",
+      "texturePath": "orange.png",
+      "value": 8.00
+    },
+    {
+      "name": "Glasses",
+      "texturePath": "orange.png",
+      "value": 6.00
+    }
+  ]
+}
