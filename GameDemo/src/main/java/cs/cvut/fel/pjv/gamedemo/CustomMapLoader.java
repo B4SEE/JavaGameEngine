@@ -286,7 +286,8 @@ public class CustomMapLoader extends Application {
         //first line is wagon type
         String[] lines = sb.toString().split("\n");
         String wagonType = lines[0];
-        String filename = wagonType + "_wagon.txt";
+        //name file based on wagon type and number of files with the same wagon type (to avoid overwriting)
+        String filename = getString(wagonType);
         //check if wagon type is in String[] WAGON_TYPES
         if (!Arrays.asList(Constants.WAGON_TYPES).contains(wagonType)) {
             return false;
@@ -298,6 +299,23 @@ public class CustomMapLoader extends Application {
         return loadTxtMap(sb.toString(), filename);
     }
 
+    private static String getString(String wagonType) {
+        int filesCount = 0;
+        File folder = new File("maps/custom");
+        File[] listOfFiles = folder.listFiles();
+        if (listOfFiles != null) {
+            for (File f : listOfFiles) {
+                if (f.isFile()) {
+                    if (f.getName().startsWith(wagonType)) {
+                        filesCount++;
+                    }
+                }
+            }
+        }
+        String filename = wagonType + "_" + filesCount + "_wagon.txt";
+        return filename;
+    }
+
     private boolean loadTxtMap(String map, String filename) {
         //check if the map is valid
         Checker checker = new Checker();
@@ -305,13 +323,16 @@ public class CustomMapLoader extends Application {
             return false;
         }
         //load the map
-        String path = "maps/custom_maps/" + filename;
+        String path = "maps/custom/" + filename;
 
         this.mapPath = path;
 
         try {
-            java.io.PrintWriter writer = new java.io.PrintWriter(path);
-            writer.print(map);
+            //create a new file
+            File file = new File(path);
+            //write the map to the file
+            java.io.FileWriter writer = new java.io.FileWriter(file);
+            writer.write(map);
             writer.close();
         } catch (Exception e) {
             e.printStackTrace();
