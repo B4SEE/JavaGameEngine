@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
+import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
@@ -19,6 +20,7 @@ import java.util.Objects;
 public class Entity {
     private String name;
     private String texturePath;
+    private String dialoguePath;
     private String type;
     private String initialBehaviour;
     private String behaviour;
@@ -44,13 +46,11 @@ public class Entity {
     private int health;
     private int maxHealth;
     private int damage;
-    //
     private int cooldown;
     private boolean canAttack = true;
     private long whenAttacked;
     private long whenStartedPursuing = 0;
     private ImageView entityView;
-
     private Wagon currentWagon;
 
     public Entity(String name, String texturePath) {
@@ -98,9 +98,7 @@ public class Entity {
         setHeight(Constants.ENEMY_BASIC_HEIGHT);
 
         speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
-        System.out.println(speed_x);
         speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
-        System.out.println(speed_y);
 
         int maxHealth = (int) (Math.random() * (Constants.ENEMY_BASIC_MAX_HEALTH_MAX - Constants.ENEMY_BASIC_MAX_HEALTH_MIN) + Constants.ENEMY_BASIC_MAX_HEALTH_MIN);
         maxHealth = (maxHealth / 10) * 10;
@@ -119,19 +117,19 @@ public class Entity {
      * Not functional yet.
      */
     public void setAsDefaultNPC() {
+        setAsDefaultEnemy();
+
         setType(Constants.NPC);
         setBehaviour(Constants.NEUTRAL);
         setInitialBehaviour(getBehaviour());
-        setHeight(Constants.ENEMY_BASIC_HEIGHT);
-        speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
-        System.out.println(speed_x);
-        speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
-        System.out.println(speed_y);
-        setHitBoxSize(Constants.ENEMY_BASIC_HITBOX);
-        setAttackRangeSize(Constants.ENEMY_BASIC_ATTACK_RANGE);
-        setDamage(Constants.ENEMY_BASIC_DAMAGE);
-        setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
-        setHealth(maxHealth);
+
+        if (dialoguePath == null) {
+            RandomHandler randomHandler = new RandomHandler();
+            System.out.println(randomHandler.getRandomDialogueThatStartsWith(name));
+        }
+
+        intelligence = (int) (Math.random() * 2);
+        negativeThreshold = (int) (Math.random() * 10 + 1);
     }
     public String getName() {
         return name;
@@ -143,6 +141,14 @@ public class Entity {
 
     public String getTexturePath() {
         return texturePath;
+    }
+
+    public void setDialoguePath(String dialoguePath) {
+        this.dialoguePath = dialoguePath;
+    }
+
+    public String getDialoguePath() {
+        return dialoguePath;
     }
 
     public void setType(String type) {
