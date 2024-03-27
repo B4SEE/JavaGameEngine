@@ -236,7 +236,7 @@ public class GameLogic {
         });
     }
     private void openDialogue(Entity entity) {
-        Dialogue dialogue = new Dialogue(entity.getName());
+        Dialogue dialogue = new Dialogue(entity.getDialoguePath());
         //TODO selectRandomDialogue(entity.getName())
         dialogue.setEntity(entity);
         setDialogueHandle(dialogue, entity);
