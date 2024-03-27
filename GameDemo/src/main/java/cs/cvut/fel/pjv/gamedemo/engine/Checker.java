@@ -10,6 +10,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class with all checking methods.
@@ -56,6 +57,7 @@ public class Checker {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
             for (String code : subRows) {
                 if (code.length() != 4) {
+                    System.out.println(code);
                     System.out.println("first");
                     return false;
                 }
@@ -134,7 +136,7 @@ public class Checker {
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity.isAlive()) {
-                    if (entity.getType().equals(Constants.NPC) && checkCollision(player.getAttackRange(), entity.getHitbox()) && entity.getBehaviour() == Constants.NEUTRAL) {
+                    if (entity.getDialoguePath() != null && checkCollision(player.getAttackRange(), entity.getHitbox()) && Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
                         return entity;
                     }
                 }
@@ -157,7 +159,7 @@ public class Checker {
     }
     public boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
         Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 80, aimX, aimY);
-        aimLine.setStrokeWidth(7);
+        aimLine.setStrokeWidth(10);
         Circle shootHitbox = (Circle) target.getHitbox();
         shootHitbox.setStroke(Color.RED);
         shootHitbox.setStrokeWidth(7);
