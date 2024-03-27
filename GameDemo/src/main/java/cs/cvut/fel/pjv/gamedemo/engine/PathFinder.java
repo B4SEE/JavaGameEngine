@@ -62,7 +62,7 @@ public class PathFinder {
     }
 
     int[][] tracePath(Cell[][] cellDetails, Pair dest) {
-        System.out.println("The Path:  ");
+//        System.out.println("The Path:  ");
 
         Stack<Pair> path = new Stack<>();
 
@@ -82,7 +82,7 @@ public class PathFinder {
         while (!path.empty()) {
             Pair p = path.peek();
             path.pop();
-            System.out.println("-> (" + p.first + ", " + p.second + ")");
+//            System.out.println("-> (" + p.first + ", " + p.second + ")");
             result[path.size()][0] = p.first;
             result[path.size()][1] = p.second;
         }
@@ -91,26 +91,26 @@ public class PathFinder {
     public int[][] aStarSearch(int[][] grid, int rows, int cols, Pair src, Pair dest) {
 
         if (!isValid(rows, cols, src)) {
-            System.out.println("Source is invalid...");
+//            System.out.println("Source is invalid...");
             return new int[0][0];
         }
 
 
         if (!isValid(rows, cols, dest)) {
-            System.out.println("Destination is invalid...");
+//            System.out.println("Destination is invalid...");
             return new int[0][0];
         }
 
 
         if (!isUnBlocked(grid, rows, cols, src)
                 || !isUnBlocked(grid, rows, cols, dest)) {
-            System.out.println("Source or destination is blocked...");
+//            System.out.println("Source or destination is blocked...");
             return new int[0][0];
         }
 
 
         if (isDestination(src, dest)) {
-            System.out.println("We're already (t)here...");
+//            System.out.println("We're already (t)here...");
             return new int[0][0];
         }
 
@@ -152,7 +152,7 @@ public class PathFinder {
 
                     if (isDestination(neighbour, dest)) {
                         cellDetails[neighbour.first][neighbour.second].parent = new Pair ( i, j );
-                        System.out.println("The destination cell is found");
+//                        System.out.println("The destination cell is found");
                         return tracePath(cellDetails, dest);
                     }
 
@@ -178,7 +178,7 @@ public class PathFinder {
             }
         }
 
-        System.out.println("Failed to find the Destination Cell");
+//        System.out.println("Failed to find the Destination Cell");
         return new int[0][0];
     }
 }

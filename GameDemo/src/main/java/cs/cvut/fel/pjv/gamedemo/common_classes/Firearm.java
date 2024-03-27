@@ -1,13 +1,12 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
-import java.util.List;
-
 public class Firearm extends Item {
-    private int damage = 40;
+    private int damage;
     private int shootingSpeed;
 
-    public Firearm(String name, String texturePath, int shootingSpeed) {
+    public Firearm(String name, String texturePath, int damage, int shootingSpeed) {
         super(name, texturePath, "WEAPON");
+        this.damage = damage;
         this.shootingSpeed = shootingSpeed;
     }
 
