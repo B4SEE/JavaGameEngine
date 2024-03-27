@@ -201,7 +201,32 @@ public class Wagon {
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
                         Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
                         object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
-                        int chance = (int) (Math.random() * 100);
+                        for (int k = 0; k < object.getObjectInventory().inventorySize; k++) {
+                            //generate random chance for each item
+                            int chance = (int) (Math.random() * 100);
+                            int generate = (int) (Math.random() * 100);
+                            if (chance > generate) {
+                                RandomHandler randomHandler = new RandomHandler();
+                                //get random number for item type: 1 - default, 2 - melee, 3 - firearm, 4 - food
+                                int itemType = (int) (Math.random() * 4 + 1);
+                                switch (itemType) {
+                                    case 1:
+                                        object.getObjectInventory().addItem(randomHandler.getRandomDefaultItem());
+                                        break;
+                                    case 2:
+                                        object.getObjectInventory().addItem(randomHandler.getRandomMeleeItem());
+                                        break;
+                                    case 3:
+                                        object.getObjectInventory().addItem(randomHandler.getRandomFirearmItem());
+                                        break;
+                                    case 4:
+                                        object.getObjectInventory().addItem(randomHandler.getRandomFoodItem());
+                                        break;
+                                }
+                            } else {
+                                object.getObjectInventory().addItem(null);
+                            }
+                        }
 //                        object.getObjectInventory().fillWithRandomItems(Constants.LOOT_TABLE_STANDARD, chance);//fill the chest with random items, with random chance
                         object.setHeight(1);
                         objectsArray[i][j] = object;
