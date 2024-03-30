@@ -1,8 +1,11 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.io.File;
 import java.io.IOException;
@@ -205,10 +208,11 @@ public class Wagon {
                             //generate random chance for each item
                             int chance = (int) (Math.random() * 100);
                             int generate = (int) (Math.random() * 100);
+                            RandomHandler randomHandler = new RandomHandler();
                             if (chance > generate) {
-                                RandomHandler randomHandler = new RandomHandler();
-                                //get random number for item type: 1 - default, 2 - melee, 3 - firearm, 4 - food
-                                int itemType = (int) (Math.random() * 4 + 1);
+                                //get random number for item type: 1 - default, 2 - melee, 3 - firearm, 4 - food, 5 - necessary to spawn item
+                                int itemType = (int) (Math.random() * 5 + 1);
+                                System.out.println("Item type: " + itemType);
                                 switch (itemType) {
                                     case 1:
                                         object.getObjectInventory().addItem(randomHandler.getRandomDefaultItem());
@@ -222,12 +226,14 @@ public class Wagon {
                                     case 4:
                                         object.getObjectInventory().addItem(randomHandler.getRandomFoodItem());
                                         break;
+                                    case 5:
+                                        object.getObjectInventory().addItem(randomHandler.getRandomNecessaryToSpawnItem());
+                                        break;
                                 }
                             } else {
                                 object.getObjectInventory().addItem(null);
                             }
                         }
-//                        object.getObjectInventory().fillWithRandomItems(Constants.LOOT_TABLE_STANDARD, chance);//fill the chest with random items, with random chance
                         object.setHeight(1);
                         objectsArray[i][j] = object;
                     }
@@ -285,47 +291,44 @@ public class Wagon {
                         //pick random name from dictionary
                         String[] names = Constants.WAGON_TYPE_ENEMIES.get(type);
                         String name = names[(int) (Math.random() * names.length)];
-
                         Entity enemy = new Entity(name, name + "_front.png");//works, but entities are all in the same position
                         enemy.setCurrentWagon(this);
-
                         enemy.setAsDefaultEnemy();
                         enemy.setPositionX(300);
                         enemy.setPositionY(240);
-
                         entities.add(enemy);
                     }
                     if (letterID.equals(Constants.NPC_SPAWN)) {
                         //pick random name from dictionary
                         String[] names = Constants.WAGON_TYPE_NPC.get(type);
                         String name = names[(int) (Math.random() * names.length)];
-
                         Entity npc = new Entity(name, name + "_front.png");
                         npc.setCurrentWagon(this);
-
                         npc.setAsDefaultNPC();
-
                         npc.setPositionX(500);
                         npc.setPositionY(240);
-
                         entities.add(npc);
                     }
                     if (letterID.equals(Constants.VENDOR_SPAWN)) {
                         String[] names = Constants.WAGON_TYPE_NPC.get(type);
                         String name = names[(int) (Math.random() * names.length)];
-
-                        int randomInventorySize = (int) (Math.random() * 20 + 1);
-
-                        int randomIntelligence = (int) (Math.random() * 2);
-
-                        int randomNegativeThreshold = (int) (Math.random() * 10 + 1);
-
-                        Vendor vendor = new Vendor("vendor" + name, "vendor" + name + "_front.png", randomInventorySize);
+                        Vendor vendor = new Vendor("vendor" + name, "vendor" + name + "_front.png");
                         vendor.setCurrentWagon(this);
-                        vendor.setIntelligence(randomIntelligence);
-                        vendor.setNegativeThreshold(randomNegativeThreshold);
-
+                        vendor.setPositionX(500);
+                        vendor.setPositionY(240);
                         entities.add(vendor);
+                    }
+                    if (letterID.equals(Constants.QUEST_SPAWN)) {
+                        List<QuestNPC> availableQuestNPCs = Events.getAvailableQuestNPCs();
+                        System.out.println("***" + availableQuestNPCs);
+                        if (availableQuestNPCs != null) {
+                            QuestNPC questNPC = Events.getAvailableQuestNPCs().get((int) (Math.random() * availableQuestNPCs.size()));
+                            Events.removeQuestNPC(questNPC);
+                            questNPC.setCurrentWagon(this);
+                            questNPC.setPositionX(500);
+                            questNPC.setPositionY(240);
+                            entities.add(questNPC);
+                        }
                     }
                 }
             }
@@ -352,6 +355,17 @@ public class Wagon {
         entities.add(entity);
         System.out.println("Entity added to wagon " + id);
         System.out.println(java.util.Arrays.toString(entities.toArray()));
+    }
+    public void removeTrap() {//removes only one trap per call
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                if (object.getTwoLetterId().equals(Constants.TRAP)) {
+                    object.setTwoLetterId("TF");
+                    return;
+                }
+            }
+        }
+
     }
 
 //    private String setRandomTexture(String path) {
