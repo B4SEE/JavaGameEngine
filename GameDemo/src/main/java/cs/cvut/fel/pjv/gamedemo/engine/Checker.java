@@ -39,6 +39,22 @@ public class Checker {
         }
         return checkHowManyDoors(lines);
     }
+    public boolean checkIfWagonHasTrap(Object[][] objects) {
+        if (objects == null) {
+            return false;
+        }
+        //check if the wagon has a trap
+        for (Object[] objectArray : objects) {
+            for (Object object : objectArray) {
+                if (object != null) {
+                    if (object.getTwoLetterId().equals(Constants.TRAP)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
     private boolean checkLinesLength(String[] lines) {
         //check if all map lines are the same length
         int lineLength = lines[0].length();
@@ -138,7 +154,7 @@ public class Checker {
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity.isAlive()) {
-                    if (entity.getDialoguePath() != null && checkCollision(player.getAttackRange(), entity.getHitbox()) && Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
+                    if (entity.getDialoguePath() != null && checkCollision(player.getAttackRange(), entity.getHitbox()) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
                         return entity;
                     }
                 }
