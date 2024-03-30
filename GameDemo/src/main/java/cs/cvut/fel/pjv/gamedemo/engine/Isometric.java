@@ -191,11 +191,9 @@ public class Isometric {
      */
     public void setPlayer(Player player) {
         this.player = player;
-        player.setHitbox(getEntityHitBox((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getHitBoxSize()));
-        player.setTrackPoint(getEntityTrackPoint((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight()));
-        player.setAttackRange(getEntityAttackRange((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getAttackRangeSize()));
-        player.setStartPositionX(player.getPositionX());
-        player.setStartPositionY(player.getPositionY());
+        setEntityBoxes(this.player);
+        this.player.setStartPositionX(player.getPositionX());
+        this.player.setStartPositionY(player.getPositionY());
         updatePlayerDeltaX(0);
         updatePlayerDeltaY(0);
     }
@@ -212,9 +210,7 @@ public class Isometric {
         player.setHunger(Constants.PLAYER_MAX_HUNGER);
         player.setPositionX(player.getStartPositionX());
         player.setPositionY(player.getStartPositionY());
-        player.setHitbox(getEntityHitBox((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getHitBoxSize()));
-        player.setTrackPoint(getEntityTrackPoint((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight()));
-        player.setAttackRange(getEntityAttackRange((int) player.getPositionX(), (int) player.getPositionY(), player.getHeight(), player.getAttackRangeSize()));
+        setEntityBoxes(player);
     }
     /**
      * Get the player.
@@ -231,20 +227,15 @@ public class Isometric {
         this.entities = entities;
         drawnEntities = new ArrayList<>();
         for (Entity entity : this.entities) {
-            entity.setHitbox(getEntityHitBox((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
-            entity.setTrackPoint(getEntityTrackPoint((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight()));
-            entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), 1));
+            setEntityBoxes(entity);
             entity.setStartPositionX(entity.getPositionX());
             entity.setStartPositionY(entity.getPositionY());
         }
     }
-
-    /**
-     * Add the entity.
-     * @param entity the entity
-     */
-    public void addEntity(Entity entity) {
-        entities.add(entity);
+    public void setEntityBoxes(Entity entity) {
+        entity.setHitbox(getEntityHitBox((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
+        entity.setTrackPoint(getEntityTrackPoint((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight()));
+        entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), 1));
     }
     /**
      * Reset the entities.

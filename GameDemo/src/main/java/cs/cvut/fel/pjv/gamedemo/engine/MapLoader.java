@@ -38,7 +38,7 @@ public class MapLoader {
         try {
             String[] rows = seed.split(Constants.MAP_ROW_SEPARATOR);
             String[] subRows;
-            //3 - random; next number: 1 - chest, 2 - trap, 3 - enemy; next two numbers: chance; Note: was tested and works
+            //3 - random; next number: 1 - chest, 2 - trap, 3 - enemy; 4 - NPC; 5 - quest; next two numbers: chance; Note: was tested and works
             for (int i = 0; i < rows.length; i++) {
                 subRows = rows[i].split(Constants.MAP_COLUMN_SEPARATOR);
                 for (int j = 0; j < subRows.length; j++) {
@@ -61,6 +61,14 @@ public class MapLoader {
                                 // Generate the enemy
                                 String enemy = "00EN";
                                 subRows[j] = enemy;
+                            } else if (subRows[j].charAt(1) == '4') {
+                                // Generate the NPC
+                                String npc = "00NP";
+                                subRows[j] = npc;
+                            } else if (subRows[j].charAt(1) == '5') {
+                                // Generate the quest
+                                String quest = "00QU";
+                                subRows[j] = quest;
                             }
                         } else {
                             subRows[j] = "00TF";

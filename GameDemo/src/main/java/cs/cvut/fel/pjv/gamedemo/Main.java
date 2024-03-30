@@ -1,10 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
-import cs.cvut.fel.pjv.gamedemo.engine.Checker;
-import cs.cvut.fel.pjv.gamedemo.engine.Dialogue;
-import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
-import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
+import cs.cvut.fel.pjv.gamedemo.engine.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -15,6 +12,7 @@ import java.util.List;
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
+        removeUnnecessaryFiles();
         Player player = createPlayer();
         // Load and start the game
         GameLogic gameLogic = new GameLogic(stage);
@@ -33,8 +31,9 @@ public class Main extends Application {
         vendor.getVendorInventory().addItem(item);
         vendor.getVendorInventory().addItem(item2);
         vendor.getVendorInventory().addItem(item4);
+
         wagon.generateWagon();
-        wagon.addEntity(vendor);
+//        wagon.addEntity(vendor);
         gameLogic.loadGame(player, wagon);
         gameLogic.start();
     }
@@ -56,7 +55,24 @@ public class Main extends Application {
         player.setPlayerInventory(playerInventory);
         player.getPlayerInventory().setMoney(160);
         player.getPlayerInventory().setAmmo(50);
+
+        for (String name : Constants.QUEST_NPC_NAMES) {
+            Events.addQuestNPC(new QuestNPC(name, name + "_front.png"));
+        }
+        Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
+
         return player;
+    }
+    private void removeUnnecessaryFiles() {
+        RandomHandler randomHandler = new RandomHandler();
+        List<File> files = randomHandler.getListOfFilesThatStartWith("necessary_to_spawn_item", "items/");
+        for (File file : files) {
+            if (file.delete()) {
+                System.out.println("File deleted successfully");
+            } else {
+                System.out.println("Failed to delete the file");
+            }
+        }
     }
 
     public static void main(String[] args) {

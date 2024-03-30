@@ -128,17 +128,34 @@ public class Inventory {
 
     /**
      * Remove item from inventory
+     *
      * @param item item to remove
-     * @return true if removed, false if not
      */
-    public boolean removeItem(Item item) {
+    public void removeItem(Item item) {
         if (item == null) {
-            return false;
+            return;
         }
         for (int i = 0; i < inventorySize; i++) {
             if (itemsArray[i] == item) {
                 itemsArray[i] = null;
+                return;
+            }
+        }
+    }
+    public boolean contains(Item item) {
+        for (int i = 0; i < inventorySize; i++) {
+            if (itemsArray[i] == item) {
                 return true;
+            }
+        }
+        return false;
+    }
+    public boolean containsWithSameName(Item item) {
+        for (int i = 0; i < inventorySize; i++) {
+            if (itemsArray[i] != null) {
+                if (itemsArray[i].getName().equals(item.getName())) {
+                    return true;
+                }
             }
         }
         return false;

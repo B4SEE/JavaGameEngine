@@ -307,7 +307,7 @@ public class PlayerInventory extends Inventory {
 
             if (index >= 0) {
                 if (index < inventorySize && itemsArray[index] != null) {
-                    itemNameLabel.setText(itemsArray[index].getName());
+                    itemNameLabel.setText(itemsArray[index].getName() + " | " + itemsArray[index].getValue());
                     //if clicked on item, select it (border)
                 } else {
                     itemNameLabel.setText(x + " " + y + " | " + e.getX() + " " + e.getY());

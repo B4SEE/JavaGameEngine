@@ -21,7 +21,7 @@ public class Player extends Entity {
     private long whenStarved;
 
     public Player(String name, String texturePath, int positionX, int positionY) {
-        super(name, texturePath, "PLAYER", positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
+        super(name, texturePath, Constants.EntityType.PLAYER, positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
         super.setHeight(2);
         super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
@@ -30,7 +30,7 @@ public class Player extends Entity {
     }
 
     public Player(Wagon currentWagon) {
-        super("PLAYER_NAME", "texturePath", "PLAYER", Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
+        super("PLAYER_NAME", "texturePath", Constants.EntityType.PLAYER, Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
         super.setHeight(2);
         super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
@@ -172,8 +172,8 @@ public class Player extends Entity {
                 target.takeDamage(firearm.getDamage());
                 System.out.println("Target health: " + target.getHealth());
                 for (Entity entity : targets) {
-                    if (checker.checkIfEntityCanSee(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.NEUTRAL)) {
-                        entity.setBehaviour(Constants.AGGRESSIVE);
+                    if (checker.checkIfEntityCanSee(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
+                        entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                     }
                 }
                 //sound of shooting

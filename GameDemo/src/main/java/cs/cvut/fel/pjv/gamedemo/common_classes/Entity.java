@@ -21,10 +21,10 @@ public class Entity {
     private String name;
     private String texturePath;
     private String dialoguePath;
-    private String type;
-    private String initialBehaviour;
-    private String behaviour;
-    private int intelligence = 2;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
+    private Constants.EntityType type;
+    private Constants.Behaviour behaviour;
+    private Constants.Behaviour initialBehaviour;
+    private int intelligence = 0;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
     private int negativeThreshold = 2;
     private int negativeCount = 0;
     private double startPositionX;
@@ -59,7 +59,7 @@ public class Entity {
         this.maxHealth = Constants.ENTITY_BASIC_MAX_HEALTH;
     }
 
-    public Entity(String name, String texturePath, String type, int positionX, int positionY, int hitBoxSize, int health, int damage, Wagon currentWagon) {
+    public Entity(String name, String texturePath, Constants.EntityType type, int positionX, int positionY, int hitBoxSize, int health, int damage, Wagon currentWagon) {
         this.name = name;
         this.texturePath = texturePath;
         this.type = type;
@@ -90,25 +90,19 @@ public class Entity {
      * Note: hitbox size, attack range size, damage and cooldown are set to default values, but it will be changed in the future (randomized).
      */
     public void setAsDefaultEnemy() {
-        setType(Constants.ENEMY);
-
-        setBehaviour(Constants.AGGRESSIVE);
+        setType(Constants.EntityType.ENEMY);
+        setBehaviour(Constants.Behaviour.AGGRESSIVE);
         setInitialBehaviour(getBehaviour());
-
+        intelligence = (int) (Math.random() * 2);
         setHeight(Constants.ENEMY_BASIC_HEIGHT);
-
         speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
         speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
-
         int maxHealth = (int) (Math.random() * (Constants.ENEMY_BASIC_MAX_HEALTH_MAX - Constants.ENEMY_BASIC_MAX_HEALTH_MIN) + Constants.ENEMY_BASIC_MAX_HEALTH_MIN);
         maxHealth = (maxHealth / 10) * 10;
         this.maxHealth = maxHealth;
-
         setHealth(maxHealth);
-
         setHitBoxSize(Constants.ENEMY_BASIC_HITBOX);
         setAttackRangeSize(Constants.ENEMY_BASIC_ATTACK_RANGE);
-
         setDamage(Constants.ENEMY_BASIC_DAMAGE);
         setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
     }
@@ -118,17 +112,14 @@ public class Entity {
      */
     public void setAsDefaultNPC() {
         setAsDefaultEnemy();
-
-        setType(Constants.NPC);
-        setBehaviour(Constants.NEUTRAL);
+        setType(Constants.EntityType.NPC);
+        setBehaviour(Constants.Behaviour.NEUTRAL);
         setInitialBehaviour(getBehaviour());
-
         if (dialoguePath == null) {
             RandomHandler randomHandler = new RandomHandler();
-            System.out.println(randomHandler.getRandomDialogueThatStartsWith(name));
+            dialoguePath = randomHandler.getRandomDialogueThatStartsWith(name);
+//            System.out.println(randomHandler.getRandomDialogueThatStartsWith(name));
         }
-
-        intelligence = (int) (Math.random() * 2);
         negativeThreshold = (int) (Math.random() * 10 + 1);
     }
     public String getName() {
@@ -151,27 +142,27 @@ public class Entity {
         return dialoguePath;
     }
 
-    public void setType(String type) {
+    public void setType(Constants.EntityType type) {
         this.type = type;
     }
 
-    public String getType() {
+    public Constants.EntityType getType() {
         return type;
     }
 
-    public String getInitialBehaviour() {
+    public void setInitialBehaviour(Constants.Behaviour initialBehaviour) {
+        this.initialBehaviour = initialBehaviour;
+    }
+
+    public Constants.Behaviour getInitialBehaviour() {
         return initialBehaviour;
     }
 
-    public void setInitialBehaviour(String initialType) {
-        this.initialBehaviour = initialType;
-    }
-
-    public void setBehaviour(String behaviour) {
+    public void setBehaviour(Constants.Behaviour behaviour) {
         this.behaviour = behaviour;
     }
 
-    public String getBehaviour() {
+    public Constants.Behaviour getBehaviour() {
         return behaviour;
     }
 
@@ -349,8 +340,8 @@ public class Entity {
     public void takeDamage(int damage) {
         System.out.println(name + " took " + damage + " damage.");
         health -= damage;
-        if (Objects.equals(this.getBehaviour(), Constants.NEUTRAL)) {
-            this.setBehaviour(Constants.AGGRESSIVE);
+        if (Objects.equals(this.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
+            this.setBehaviour(Constants.Behaviour.AGGRESSIVE);
         }
     }
     /**

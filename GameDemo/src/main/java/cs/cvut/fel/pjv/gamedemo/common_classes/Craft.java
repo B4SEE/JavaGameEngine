@@ -42,12 +42,12 @@ public class Craft {
         String name = Constants.CRAFT_RECIPES.get(craftItems);
         System.out.println(name);
         if (name != null) {
-            return new Item(name, Constants.ITEM_TEXTURES.get(name));
+            return new Item(name, Constants.ITEM_TEXTURES.get(name), (firstItem.getValue() + secondItem.getValue() - (int) (Math.random() * 10)));
         } else {
             List<String> craftItemsReversed = List.of(secondItem.getName(), firstItem.getName());
             name = Constants.CRAFT_RECIPES.get(craftItemsReversed);
             if (name != null) {
-                return new Item(name, Constants.ITEM_TEXTURES.get(name));
+                return new Item(name, Constants.ITEM_TEXTURES.get(name), (firstItem.getValue() + secondItem.getValue() - (int) (Math.random() * 10)));
             }
         }
         return null;
