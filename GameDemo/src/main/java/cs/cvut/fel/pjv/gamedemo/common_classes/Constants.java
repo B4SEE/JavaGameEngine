@@ -55,12 +55,17 @@ public class Constants {
     public static final String TRAP = "TR";
     //string constants for wagon types
     //string constants for entity's behaviour
-    public static final String NEUTRAL = "NEUTRAL";
-    public static final String AGGRESSIVE = "AGGRESSIVE";
+    public enum Behaviour {
+        NEUTRAL,
+        AGGRESSIVE,
+        COWARD
+    }
     //string constants for entity's type
-    public static final String PLAYER = "PLAYER";
-    public static final String ENEMY = "ENEMY";
-    public static final String NPC = "NPC";
+    public enum EntityType {
+        PLAYER,
+        ENEMY,
+        NPC
+    }
     //char constants for map's int codes
     public static final String MAP_COLUMN_SEPARATOR = "_";
     public static final String MAP_ROW_SEPARATOR = "-";
@@ -81,8 +86,18 @@ public class Constants {
     public static final String VALID_TICKET = "VALID_TICKET";
     public static final String[] WAGON_TYPES = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
     public static final int MAX_PREV_POS_LIST_SIZE = 10;
+    public static final int MIN_TRAP_ENEMIES_COUNT = 1;
+    public static final int MAX_TRAP_ENEMIES_COUNT = 5;
 
     public static final int MAX_COUNTER = 5;
+//    public static final String[] QUEST_NPC_NAMES = {"ticketless_elder", "lost_toy_lady", "eco_freak"};
+    public static final String[] QUEST_NPC_NAMES = {"lost_toy_lady"};
+    public enum Event {
+        DEFAULT_EVENT,
+        TRAP_EVENT,
+        SILENCE_EVENT,
+        TIME_LOOP_EVENT
+    }
     //consider enum
     public static final Map <String, String> OBJECT_IDS = Map.ofEntries(
             Map.entry("TF", "tile_floor.png"),
@@ -126,13 +141,17 @@ public class Constants {
     public static final Map <String, String[]> WAGON_TYPE_ENEMIES = Map.ofEntries(
             Map.entry("DEFAULT", new String[]{"zombie"}),
             Map.entry("COMPARTMENT", new String[]{"zombie", "robot", "bully"}),
-            Map.entry("RESTAURANT", new String[]{"gentleman"})
+            Map.entry("RESTAURANT", new String[]{"gentleman"}),
+            Map.entry("SLEEPER", new String[]{"lady", "child"}),
+            Map.entry("CARGO", new String[]{"zombie"})
     );
 
     public static final Map <String, String[]> WAGON_TYPE_NPC = Map.ofEntries(
             Map.entry("DEFAULT", new String[]{"gentleman"}),
             Map.entry("COMPARTMENT", new String[]{"gentleman", "lady", "child"}),
-            Map.entry("RESTAURANT", new String[]{"gentleman"})
+            Map.entry("RESTAURANT", new String[]{"gentleman", "lady"}),
+            Map.entry("SLEEPER", new String[]{"gentleman", "lady", "child"}),
+            Map.entry("CARGO", new String[]{"gentleman", "lady", "child"})
     );
 
     public static final Map <List<String>, String> CRAFT_RECIPES = Map.ofEntries(
