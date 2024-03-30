@@ -16,7 +16,6 @@ public class RandomHandler {
     public  RandomHandler() {
     }
     public String getRandomDialogueThatStartsWith(String start) {
-        //list all files from dialogues directory
         File folder = new File("dialogues/");
         File[] listOfFiles = folder.listFiles();
         List<File> listOfFilesThatStartWith = new java.util.ArrayList<>();
@@ -32,11 +31,12 @@ public class RandomHandler {
             }
         }
         randomDialogue = listOfFilesThatStartWith.get((int) (Math.random() * listOfFilesThatStartWith.size())).getName();
+        System.out.println("--------------------");
+        System.out.println(randomDialogue);
+        System.out.println("--------------------");
         return randomDialogue;
     }
     public Item getRandomDefaultItem() {
-        //list all files from items directory
-        File file = new File("items/default_items.json");
         ObjectMapper objectMapper = new ObjectMapper();
         Item item = null;
         try {
@@ -44,8 +44,7 @@ public class RandomHandler {
             JsonNode rootNode = objectMapper.readTree(jsonData);
             JsonNode items = rootNode.get("default_items");
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
-            item = new Item(randomItem.get("name").asText(), randomItem.get("texturePath").asText());
-            item.setValue(randomItem.get("value").asInt());
+            item = new Item(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("value").asInt());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,8 +52,6 @@ public class RandomHandler {
     }
 
     public Food getRandomFoodItem() {
-        //list all files from items directory
-        File file = new File("items/food_items.json");
         ObjectMapper objectMapper = new ObjectMapper();
         Food food = null;
         try {
@@ -70,7 +67,6 @@ public class RandomHandler {
         return food;
     }
     public MeleeWeapon getRandomMeleeItem() {
-        File file = new File("items/melee_items.json");
         ObjectMapper objectMapper = new ObjectMapper();
         MeleeWeapon melee = null;
         try {
@@ -87,7 +83,6 @@ public class RandomHandler {
     }
 
     public Firearm getRandomFirearmItem() {
-        File file = new File("items/firearm_items.json");
         ObjectMapper objectMapper = new ObjectMapper();
         Firearm firearm = null;
         try {
@@ -102,6 +97,21 @@ public class RandomHandler {
         }
         return firearm;
     }
+    public Item getQuestItem(String name) {
+        //list all files from items directory
+        File file = new File("items/" + name + ".json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        Item questItem = null;
+        try {
+            byte[] jsonData = Files.readAllBytes(Paths.get("items/" + name + ".json"));
+            JsonNode rootNode = objectMapper.readTree(jsonData);
+            JsonNode item = rootNode.get("quest_item_data");
+            questItem = new Item(item.get("name").asText(), item.get("texturePath").asText(), item.get("value").asInt());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return questItem;
+    }
     public String getRandomWagonTypeLayout(String wagonType) {
         //list all files from wagons directory
         List<File> listOfFilesThatStartWith = getListOfFilesThatStartWith(wagonType, "maps/common");
@@ -114,7 +124,7 @@ public class RandomHandler {
         System.out.println(randomWagon);
         return randomWagon;
     }
-    private List<File> getListOfFilesThatStartWith(String start, String path) {
+    public List<File> getListOfFilesThatStartWith(String start, String path) {
         //list all files from path directory
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
@@ -130,5 +140,21 @@ public class RandomHandler {
             }
         }
         return listOfFilesThatStartWith;
+    }
+    public Item getRandomNecessaryToSpawnItem() {
+        for (File file : getListOfFilesThatStartWith("necessary_to_spawn_item", "items/")) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                byte[] jsonData = Files.readAllBytes(Paths.get(file.getPath()));
+                JsonNode rootNode = objectMapper.readTree(jsonData);
+                Item item = new Item(rootNode.get("name").asText(), rootNode.get("texturePath").asText(), rootNode.get("value").asInt());
+                //delete the file
+                file.delete();
+                return item;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
