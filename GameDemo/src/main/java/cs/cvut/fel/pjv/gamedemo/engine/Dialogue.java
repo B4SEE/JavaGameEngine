@@ -84,9 +84,25 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
         }
         Text text = new Text(currentDialogueNode.get("text").asText());
         text.setStyle("-fx-font-size: 20; -fx-fill: white");
-        text.setWrappingWidth(1300);
+        text.setWrappingWidth(1000);
         text.setX(300);
         text.setY(100);
+        if (currentOptionNode != null) {
+            Text text2 = new Text("You: " + currentOptionNode.get("text").asText());
+            text2.setStyle("-fx-font-size: 20; -fx-fill: white");
+            text2.setWrappingWidth(1000);
+            text2.setX(300);
+            text2.setY(100);
+            //player will see his answer and npc's response
+            text.setY(100 + text2.getLayoutBounds().getHeight() + 50);
+            grid.getChildren().add(text2);
+            System.out.println("option text: " + currentOptionNode.get("text").asText());
+            try {
+                Thread.sleep(700);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         grid.getChildren().add(text);
     }
     private void drawOptions() {
@@ -105,6 +121,7 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
             switch (event.getCode()) {
                 case ESCAPE:
                     currentDialogueNode = previousDialogueNode;
+                    currentOptionNode = null;
                     optionsNode = currentDialogueNode.get("options");
                     updateDialogue();
                     break;
