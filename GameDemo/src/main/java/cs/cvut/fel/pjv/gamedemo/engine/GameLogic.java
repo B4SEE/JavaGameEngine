@@ -31,7 +31,9 @@ public class GameLogic {
     private Player player;
     private Wagon wagon;
     private Train train;
-    private int gameState = 0;
+    private long eventStartTime = 0;
+    private int eventDuration;
+    private Constants.Event gameState = Constants.Event.DEFAULT_EVENT;
     private AnimationTimer timer = new AnimationTimer() {
         final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
@@ -69,11 +71,56 @@ public class GameLogic {
                             entity.getPreviousPositions().clear();
                         }
                     }
-
+                    //if wagon has trap inside, start the trap event
+                    if (checker.checkIfWagonHasTrap(wagon.getObjectsArray())) {
+                        if (eventStartTime == 0) {
+                            eventStartTime = time;
+                            //time to escape from the trap (to another wagon)
+                            eventDuration = 5;
+                        }
+                        //if the player does not escape from the trap in time, spawn enemies
+                        if ((time - eventStartTime != 0) && (time - eventStartTime) >= eventDuration && gameState == Constants.Event.DEFAULT_EVENT) {
+                            gameState = Constants.Event.TRAP_EVENT;
+                            spawnEnemies();
+                        }
+                    }
+                    if (gameState == Constants.Event.TRAP_EVENT) {
+                        checkIfAllEnemiesAreDead();
+                    }
                 }
             }
         }
     };
+    private void checkIfAllEnemiesAreDead() {
+        int count = 0;
+        for (Entity entity : wagon.getEntities()) {
+            if (entity != null && entity.isAlive()) {
+                count++;
+            }
+        }
+        if (count == 0) {
+            gameState = Constants.Event.DEFAULT_EVENT;
+            eventStartTime = 0;
+            eventDuration = 0;
+            wagon.removeTrap();
+            isometric.setObjectsToDraw(wagon.getObjectsArray());
+            isometric.updateAll();
+        }
+    }
+    private void spawnEnemies() {
+        int enemyCount = Math.max(Constants.MIN_TRAP_ENEMIES_COUNT, (int) (Math.random() * Constants.MAX_TRAP_ENEMIES_COUNT));
+        for (int i = 0; i < enemyCount; i++) {
+            String[] names = Constants.WAGON_TYPE_ENEMIES.get(wagon.getType());
+            String name = names[(int) (Math.random() * names.length)];
+            Entity enemy = new Entity(name, name + "_front.png");
+            enemy.setAsDefaultEnemy();
+            enemy.setPositionX(player.getPositionX());
+            enemy.setPositionY(player.getPositionY());
+            wagon.addEntity(enemy);
+        }
+        isometric.setEntities(wagon.getEntities());//otherwise the entities' hitboxes are drawn in the wrong place
+        isometric.updateAll();
+    }
     private void updatePlayer() {
         isometric.updatePlayerPosition();
         player.heal(time);
@@ -216,7 +263,7 @@ public class GameLogic {
                 case E:
                     if (checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
                         Object object = checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
-                        if (Objects.equals(object.getTwoLetterId(), Constants.WAGON_DOOR) && gameState != Constants.GAME_STATES.get("trap")) {
+                        if (Objects.equals(object.getTwoLetterId(), Constants.WAGON_DOOR) && gameState == Constants.Event.DEFAULT_EVENT) {
                             openWagonDoor((Door) object);
                         }
                         if (Objects.equals(object.getTwoLetterId(), Constants.CHEST_OBJECT)) {
@@ -236,10 +283,24 @@ public class GameLogic {
         });
     }
     private void openDialogue(Entity entity) {
-        Dialogue dialogue = new Dialogue(entity.getDialoguePath());
-        //TODO selectRandomDialogue(entity.getName())
-        dialogue.setEntity(entity);
-        setDialogueHandle(dialogue, entity);
+        System.out.println(entity.getName());
+        if (entity instanceof QuestNPC questNPC) {
+            questNPC.setQuestCompleted(questNPC.checkIfPlayerHasQuestItem(player));
+            entity.setDialoguePath(entity.getDialoguePath());
+            if (questNPC.isQuestCompleted()) {
+                entity.setDialoguePath(entity.getName() + "_completed.json");
+            }
+            Dialogue questDialogue = new Dialogue(entity.getDialoguePath());
+            questDialogue.setEntity(entity);
+            setDialogueHandle(questDialogue, entity);
+            if (!questNPC.isQuestCompleted()) {
+                questNPC.setDialoguePath(entity.getName() + "_default.json");
+            }
+        } else {
+            Dialogue dialogue = new Dialogue(entity.getDialoguePath());
+            dialogue.setEntity(entity);
+            setDialogueHandle(dialogue, entity);
+        }
     }
     private void setDialogueHandle(Dialogue dialogue, Entity dialogueEntity) {
         Scene scene = stage.getScene();
@@ -267,7 +328,7 @@ public class GameLogic {
             if (dialogue.getAction() != null) {//work only from the second option
                 handleDialogueAction(dialogue.getAction(), dialogueEntity);
                 dialogue.setAction(null);
-                if (Objects.equals(dialogueEntity.getBehaviour(), Constants.AGGRESSIVE)) {
+                if (Objects.equals(dialogueEntity.getBehaviour(), Constants.Behaviour.AGGRESSIVE)) {
                     dialogue.closeDialogue();
                     stage.setScene(scene);
                     setPlayerHandle();
@@ -336,26 +397,29 @@ public class GameLogic {
         if (Objects.equals(action, "negative")) {
             dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
             if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
-                dialogueEntity.setBehaviour(Constants.AGGRESSIVE);
+                dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
             }
             System.out.println(dialogueEntity.getNegativeCount());
         }
         if (Objects.equals(action, "fight")) {
-            dialogueEntity.setBehaviour(Constants.AGGRESSIVE);
+            dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
         }
         if (Objects.equals(action, "check ticket")) {
             if (checker.checkIfPlayerHasTicket(player.getPlayerInventory().getItemsArray())) {
-                dialogueEntity.setBehaviour(Constants.NEUTRAL);
+                dialogueEntity.setBehaviour(Constants.Behaviour.NEUTRAL);
             } else {
                 dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
                 if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
-                    dialogueEntity.setBehaviour(Constants.AGGRESSIVE);
+                    dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                 }
             }
         }
     }
 
     private void openWagonDoor(Door door) {
+        gameState = Constants.Event.DEFAULT_EVENT;
+        eventStartTime = 0;
+        eventDuration = 0;
         if (door.getTargetId() == -1) {
 //            String[] wagonTypes = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
             String[] wagonTypes = {"CARGO"};
@@ -566,9 +630,9 @@ public class GameLogic {
         for (Entity entity : wagon.getEntities()) {
             if (entity != null && entity.isAlive()) {
                 if (entity.getNegativeCount() >= entity.getNegativeThreshold()) {
-                    entity.setBehaviour(Constants.AGGRESSIVE);
+                    entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                 }
-                if (Objects.equals(entity.getBehaviour(), Constants.NEUTRAL)) {
+                if (Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
                     continue;
                 }
                 moveEntities();
@@ -588,7 +652,7 @@ public class GameLogic {
     public void moveEntities() {
         if (wagon.getEntities() != null) {
             for (Entity entity : wagon.getEntities()) {
-                if (entity != null && entity.isAlive() && Objects.equals(entity.getBehaviour(), Constants.AGGRESSIVE)) {
+                if (entity != null && entity.isAlive() && Objects.equals(entity.getBehaviour(), Constants.Behaviour.AGGRESSIVE)) {
                     //check if the entity can see the player
                     if (!checker.checkIfEntityCanSee(entity, player, isometric.getTwoAndTallerWalls(), time)) {
                         returnToStart(wagon.getMapForPathFinder(false), entity);
