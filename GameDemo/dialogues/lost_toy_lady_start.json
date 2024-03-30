@@ -1,0 +1,74 @@
+{
+  "dialogues": [
+    {
+      "id": "lostToyDialogue1",
+      "text": "Excuse me, could I have a moment of your time?",
+      "options": [
+        {
+          "text": "Sure, what's on your mind?",
+          "nextDialogue": "lostToyDialogue2"
+        },
+        {
+          "text": "Sorry, I'm busy right now.",
+          "nextDialogue": "lostToyDialogue3"
+        },
+        {
+          "text": "Who are you and what do you want?",
+          "nextDialogue": "lostToyDialogue3"
+        },
+        {
+          "text": "I don't have time for this.",
+          "nextDialogue": "lostToyDialogue3"
+        }
+      ]
+    },
+    {
+      "id": "lostToyDialogue2",
+      "text": "Thank you. I'm desperately seeking help to find my son's lost toy. It's the only thing he had with him when he disappeared. Please, can you help me find it? I believe it holds the key to bringing him back.",
+      "options": [
+        {
+          "text": "Of course, I'll do my best to help.",
+          "nextDialogue": "lostToyDialogue4"
+        },
+        {
+          "text": "I'm sorry, but I can't help you right now.",
+          "nextDialogue": "lostToyDialogue5"
+        }
+      ]
+    },
+    {
+      "id": "lostToyDialogue3",
+      "text": "Please, I beg of you. My son's toy is the only thing he had with him when he disappeared. I believe it holds the key to bringing him back. Please, can you help me find it?",
+      "options": [
+        {
+          "text": "I'll do my best to help.",
+            "nextDialogue": "lostToyDialogue4"
+        },
+        {
+          "text": "I'm sorry, but I can't help you right now.",
+            "nextDialogue": "lostToyDialogue5"
+        },
+        {
+          "text": "Your son's toy is not my problem.",
+          "nextDialogue": "lostToyDialogue6",
+            "action": "negative"
+        }
+      ]
+    },
+    {
+      "id": "lostToyDialogue4",
+      "text": "Oh, thank you so much! Please, search high and low. I'll be forever grateful if you can find it.",
+      "options": []
+    },
+    {
+      "id": "lostToyDialogue5",
+      "text": "I understand. If you change your mind, please let me know. My son's happiness depends on finding that toy.",
+      "options": []
+    },
+    {
+      "id": "lostToyDialogue6",
+      "text": "How can you be so heartless? You deserve to be lost and alone, just like my son. I hope you never find your way back.",
+      "options": []
+    }
+  ]
+}

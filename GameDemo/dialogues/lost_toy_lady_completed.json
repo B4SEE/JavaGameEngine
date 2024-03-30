@@ -1,0 +1,9 @@
+{
+  "dialogues": [
+    {
+      "id": "lostToyCompletedDialogue1",
+      "text": "Thank you so much for finding my toy! I was so worried about it. I'm so grateful for your help.",
+      "options": []
+    }
+  ]
+}

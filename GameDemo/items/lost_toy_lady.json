@@ -1,0 +1,7 @@
+{
+  "quest_item_data": {
+    "name": "Quest Item 1",
+    "texturePath": "chest_object_1.png",
+    "value": 0
+  }
+}
