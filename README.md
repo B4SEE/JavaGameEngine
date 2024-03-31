@@ -85,10 +85,10 @@ Completed documentation from the user's perspective.
 - :heavy_check_mark: If the level files are not "human-editable", an editor for these files must be created.
 
 
-- :construction: A method of overcoming obstacles using hints and/or tools will be implemented within the game (the player will get the necessary information from NPCs during dialogue, use water to put out a fire in a path, build a bridge of iron over a lava field, etc.).
+- :heavy_check_mark: A method of overcoming obstacles using hints and/or tools will be implemented within the game (the player will get the necessary information from NPCs during dialogue, use water to put out a fire in a path, build a bridge of iron over a lava field, etc.).
 
 
-- :construction: The hero will be able to interact with other objects using some of the items he has collected (open a door with a key, smash a chest with a stick, etc.).
+- :heavy_check_mark: The hero will be able to interact with other objects using some of the items he has collected (open a door with a key, smash a chest with a stick, etc.).
 
 
 - :heavy_check_mark: The hero will be able to use the collected materials to make a certain object (make a lamp out of a light bulb and a battery, make bread out of wheat, water and fire, etc.).
