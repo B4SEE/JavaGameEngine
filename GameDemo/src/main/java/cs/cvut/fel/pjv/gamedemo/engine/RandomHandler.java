@@ -2,20 +2,18 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Firearm;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Food;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Item;
-import cs.cvut.fel.pjv.gamedemo.common_classes.MeleeWeapon;
+import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 public class RandomHandler {
     public  RandomHandler() {
     }
-    public String getRandomDialogueThatStartsWith(String start) {
+    public static String getRandomDialogueThatStartsWith(String start) {
         File folder = new File("dialogues/");
         File[] listOfFiles = folder.listFiles();
         List<File> listOfFilesThatStartWith = new java.util.ArrayList<>();
@@ -36,7 +34,7 @@ public class RandomHandler {
         System.out.println("--------------------");
         return randomDialogue;
     }
-    public Item getRandomDefaultItem() {
+    public static Item getRandomDefaultItem() {
         ObjectMapper objectMapper = new ObjectMapper();
         Item item = null;
         try {
@@ -51,7 +49,7 @@ public class RandomHandler {
         return item;
     }
 
-    public Food getRandomFoodItem() {
+    public static Food getRandomFoodItem() {
         ObjectMapper objectMapper = new ObjectMapper();
         Food food = null;
         try {
@@ -66,7 +64,7 @@ public class RandomHandler {
         }
         return food;
     }
-    public MeleeWeapon getRandomMeleeItem() {
+    public static MeleeWeapon getRandomMeleeItem() {
         ObjectMapper objectMapper = new ObjectMapper();
         MeleeWeapon melee = null;
         try {
@@ -82,7 +80,7 @@ public class RandomHandler {
         return melee;
     }
 
-    public Firearm getRandomFirearmItem() {
+    public static Firearm getRandomFirearmItem() {
         ObjectMapper objectMapper = new ObjectMapper();
         Firearm firearm = null;
         try {
@@ -97,7 +95,7 @@ public class RandomHandler {
         }
         return firearm;
     }
-    public Item getQuestItem(String name) {
+    public static Item getQuestItem(String name) {
         //list all files from items directory
         File file = new File("items/" + name + ".json");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -112,7 +110,7 @@ public class RandomHandler {
         }
         return questItem;
     }
-    public String getRandomWagonTypeLayout(String wagonType) {
+    public static String getRandomWagonTypeLayout(String wagonType) {
         //list all files from wagons directory
         List<File> listOfFilesThatStartWith = getListOfFilesThatStartWith(wagonType, "maps/common");
         String randomWagon;
@@ -124,7 +122,7 @@ public class RandomHandler {
         System.out.println(randomWagon);
         return randomWagon;
     }
-    public List<File> getListOfFilesThatStartWith(String start, String path) {
+    public static List<File> getListOfFilesThatStartWith(String start, String path) {
         //list all files from path directory
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
@@ -141,7 +139,7 @@ public class RandomHandler {
         }
         return listOfFilesThatStartWith;
     }
-    public Item getRandomNecessaryToSpawnItem() {
+    public static Item getRandomNecessaryToSpawnItem() {
         for (File file : getListOfFilesThatStartWith("necessary_to_spawn_item", "items/")) {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -156,5 +154,63 @@ public class RandomHandler {
             }
         }
         return null;
+    }
+    public static Item getRandomKey() {
+        //constants.minvalue, constants.maxvalue
+        int value = Math.max(Constants.MIN_KEY_VALUE, (int) (Math.random() * Constants.MAX_KEY_VALUE));
+        return new Item("key", "orange.png", value);//TODO get random texture that starts with *name*
+    }
+    public static File getRandomMusicFile(String path) {
+        File folder = new File("resources/sounds/" + path);
+        System.out.println(folder.getPath());
+        List<File> listOfFiles = new java.util.ArrayList<>();
+        for (File file : Objects.requireNonNull(folder.listFiles())) {
+            if (file.isFile()) {
+                listOfFiles.add(file);
+            }
+        }
+        return listOfFiles.get((int) (Math.random() * listOfFiles.size()));
+    }
+    public static void fillInventoryWithRandomItems(Inventory inventory) {
+        for (int k = 0; k < inventory.inventorySize; k++) {
+            //generate random chance for each item
+            int chance = (int) (Math.random() * 100);
+            int generate = (int) (Math.random() * 100);
+            if (chance > generate) {
+                //get random number for item type: 1 - default, 2 - melee, 3 - firearm, 4 - food, 5 - necessary to spawn item, 6 - key
+                int itemType = (int) (Math.random() * 5 + 1);
+                switch (itemType) {
+                    case 1:
+                        inventory.addItem(getRandomDefaultItem());
+                        break;
+                    case 2:
+                        inventory.addItem(getRandomMeleeItem());
+                        break;
+                    case 3:
+                        inventory.addItem(getRandomFirearmItem());
+                        break;
+                    case 4:
+                        inventory.addItem(getRandomFoodItem());
+                        break;
+                    case 5:
+                        inventory.addItem(getRandomNecessaryToSpawnItem());
+                        break;
+                    case 6:
+                        inventory.addItem(getRandomKey());
+                        Events.setCanSpawnLockedDoor(true);
+                        break;
+                }
+            } else {
+                inventory.addItem(null);
+            }
+        }
+//        System.out.println("Inventory filled with random items: ");
+//        for (Item item : inventory.getItemsArray()) {
+//            if (item != null) {
+//                System.out.println(item.getName());
+//            } else {
+//                System.out.println("null");
+//            }
+//        }
     }
 }
