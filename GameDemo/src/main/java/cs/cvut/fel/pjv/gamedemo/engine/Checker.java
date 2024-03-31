@@ -23,7 +23,7 @@ public class Checker {
      * @param map - map to check
      * @return - true if map is valid, false if not
      */
-    public boolean checkMap(String map) {
+    public static boolean checkMap(String map) {
         String[] lines = map.split("\n");
         //if map is only one line long, check if it uses separator for rows
         if (lines.length == 1) {
@@ -39,7 +39,7 @@ public class Checker {
         }
         return checkHowManyDoors(lines);
     }
-    public boolean checkIfWagonHasTrap(Object[][] objects) {
+    public static boolean checkIfWagonHasTrap(Object[][] objects) {
         if (objects == null) {
             return false;
         }
@@ -55,7 +55,7 @@ public class Checker {
         }
         return false;
     }
-    private boolean checkLinesLength(String[] lines) {
+    private static boolean checkLinesLength(String[] lines) {
         //check if all map lines are the same length
         int lineLength = lines[0].length();
         if (lineLength < 4) {
@@ -69,7 +69,7 @@ public class Checker {
         System.out.println("lines checked");
         return true;
     }
-    private boolean checkMapCodes(String[] lines) {
+    private static boolean checkMapCodes(String[] lines) {
         //check if all map codes have the same number of characters (4)
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
@@ -83,7 +83,7 @@ public class Checker {
         }
         return checkIfCodeIsInDictionary(lines);
     }
-    private boolean checkIfCodeIsInDictionary(String[] lines) {
+    private static boolean checkIfCodeIsInDictionary(String[] lines) {
         //check if all map codes are valid (are in Constant dictionaries)
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
@@ -116,7 +116,13 @@ public class Checker {
         }
         return true;
     }
-    private boolean checkHowManyDoors(String[] lines) {
+    public static boolean checkIfPlayerHasKeyInMainHand(Player player) {
+        if (player.getPlayerInventory().getMainHandItem() != null) {
+            return player.getPlayerInventory().getMainHandItem().getType().equals(Constants.ItemType.KEY);
+        }
+        return false;
+    }
+    private static boolean checkHowManyDoors(String[] lines) {
         int doors = 0;
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
@@ -136,7 +142,7 @@ public class Checker {
      * Check if the player can interact with the objects.
      * @return the object the player can interact with, null otherwise
      */
-    public Object checkIfCanInteract(Entity entity, Object[] interactiveObjects) {
+    public static Object checkIfCanInteract(Entity entity, Object[] interactiveObjects) {
         if (interactiveObjects == null) {
             return null;
         }
@@ -147,7 +153,7 @@ public class Checker {
         }
         return null;
     }
-    public Entity checkIfPlayerCanSpeak(Player player, List<Entity> entities) {
+    public static Entity checkIfPlayerCanSpeak(Player player, List<Entity> entities) {
         if (entities == null) {
             return null;
         }
@@ -162,7 +168,7 @@ public class Checker {
         }
         return null;
     }
-    public boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacle, long time) {
+    public static boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacle, long time) {
         Line sightLine = new Line(entity.getPositionX() + 32, entity.getPositionY() + 80, target.getPositionX() + 32, target.getPositionY() + 80);
         if (checkCollision(sightLine, obstacle)) {
             if ((time - entity.getWhenStartedPursuing() != 0 && (time - entity.getWhenStartedPursuing()) % 13 == 0) || entity.getWhenStartedPursuing() == 0) {
@@ -175,7 +181,7 @@ public class Checker {
         }
         return true;
     }
-    public boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
+    public static boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
         Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 80, aimX, aimY);
         aimLine.setStrokeWidth(10);
         Circle shootHitbox = (Circle) target.getHitbox();
@@ -204,7 +210,7 @@ public class Checker {
         }
         return false;
     }
-    public boolean checkIfEntityStuck(Entity entity) {
+    public static boolean checkIfEntityStuck(Entity entity) {
         Point2D currentPosition = new Point2D(entity.getPositionX(), entity.getPositionY());
         //check if the entity has already visited the current position
         if (entity.getPreviousPositions().contains(currentPosition)) {
@@ -222,10 +228,10 @@ public class Checker {
         //check if entity is stuck
         return entity.getCounter() > Constants.MAX_COUNTER;
     }
-    public boolean checkIfPlayerHasTicket(Item[] itemsArray) {
+    public static boolean checkIfPlayerHasTicket(Item[] itemsArray) {
         for (Item item : itemsArray) {
             if (item != null) {
-                if (item.getType().equals(Constants.VALID_TICKET)) {
+                if (item.getType() == Constants.ItemType.VALID_TICKET) {
                     return true;
                 }
             }
@@ -238,11 +244,11 @@ public class Checker {
      * @param hitbox2 the second hitbox
      * @return true if there is a collision, false otherwise
      */
-    public boolean checkCollision(Shape hitbox1, Shape hitbox2) {
+    public static boolean checkCollision(Shape hitbox1, Shape hitbox2) {
         Shape intersect = Shape.intersect(hitbox1, hitbox2);
         return !intersect.getBoundsInParent().isEmpty();
     }
-    public int[] getCollisionPoint(Shape hitbox1, Shape hitbox2) {
+    public static int[] getCollisionPoint(Shape hitbox1, Shape hitbox2) {
         Shape intersect = Shape.intersect(hitbox1, hitbox2);
         if (!intersect.getBoundsInParent().isEmpty()) {
             return new int[]{(int) intersect.getBoundsInParent().getMinX(), (int) intersect.getBoundsInParent().getMinY()};
@@ -255,7 +261,7 @@ public class Checker {
      * @param objectIsoXY the object's isometric x and y position
      * @return true if the x position of the object is within the player's range, false otherwise
      */
-    public boolean checkX(Entity entity, double[] objectIsoXY) {
+    public static boolean checkX(Entity entity, double[] objectIsoXY) {
         return (objectIsoXY[0] > entity.getPositionX() - Constants.TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * Constants.TILE_WIDTH);
     }
     /**
@@ -264,7 +270,7 @@ public class Checker {
      * @param objectTexture the object's texture
      * @return true if the y position of the object is lower than the player's y position, false otherwise
      */
-    public boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
+    public static boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
         return (entity.getPositionY() + (double) Constants.TILE_HEIGHT / 2 + entity.getHeight() * Constants.TILE_HEIGHT < (objectIsoXY[1] - Constants.TILE_HEIGHT + objectTexture.getHeight()));
     }
 }
