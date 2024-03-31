@@ -7,7 +7,7 @@ public class Food extends Item {
     public final int nourishment;
 
     public Food(String name, String texturePath, int nourishment) {
-        super(name, texturePath, "FOOD");
+        super(name, texturePath, Constants.ItemType.FOOD);
         this.nourishment = nourishment;
     }
 }

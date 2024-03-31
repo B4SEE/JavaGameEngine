@@ -8,12 +8,12 @@ public class MeleeWeapon extends Item {
     private final int attackSpeed;
 
     public MeleeWeapon(String name, String texturePath, int attackSpeed) {
-        super(name, texturePath, "WEAPON");
+        super(name, texturePath, Constants.ItemType.MELEE_WEAPON);
         this.attackSpeed = attackSpeed;
     }
 
     public MeleeWeapon(String name, String texturePath, int damage, int attackSpeed) {
-        super(name, texturePath, "WEAPON");
+        super(name, texturePath, Constants.ItemType.MELEE_WEAPON);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
     }

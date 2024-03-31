@@ -1,7 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
-import javafx.scene.Scene;
 import javafx.scene.shape.Shape;
 
 import java.util.List;
@@ -134,17 +133,17 @@ public class Player extends Entity {
         if (playerInventory.getMainHandItem() == null) {
             return;
         }
-        if (playerInventory.getMainHandItem() instanceof Food) {
-            eat((Food) playerInventory.getMainHandItem());
+        if (playerInventory.getMainHandItem() instanceof Food food) {
+            eat(food);
             playerInventory.setMainHandItem(null);
-        } else if (playerInventory.getMainHandItem() instanceof MeleeWeapon) {
-            super.setDamage(super.getDamage() + ((MeleeWeapon) playerInventory.getMainHandItem()).getDamage());
-            super.setCooldown(((MeleeWeapon) playerInventory.getMainHandItem()).getAttackSpeed());
+        } else if (playerInventory.getMainHandItem() instanceof MeleeWeapon meleeWeapon) {
+            super.setDamage(super.getDamage() + (meleeWeapon.getDamage()));
+            super.setCooldown(meleeWeapon.getAttackSpeed());
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
             super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
             super.setCooldown(2);//entities will not judge player's attack with knife, because they "can't see" the knife.
-        } else if (playerInventory.getMainHandItem() instanceof Firearm) {
+        } else if (playerInventory.getMainHandItem() instanceof Firearm) {//hit (!shoot) with firearm
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
         }

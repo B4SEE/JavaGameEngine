@@ -12,7 +12,7 @@ public class Item {
     @JsonProperty("texturePath")
     private final String texturePath;
     @JsonIgnore
-    private String type;
+    private Constants.ItemType type;
     @JsonProperty("value")
     private int value;
 
@@ -22,7 +22,7 @@ public class Item {
         this.value = value;
     }
 
-    public Item(String name, String texturePath, String type) {
+    public Item(String name, String texturePath, Constants.ItemType type) {
         this.name = name;
         this.texturePath = texturePath;
         this.type = type;
@@ -38,12 +38,12 @@ public class Item {
     }
 
     @JsonIgnore
-    public void setType(String type) {
+    public void setType(Constants.ItemType type) {
         this.type = type;
     }
 
     @JsonIgnore
-    public String getType() {
+    public Constants.ItemType getType() {
         return type;
     }
 

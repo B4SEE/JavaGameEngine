@@ -1,7 +1,5 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 
@@ -15,10 +13,10 @@ public class QuestNPC extends Entity {
     public QuestNPC(String name, String texturePath) {
         super(name, texturePath);
         super.setAsDefaultNPC();
+        super.setType(Constants.EntityType.QUEST_NPC);
         setDialoguePath(name + "_start.json");
         String nameWithoutSpaces = name.replaceAll("\\s", "");
-        RandomHandler randomHandler = new RandomHandler();
-        this.questItem = randomHandler.getQuestItem(nameWithoutSpaces);
+        this.questItem = RandomHandler.getQuestItem(nameWithoutSpaces);
         writeQuestItemToNecessaryToSpawnItems();
     }
     public Item getQuestItem() {
@@ -47,9 +45,8 @@ public class QuestNPC extends Entity {
         //write to necessary_to_spawn_item.json
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            RandomHandler randomHandler = new RandomHandler();
-            randomHandler.getListOfFilesThatStartWith("necessary_to_spawn_item", "items/");
-            int count = randomHandler.getListOfFilesThatStartWith("necessary_to_spawn_item", "items/").size();
+            RandomHandler.getListOfFilesThatStartWith("necessary_to_spawn_item", "items/");
+            int count = RandomHandler.getListOfFilesThatStartWith("necessary_to_spawn_item", "items/").size();
             FileWriter file = new FileWriter("items/necessary_to_spawn_item_" + count + ".json");
             objectMapper.writeValue(file, questItem);
         } catch (IOException e) {

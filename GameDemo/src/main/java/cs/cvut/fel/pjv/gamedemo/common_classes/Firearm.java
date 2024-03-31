@@ -5,7 +5,7 @@ public class Firearm extends Item {
     private int shootingSpeed;
 
     public Firearm(String name, String texturePath, int damage, int shootingSpeed) {
-        super(name, texturePath, "WEAPON");
+        super(name, texturePath, Constants.ItemType.FIREARM);
         this.damage = damage;
         this.shootingSpeed = shootingSpeed;
     }

@@ -29,7 +29,7 @@ public class Entity {
     private int negativeCount = 0;
     private double startPositionX;
     private double startPositionY;
-    private int[] startIndex;
+    private int[] targetIndex;
     private List<Point2D> previousPositions = new ArrayList<>();
     private int counter = 0;
     private int[] lastKnownPosition = new int[]{0, 0};
@@ -116,8 +116,7 @@ public class Entity {
         setBehaviour(Constants.Behaviour.NEUTRAL);
         setInitialBehaviour(getBehaviour());
         if (dialoguePath == null) {
-            RandomHandler randomHandler = new RandomHandler();
-            dialoguePath = randomHandler.getRandomDialogueThatStartsWith(name);
+            dialoguePath = RandomHandler.getRandomDialogueThatStartsWith(name);
 //            System.out.println(randomHandler.getRandomDialogueThatStartsWith(name));
         }
         negativeThreshold = (int) (Math.random() * 10 + 1);
@@ -191,11 +190,11 @@ public class Entity {
     }
 
     public void setStartIndex(int[] startIndex) {
-        this.startIndex = startIndex;
+        this.targetIndex = startIndex;
     }
 
     public int[] getStartIndex() {
-        return startIndex;
+        return targetIndex;
     }
     public void setPositionX(double positionX) {
         this.positionX = positionX;
@@ -358,13 +357,12 @@ public class Entity {
      * @return list of entities in the attack range of the entity
      */
     public List<Entity> inAttackRange(List<Entity> entities) {
-        Checker checker = new Checker();
         List<Entity> inRange = new ArrayList<>();
         int i = 0;
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity != this) {
-                    if (entity.isAlive() && checker.checkCollision(attackRange, entity.getHitbox())) {
+                    if (entity.isAlive() && Checker.checkCollision(attackRange, entity.getHitbox())) {
                         inRange.add(entity);
                         i++;
                     }
@@ -401,8 +399,8 @@ public class Entity {
         }
     }
     public int[][] findPath(int[][] map, Object[][] objectsArray, Entity target, boolean returnToStart) {
-        if (startIndex == null) {
-            startIndex = findOnWhatObject(this, objectsArray);
+        if (targetIndex == null) {
+            targetIndex = findOnWhatObject(this, objectsArray);
         }
 
         int[][] path;
@@ -415,7 +413,7 @@ public class Entity {
         }
 
         if (returnToStart) {
-            targetPosition = startIndex;
+            targetPosition = targetIndex;
         }
 
         PathFinder.Pair src = new PathFinder.Pair(startPosition[0], startPosition[1]);
@@ -427,12 +425,11 @@ public class Entity {
         return path;
     }
     public int[] findOnWhatObject(Entity target, Object[][] objectsArray) {
-        Checker checker = new Checker();
         for (int i = 0; i < objectsArray.length; i++) {
             for (int j = 0; j < objectsArray[0].length; j++) {
                 if (objectsArray[i][j] != null) {
                     //reduce the hitbox size of the object to make it easier to find the object
-                    if (checker.checkCollision(target.getTrackPoint(), objectsArray[i][j].getObjectHitbox())) {
+                    if (Checker.checkCollision(target.getTrackPoint(), objectsArray[i][j].getObjectHitbox())) {
                         int[] result = new int[2];
                         result[0] = i;
                         result[1] = j;
@@ -455,4 +452,5 @@ public class Entity {
     public int getCounter() {
         return counter;
     }
+
 }

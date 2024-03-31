@@ -1,11 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Player;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Wagon;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
-import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
-import cs.cvut.fel.pjv.gamedemo.engine.Isometric;
 import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -16,21 +12,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 /**
  * Class for loading custom maps.
@@ -204,14 +196,13 @@ public class CustomMapLoader extends Application {
         final int[] count = {0};
         EventHandler<ActionEvent> removeEvent = e -> {
             MapLoader mapLoader = new MapLoader();
-            Checker checker = new Checker();
             File folder = new File("maps/common");
             File[] listOfFiles = folder.listFiles();
             List<File> filesToMove;
-            filesToMove = getInvalidMaps(count, mapLoader, checker, listOfFiles);
+            filesToMove = getInvalidMaps(count, mapLoader, listOfFiles);
             folder = new File("maps/custom");
             listOfFiles = folder.listFiles();
-            filesToMove.addAll(getInvalidMaps(count, mapLoader, checker, listOfFiles));
+            filesToMove.addAll(getInvalidMaps(count, mapLoader, listOfFiles));
             for (File f : filesToMove) {
                 try {
                     //create a copy of the file and move it to the invalid maps folder
@@ -251,14 +242,14 @@ public class CustomMapLoader extends Application {
         return removeButton;
     }
 
-    private List<File> getInvalidMaps(int[] count, MapLoader mapLoader, Checker checker, File[] listOfFiles) {
+    private List<File> getInvalidMaps(int[] count, MapLoader mapLoader, File[] listOfFiles) {
         List<File> filesToMove = new java.util.ArrayList<>();
         if (listOfFiles != null) {
             for (File f : listOfFiles) {
                 if (f.isFile()) {
                     String unparsedSeed = mapLoader.load(f.getPath());
                     String parsedSeed = mapLoader.parseMap(unparsedSeed);
-                    if (!checker.checkMap(parsedSeed)) {
+                    if (!Checker.checkMap(parsedSeed)) {
                         filesToMove.add(f);
                         count[0]++;
                     }
@@ -399,8 +390,7 @@ public class CustomMapLoader extends Application {
 
     private boolean loadTxtMap(String map, String filename) {
         //check if the map is valid
-        Checker checker = new Checker();
-        if (!checker.checkMap(map)) {
+        if (!Checker.checkMap(map)) {
             return false;
         }
         //load the map

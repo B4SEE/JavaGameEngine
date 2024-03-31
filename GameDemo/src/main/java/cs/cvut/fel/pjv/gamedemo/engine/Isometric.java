@@ -22,7 +22,6 @@ import java.util.List;
  * Class for isometric graphics logic.
  */
 public class Isometric {
-    private final Checker checker = new Checker();
     private int deltaX = 10;
     private int deltaY = 0;
     private String map = "";
@@ -101,7 +100,7 @@ public class Isometric {
             System.out.println("Exiting the program");
             System.exit(1);
         }
-        if (!checker.checkMap(map)) {
+        if (!Checker.checkMap(map)) {
             System.out.println("Map string is not valid");
             System.out.println("Exiting the program");
             System.exit(1);
@@ -383,8 +382,8 @@ public class Isometric {
         entity.getTrackPoint().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
         entity.getAttackRange().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
         entity.getAttackRange().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
-
-        return !checker.checkCollision(entity.getHitbox(), walls);
+        //check collision with walls
+        return !Checker.checkCollision(entity.getHitbox(), walls);
     }
     /**
      * Update all the objects in the game.
@@ -403,7 +402,7 @@ public class Isometric {
      * @param deltaY the delta y
      */
     public void moveGrid(int deltaX, int deltaY) {
-        if (checker.checkCollision(player.getHitbox(), walls)) {
+        if (Checker.checkCollision(player.getHitbox(), walls)) {
             this.deltaX -= deltaX;
             this.deltaY -= deltaY;
             return;
@@ -534,14 +533,14 @@ public class Isometric {
     }
 
     private boolean isEntitiesDrawn(boolean playerDrawn, Image objectTexture, double[] objectIsoXY) {
-        if (checker.checkX(player, objectIsoXY) && checker.checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
+        if (Checker.checkX(player, objectIsoXY) && Checker.checkY(player, objectIsoXY, objectTexture) && !playerDrawn) {
             drawEntity(player);
             playerDrawn = true;
         }
         if (entities != null) {
             for (Entity entity : entities) {
                 if (entity != null && entity.isAlive() && !drawnEntities.contains(entity)) {
-                    if (checker.checkX(entity, objectIsoXY) && checker.checkY(entity, objectIsoXY, objectTexture)) {
+                    if (Checker.checkX(entity, objectIsoXY) && Checker.checkY(entity, objectIsoXY, objectTexture)) {
                         drawEntity(entity);
                         drawnEntities.add(entity);
                     }
@@ -773,8 +772,8 @@ public class Isometric {
         bulletHitbox.setEndY(player.getPositionY() + 64 + (mouseY - player.getPositionY() - 64) * ratio);
 
         //if collision with walls, set end of line to the point of collision
-        if (checker.checkCollision(bulletHitbox, twoAndTallerWalls)) {
-            int[] collisionPoint = checker.getCollisionPoint(bulletHitbox, twoAndTallerWalls);
+        if (Checker.checkCollision(bulletHitbox, twoAndTallerWalls)) {
+            int[] collisionPoint = Checker.getCollisionPoint(bulletHitbox, twoAndTallerWalls);
             bulletHitbox = new Line(player.getPositionX() + 32, player.getPositionY() + 64, collisionPoint[0], collisionPoint[1]);
             bulletHitbox.setStyle("-fx-stroke: #0095ff; -fx-stroke-width: 1; -fx-opacity: 0.5;");
         }
