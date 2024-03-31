@@ -78,32 +78,28 @@ public class GameLogic {
                             //time to escape from the trap (to another wagon)
                             eventDuration = Constants.TIME_TO_ESCAPE_TRAP;
                             //set trap event: 1 - trap with enemies, 2 - trap with boss, 3 - trap with time loop, 4 - silence
-//                            int trapType = (int) (Math.random() * 4) + 1;
-//                            switch (trapType) {
-//                                case 1:
-//                                    Events.setNextEvent(Constants.Event.TRAP_EVENT);
-//                                    System.out.println("Trap event");
-//                                    break;
-//                                case 2:
-//                                    Events.setNextEvent(Constants.Event.TRAP_EVENT);
-//                                    //TODO: spawn boss
-//                                    break;
-//                                case 3:
-//                                    Events.setNextEvent(Constants.Event.TIME_LOOP_EVENT);
-//                                    int randomCounter = (int) (Math.random() * Constants.MAX_TIME_LOOP_COUNTER);
-//                                    System.out.println("Time loop event. Number of loops: " + randomCounter);
-//                                    Events.setTimeLoopCounter(randomCounter);
-//                                    break;
-//                                case 4:
-//                                    Events.setNextEvent(Constants.Event.SILENCE_EVENT);
-//                                    eventDuration = Constants.TIME_TO_ESCAPE_SILENCE;
-//                                    System.out.println("Silence event");
-//                                    break;
-//                            }
-                            Events.setNextEvent(Constants.Event.SILENCE_EVENT);
-                            eventDuration = Constants.TIME_TO_ESCAPE_SILENCE;
-                            Atmospheric.fadeOutMusic(0.05f);
-                            System.out.println("Silence event");
+                            int trapType = (int) (Math.random() * 4) + 1;
+                            switch (trapType) {
+                                case 1:
+                                    Events.setNextEvent(Constants.Event.TRAP_EVENT);
+                                    System.out.println("Trap event");
+                                    break;
+                                case 2:
+                                    Events.setNextEvent(Constants.Event.TRAP_EVENT);
+                                    //TODO: spawn boss
+                                    break;
+                                case 3:
+                                    Events.setNextEvent(Constants.Event.TIME_LOOP_EVENT);
+                                    int randomCounter = (int) (Math.random() * Constants.MAX_TIME_LOOP_COUNTER);
+                                    System.out.println("Time loop event. Number of loops: " + randomCounter);
+                                    Events.setTimeLoopCounter(randomCounter);
+                                    break;
+                                case 4:
+                                    Events.setNextEvent(Constants.Event.SILENCE_EVENT);
+                                    eventDuration = Constants.TIME_TO_ESCAPE_SILENCE;
+                                    System.out.println("Silence event");
+                                    break;
+                            }
                         }
                         //if the player does not escape from the trap in time, spawn enemies
                         if ((time - eventStartTime != 0) && (time - eventStartTime) >= eventDuration && Events.getCurrentEvent() == Constants.Event.DEFAULT_EVENT) {
