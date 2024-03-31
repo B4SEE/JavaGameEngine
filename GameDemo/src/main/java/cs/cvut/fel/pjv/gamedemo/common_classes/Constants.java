@@ -7,6 +7,8 @@ import java.util.Map;
  * Provide a single source of truth for all constants used in the game.
  */
 public class Constants {
+    public static final int MAX_TIME_LOOP_COUNTER = 10;
+    public static final int TIME_TO_ESCAPE_SILENCE = 15;
 
     public static final int TILE_WIDTH = 32;
     public static final int TILE_HEIGHT = 32;
@@ -53,6 +55,12 @@ public class Constants {
     public static final String VENDOR_SPAWN = "VE";
     public static final String QUEST_SPAWN = "QU";
     public static final String TRAP = "TR";
+    public static final int MIN_KEY_VALUE = 1;
+    public static final int MAX_KEY_VALUE = 10;
+    public static final int LOCKED_DOOR_SPAWN_CHANCE = 90;//15
+    public static final int TIME_LOOP_EVENT_CHANCE = 10;
+
+    public static final int TIME_TO_ESCAPE_TRAP = 5;
     //string constants for wagon types
     //string constants for entity's behaviour
     public enum Behaviour {
@@ -64,7 +72,9 @@ public class Constants {
     public enum EntityType {
         PLAYER,
         ENEMY,
-        NPC
+        NPC,
+        VENDOR,
+        QUEST_NPC
     }
     //char constants for map's int codes
     public static final String MAP_COLUMN_SEPARATOR = "_";
@@ -97,6 +107,14 @@ public class Constants {
         TRAP_EVENT,
         SILENCE_EVENT,
         TIME_LOOP_EVENT
+    }
+    public enum ItemType {
+        FOOD,
+        MELEE_WEAPON,
+        FIREARM,
+        DEFAULT,
+        VALID_TICKET,
+        KEY
     }
     //consider enum
     public static final Map <String, String> OBJECT_IDS = Map.ofEntries(
@@ -151,7 +169,7 @@ public class Constants {
             Map.entry("COMPARTMENT", new String[]{"gentleman", "lady", "child"}),
             Map.entry("RESTAURANT", new String[]{"gentleman", "lady"}),
             Map.entry("SLEEPER", new String[]{"gentleman", "lady", "child"}),
-            Map.entry("CARGO", new String[]{"gentleman", "lady", "child"})
+            Map.entry("CARGO", new String[]{"gentleman"})
     );
 
     public static final Map <List<String>, String> CRAFT_RECIPES = Map.ofEntries(
@@ -171,10 +189,4 @@ public class Constants {
             Map.entry("loop", 4),
             Map.entry("silence", 5)
     );
-
-//    public static final Map<Integer, Item> LOOT_TABLE_STANDARD = Map.ofEntries(
-//            Map.entry(0, new Food("orange", "orange.png", 15)),
-//            Map.entry(1, new MeleeWeapon("knife", "knife.png", 20, 1)),
-//            Map.entry(2, new Item("box", "chest_object_1.png"))
-//    );//luckily will be moved to .txt file
 }
