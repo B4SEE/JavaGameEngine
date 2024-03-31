@@ -4,12 +4,10 @@ import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Class representing the wagon, holds all the objects, interactive objects and entities that are in the wagon at the moment.
@@ -127,9 +125,8 @@ public class Wagon {
      */
     public void generateWagon() {
         // Generate the wagon
-        RandomHandler randomHandler = new RandomHandler();
         MapLoader mapLoader = new MapLoader();
-        String path = randomHandler.getRandomWagonTypeLayout(type);
+        String path = RandomHandler.getRandomWagonTypeLayout(type);
         String unparsedSeed = mapLoader.load(path);
         seed = mapLoader.parseMap(unparsedSeed);
         initWagon();
@@ -164,9 +161,7 @@ public class Wagon {
     public void initWagon() {
         // Initialize the wagon
 
-        Checker checker = new Checker();
-
-        if (!checker.checkMap(seed)) {
+        if (!Checker.checkMap(seed)) {
             System.out.println("Invalid seed");
             return;
         }
@@ -204,36 +199,7 @@ public class Wagon {
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
                         Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
                         object.setObjectInventory(new Inventory(Character.getNumericValue(subRows[j].charAt(1))));
-                        for (int k = 0; k < object.getObjectInventory().inventorySize; k++) {
-                            //generate random chance for each item
-                            int chance = (int) (Math.random() * 100);
-                            int generate = (int) (Math.random() * 100);
-                            RandomHandler randomHandler = new RandomHandler();
-                            if (chance > generate) {
-                                //get random number for item type: 1 - default, 2 - melee, 3 - firearm, 4 - food, 5 - necessary to spawn item
-                                int itemType = (int) (Math.random() * 5 + 1);
-                                System.out.println("Item type: " + itemType);
-                                switch (itemType) {
-                                    case 1:
-                                        object.getObjectInventory().addItem(randomHandler.getRandomDefaultItem());
-                                        break;
-                                    case 2:
-                                        object.getObjectInventory().addItem(randomHandler.getRandomMeleeItem());
-                                        break;
-                                    case 3:
-                                        object.getObjectInventory().addItem(randomHandler.getRandomFirearmItem());
-                                        break;
-                                    case 4:
-                                        object.getObjectInventory().addItem(randomHandler.getRandomFoodItem());
-                                        break;
-                                    case 5:
-                                        object.getObjectInventory().addItem(randomHandler.getRandomNecessaryToSpawnItem());
-                                        break;
-                                }
-                            } else {
-                                object.getObjectInventory().addItem(null);
-                            }
-                        }
+                        RandomHandler.fillInventoryWithRandomItems(object.getObjectInventory());
                         object.setHeight(1);
                         objectsArray[i][j] = object;
                     }
@@ -248,6 +214,16 @@ public class Wagon {
                         Door wagonDoor = new Door(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, Constants.NULL_WAGON_ID, null, false);
                         wagonDoor.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
                         wagonDoor.setTwoLetterId(letterID);//without this, the door's twoLetterId is null
+
+                        if (Events.canSpawnLockedDoor()) {//locked door can be spawned only if the player has at least one key (if the key was spawned in the chest or in vendor's inventory)
+                            int chance = (int) (Math.random() * 100);
+                            System.out.println("can spawn locked door");
+                            if (chance < Constants.LOCKED_DOOR_SPAWN_CHANCE) {
+                                wagonDoor.lock();
+                                Events.setCanSpawnLockedDoor(false);
+                                System.out.println("Locked wagon door spawned");
+                            }
+                        }
 
                         objectsArray[i][j] = wagonDoor;
                     }
@@ -312,7 +288,8 @@ public class Wagon {
                     if (letterID.equals(Constants.VENDOR_SPAWN)) {
                         String[] names = Constants.WAGON_TYPE_NPC.get(type);
                         String name = names[(int) (Math.random() * names.length)];
-                        Vendor vendor = new Vendor("vendor" + name, "vendor" + name + "_front.png");
+                        System.out.println("vendor_" + name);
+                        Vendor vendor = new Vendor("vendor_" + name, "zombie" + "_front.png");
                         vendor.setCurrentWagon(this);
                         vendor.setPositionX(500);
                         vendor.setPositionY(240);
