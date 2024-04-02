@@ -171,8 +171,7 @@ public class Isometric {
      */
     public void initialiseWagon(Wagon wagon) {
         if (wagon == null) {
-            wagon = new Wagon("DEFAULT");
-            wagon.generateWagon();
+            return;
         }
         setMap(wagon.getSeed());
         setObjectsToDraw(wagon.getObjectsArray());
@@ -595,7 +594,7 @@ public class Isometric {
             //add hunger bar
             Rectangle hungerBar = new Rectangle(entity.getPositionX(), entity.getPositionY() - barGap, barWidth, barHeight);
             hungerBar.setStyle("-fx-fill: #d07e00;");
-            hungerBar.setWidth((double) (barWidth * player.getHunger()) / player.getMaxHunger());
+            hungerBar.setWidth((double) (barWidth * player.getHunger()) / Constants.PLAYER_MAX_HUNGER);
             grid.getChildren().add(hungerBarBackground);
             grid.getChildren().add(hungerBar);
             grid.getChildren().add(aimLine);
@@ -615,6 +614,9 @@ public class Isometric {
                 int y = i * Constants.TILE_HEIGHT + deltaY * Constants.TILE_HEIGHT;
                 Polygon parallelogram = getObjectHitBox(x, y);
                 objectsToDraw[i][j].setObjectHitbox(parallelogram);
+//                if (objectsToDraw[i][j].getId() == 2) {
+//                    System.out.println(objectsToDraw[i][j].getObjectHitbox());
+//                }
             }
         }
     }

@@ -97,11 +97,6 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
             text.setY(100 + text2.getLayoutBounds().getHeight() + 50);
             grid.getChildren().add(text2);
             System.out.println("option text: " + currentOptionNode.get("text").asText());
-            try {
-                Thread.sleep(700);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
         grid.getChildren().add(text);
     }
@@ -122,6 +117,9 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
                 case ESCAPE:
                     currentDialogueNode = previousDialogueNode;
                     currentOptionNode = null;
+                    if (currentDialogueNode == null) {
+                        return;
+                    }
                     optionsNode = currentDialogueNode.get("options");
                     updateDialogue();
                     break;

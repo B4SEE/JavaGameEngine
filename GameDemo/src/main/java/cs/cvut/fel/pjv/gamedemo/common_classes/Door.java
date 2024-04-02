@@ -1,13 +1,19 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.*;
+
 /**
  * Object child class representing a door, which functions as a teleport to another wagon.
  */
 public class Door extends Object {
+    @JsonProperty("targetId")
     private int targetId;
+    @JsonProperty("teleport")
     private Object teleport;
+    @JsonProperty("isLocked")
     private boolean isLocked;
-    public Door(int id, String name, String texturePath, int targetId, Object teleport, boolean isLocked) {
+    @JsonCreator
+    public Door(@JsonProperty("id") int id, @JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("targetId") int targetId, @JsonProperty("teleport") Object teleport, @JsonProperty("isLocked") boolean isLocked) {
         super(id, name, texturePath);
         super.setTwoLetterId(Constants.WAGON_DOOR);
         super.setObjectInventory(null);
@@ -16,19 +22,19 @@ public class Door extends Object {
         this.teleport = teleport;
         this.isLocked = isLocked;
     }
-
+    @JsonIgnore
     public int getTargetId() {
         return targetId;
     }
-
+    @JsonSetter("targetId")
     public void setTargetId(int targetId) {
         this.targetId = targetId;
     }
-
+    @JsonIgnore
     public Object getTeleport() {
         return teleport;
     }
-
+    @JsonSetter("teleport")
     public void setTeleport(Object teleport) {
         this.teleport = teleport;
     }
@@ -37,6 +43,7 @@ public class Door extends Object {
      * Teleports the entity to the position of the teleport object.
      * @param entity - entity to be teleported
      */
+    @JsonIgnore
     public void teleport(Entity entity) {
         double objectIsoX = teleport.getIsoX();
         double objectIsoY = teleport.getIsoY();
@@ -49,17 +56,23 @@ public class Door extends Object {
     /**
      * Locks the door.
      */
+    @JsonIgnore
     public void lock() {
         isLocked = true;
     }
     /**
      * Unlocks the door.
      */
+    @JsonIgnore
     public void unlock() {
         isLocked = false;
     }
-
+    @JsonIgnore
     public boolean isLocked() {
         return isLocked;
+    }
+    @JsonSetter("isLocked")
+    public void setIsLocked(boolean isLocked) {
+        this.isLocked = isLocked;
     }
 }

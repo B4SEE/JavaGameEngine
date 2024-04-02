@@ -1,11 +1,12 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
-
 public class Vendor extends Entity {
+    @JsonProperty("vendorInventory")
     private Inventory vendorInventory;
-
-
     public Vendor(String name, String texturePath) {
         super(name, texturePath);
         setAsDefaultVendor();
@@ -17,13 +18,15 @@ public class Vendor extends Entity {
         vendorInventory.setVendor(true);
         vendorInventory.setInventoryLabel(this.getName());
     }
+    @JsonIgnore
     public Inventory getVendorInventory() {
         return vendorInventory;
     }
-
+    @JsonIgnore
     public void setVendorInventory(Inventory vendorInventory) {
         this.vendorInventory = vendorInventory;
     }
+    @JsonIgnore
     public void setAsDefaultVendor() {
         super.setAsDefaultNPC();
         super.setType(Constants.EntityType.VENDOR);

@@ -1,5 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,16 +15,25 @@ import javafx.scene.shape.Rectangle;
  * It has additional slots for main hand, crafting table and result slot and shows player's money and ammo.
  */
 public class PlayerInventory extends Inventory {
+    @JsonProperty("mainHandItem")
     private Item mainHandItem;
+    @JsonProperty("firstCraftingItem")
     private Item firstCraftingItem;
+    @JsonProperty("secondCraftingItem")
     private Item secondCraftingItem;
+    @JsonProperty("resultItem")
     private Item resultItem;
+    @JsonProperty("money")
     private int money = 0;
+    @JsonProperty("ammo")
     private int ammo = 0;
-
+    @JsonIgnore
     private final int[] mainHandSlotXY = new int[2];
+    @JsonIgnore
     private final int[] firstCraftingSlotXY = new int[2];
+    @JsonIgnore
     private final int[] secondCraftingSlotXY = new int[2];
+    @JsonIgnore
     private final int[] resultSlotXY = new int[2];
     public PlayerInventory() {
         super(Constants.PLAYER_INVENTORY_SIZE);
@@ -33,6 +44,7 @@ public class PlayerInventory extends Inventory {
      * Open inventory and set basic handler
      * @return scene
      */
+    @JsonIgnore
     @Override
     public Scene openInventory() {
         updateInventory();
@@ -44,6 +56,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Clear all buttons and reset handlers
      */
+    @JsonIgnore
     private void clearButton() {
         setSelectedItem(null);
         grid.getChildren().removeIf(node -> node instanceof Button);
@@ -57,6 +70,7 @@ public class PlayerInventory extends Inventory {
      * @param index - index of selected item
      * @return delete button
      */
+    @JsonIgnore
     private Button deleteButton(int index) {
         Button deleteButton = new Button("Delete");
         deleteButton.setPrefSize(100, 50);
@@ -77,6 +91,7 @@ public class PlayerInventory extends Inventory {
      * @param y - y coordinate of selected item
      * @return put back button
      */
+    @JsonIgnore
     private Button putBackButton(int x, int y) {
         Button putBackButton = new Button("Put back");
         putBackButton.setPrefSize(125, 50);
@@ -119,6 +134,7 @@ public class PlayerInventory extends Inventory {
      * @param index - index of selected item
      * @return put to craft table button
      */
+    @JsonIgnore
     private Button putToCraftTableButton(int index) {
         Button putToCraftTableButton = new Button("Craft");
         putToCraftTableButton.setPrefSize(100, 50);
@@ -148,6 +164,7 @@ public class PlayerInventory extends Inventory {
      * @param index - index of selected item
      * @return equip button
      */
+    @JsonIgnore
     private Button mainHandSlotButton(int index) {
         Button mainHandSlotButton = new Button("Equip");
         mainHandSlotButton.setPrefSize(100, 50);
@@ -167,6 +184,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Update inventory
      */
+    @JsonIgnore
     @Override
     public void updateInventory() {
         grid.getChildren().clear();
@@ -185,6 +203,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Draw main hand slot
      */
+    @JsonIgnore
     private void drawMainHandSlot() {
         int mainHandSlotGap = 1;
         Rectangle mainHandSlot = new Rectangle(Constants.SLOT_SIZE, Constants.SLOT_SIZE);
@@ -203,6 +222,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Draw crafting table
      */
+    @JsonIgnore
     private void drawCraftTable() {
         int craftSlotGap = 1;
 
@@ -265,6 +285,7 @@ public class PlayerInventory extends Inventory {
      * @param x - actual x coordinate of the slot
      * @return grid x coordinate
      */
+    @JsonIgnore
     private int getGridX(int x) {
         return (x - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP);
     }
@@ -274,6 +295,7 @@ public class PlayerInventory extends Inventory {
      * @param y - actual y coordinate of the slot
      * @return grid y coordinate
      */
+    @JsonIgnore
     private int getGridY(int y) {
         return (y - Constants.INVENTORY_LEFT_CORNER_Y) / (Constants.SLOT_SIZE + Constants.SLOT_GAP);
     }
@@ -283,6 +305,7 @@ public class PlayerInventory extends Inventory {
      * @param slot - slot where to draw
      * @param item - item to draw
      */
+    @JsonIgnore
     private void drawItemPreview(Rectangle slot, Item item) {
         ImageView imageView = new ImageView(new Image(item.getTexturePath()));
         imageView.setFitHeight(Constants.SLOT_SIZE);
@@ -295,6 +318,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Set basic handler for inventory: show item name on hover, select item on click.
      */
+    @JsonIgnore
     private void setSceneBasicHandler() {
         scene.setOnMouseMoved(e -> {
 
@@ -327,6 +351,7 @@ public class PlayerInventory extends Inventory {
      * @param actualY - y coordinate of mouse
      * @return grid x and y coordinates
      */
+    @JsonIgnore
     private int[] getMouseGridXY(double actualX, double actualY) {
         int x = (int) ((actualX - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         int y = (int) ((actualY - Constants.INVENTORY_LEFT_CORNER_Y) / (Constants.SLOT_SIZE + Constants.SLOT_GAP));
@@ -342,6 +367,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Set select handler for inventory: select item on click, deselect on second click.
      */
+    @JsonIgnore
     private void setSceneSelectHandler() {
         scene.setOnMouseClicked(e -> {
 
@@ -402,6 +428,7 @@ public class PlayerInventory extends Inventory {
      * it means that they cannot be selected by the basic handler (that select items from the inventory array by their index);
      * this also means that they are separate inventory slots and can hold items, making actual inventory size bigger (size + main hand slot + crafting table 2 slots)
      */
+    @JsonIgnore
     private void setNonInventorySelectionHandler(int x, int y, Item item, String buttonText) {
         clearSceneHandlers();
         updateInventory();
@@ -417,6 +444,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Set deselect handler for inventory: deselect item on click, clear all buttons and reset handlers.
      */
+    @JsonIgnore
     private void setSceneDeselectHandler() {
         scene.setOnMouseClicked(e1 -> {
             updateInventory();
@@ -430,6 +458,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Show player's money
      */
+    @JsonIgnore
     private void showMoney() {
         Label moneyLabel = new Label("Money: " + money);
         moneyLabel.setLayoutX(0);
@@ -441,6 +470,7 @@ public class PlayerInventory extends Inventory {
     /**
      * Show player's ammo
      */
+    @JsonIgnore
     private void showAmmo() {
         Label ammoLabel = new Label("Ammo: " + ammo);
         ammoLabel.setLayoutX(0);
@@ -448,22 +478,27 @@ public class PlayerInventory extends Inventory {
         ammoLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
         grid.getChildren().add(ammoLabel);
     }
+    @JsonIgnore
     public void setMoney(int money) {
         this.money = money;
     }
+    @JsonIgnore
     public int getMoney() {
         return money;
     }
+    @JsonIgnore
     public void setAmmo(int ammo) {
         this.ammo = ammo;
     }
+    @JsonIgnore
     public int getAmmo() {
         return ammo;
     }
+    @JsonIgnore
     public void setMainHandItem(Item item) {
         mainHandItem = item;
     }
-
+    @JsonIgnore
     public Item getMainHandItem() {
         return mainHandItem;
     }

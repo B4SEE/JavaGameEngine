@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.*;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import javafx.scene.shape.Shape;
 
@@ -10,55 +11,48 @@ import java.util.Objects;
  * Represents a player in the game.
  */
 public class Player extends Entity {
+    @JsonProperty("hunger")
     private int hunger;
-    private final int maxHunger;
-//    private Item handItem;
+    @JsonIgnore//inventory will be saved in separate file
     private PlayerInventory playerInventory;
+    @JsonIgnore
     private boolean shouldStarve = false;
+    @JsonIgnore
     private boolean canHeal = true;
+    @JsonIgnore
     private long whenHealed;
+    @JsonIgnore
     private long whenStarved;
-
-    public Player(String name, String texturePath, int positionX, int positionY) {
-        super(name, texturePath, Constants.EntityType.PLAYER, positionX, positionY, 0, Constants.PLAYER_MAX_HEALTH, 0, null);
-        super.setHeight(2);
-        super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
+    @JsonCreator
+    public Player(@JsonProperty("positionX") int positionX, @JsonProperty("positionY") int positionY) {
+        super("PLAYER", Constants.PLAYER_TEXTURE_PATH);
+        super.setAsDefaultPlayer();
+        super.setPositionX(positionX);
+        super.setPositionY(positionY);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
-        this.maxHunger = Constants.PLAYER_MAX_HUNGER;
         this.playerInventory = new PlayerInventory();
     }
-
-    public Player(Wagon currentWagon) {
-        super("PLAYER_NAME", "texturePath", Constants.EntityType.PLAYER, Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y, Constants.PLAYER_HITBOX, Constants.PLAYER_MAX_HEALTH, Constants.PLAYER_BASIC_DAMAGE, currentWagon);
-        super.setHeight(2);
-        super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
-        this.hunger = Constants.PLAYER_MAX_HUNGER;
-        this.maxHunger = Constants.PLAYER_MAX_HUNGER;
-        this.playerInventory = new PlayerInventory();
-    }
-
+    @JsonSetter("hunger")
     public void setHunger(int hunger) {
         this.hunger = hunger;
     }
-
+    @JsonIgnore
     public int getHunger() {
         return hunger;
     }
-    public int getMaxHunger() {
-        return maxHunger;
-    }
+    @JsonIgnore
     public void setHandItem(Item handItem) {
         this.playerInventory.setMainHandItem(handItem);
     }
-
+    @JsonIgnore
     public Item getHandItem() {
         return playerInventory.getMainHandItem();
     }
-
+    @JsonIgnore
     public void setPlayerInventory(PlayerInventory playerInventory) {
         this.playerInventory = playerInventory;
     }
-
+    @JsonIgnore
     public PlayerInventory getPlayerInventory() {
         return playerInventory;
     }
@@ -67,6 +61,7 @@ public class Player extends Entity {
      * Method to heal the player; the player heals 1 health point every healCooldown seconds if his hunger/saturation is greater than his health
      * @param time current time
      */
+    @JsonIgnore
     public void heal(long time) {
         int healCooldown = 2;
         if (canHeal) {
@@ -88,9 +83,10 @@ public class Player extends Entity {
      * Method to eat food and increase the player's hunger/saturation
      * @param food food to be eaten
      */
+    @JsonIgnore
     public void eat(Food food) {
-        if ((hunger + food.nourishment) > maxHunger) {
-            hunger = maxHunger;
+        if ((hunger + food.nourishment) > Constants.PLAYER_MAX_HUNGER) {
+            hunger = Constants.PLAYER_MAX_HUNGER;
         } else {
             hunger += food.nourishment;
         }
@@ -100,6 +96,7 @@ public class Player extends Entity {
      * Method to starve the player; the player loses 1 health point every starveCooldown seconds if his hunger/saturation is less than his health
      * @param time current time
      */
+    @JsonIgnore
     public void starve(long time) {
         int starveCooldown = 3;
         if (shouldStarve) {
@@ -129,6 +126,7 @@ public class Player extends Entity {
      * if the hand item is a melee weapon, the player attacks with it.
      * @param time current time
      */
+    @JsonIgnore
     public void useHandItem(long time) {
         if (playerInventory.getMainHandItem() == null) {
             return;
@@ -157,8 +155,8 @@ public class Player extends Entity {
      * @param time current time
      * @param obstacles obstacles that the bullet can't pass through
      */
+    @JsonIgnore
     public void shoot(Firearm firearm, List<Entity> targets, int aimX, int aimY, long time, Shape obstacles) {
-        Checker checker = new Checker();
         System.out.println(playerInventory.getAmmo());
         if (playerInventory.getAmmo() <= 0) {
             //sound of no ammo
@@ -167,11 +165,11 @@ public class Player extends Entity {
         System.out.println("Shooting");
         playerInventory.setAmmo(playerInventory.getAmmo() - 1);
         for (Entity target : targets) {
-            if (target != null && target.isAlive() && checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time) && playerInventory.getAmmo() >= 0) {
+            if (target != null && target.isAlive() && Checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time) && playerInventory.getAmmo() >= 0) {
                 target.takeDamage(firearm.getDamage());
                 System.out.println("Target health: " + target.getHealth());
                 for (Entity entity : targets) {
-                    if (checker.checkIfEntityCanSee(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
+                    if (Checker.checkIfEntityCanSee(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
                         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                     }
                 }

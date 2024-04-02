@@ -1,5 +1,9 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -19,23 +23,34 @@ import java.util.List;
  * @see PlayerInventory
  */
 public class Inventory {
+    @JsonProperty("inventorySize")
     public final int inventorySize;
+    @JsonProperty("itemsArray")
     protected Item[] itemsArray;
+    @JsonIgnore
     protected final Label itemNameLabel = new Label();
+    @JsonIgnore
     protected Scene scene;
+    @JsonIgnore
     protected Pane grid = new Pane();
-
+    @JsonIgnore
     private Label inventoryLabel = new Label();
+    @JsonProperty
     private boolean vendor;
+    @JsonIgnore
     private Item selectedItem;
+    @JsonIgnore
     private List<Item> takenItems = new ArrayList<>();
-    public Inventory(int size) {
+    @JsonCreator
+    public Inventory(@JsonProperty("size") int size) {
         inventorySize = size;
         itemsArray = new Item[size];
     }
+    @JsonIgnore
     public boolean isVendor() {
         return vendor;
     }
+    @JsonSetter("vendor")
     public void setVendor(boolean vendor) {
         this.vendor = vendor;
     }
@@ -48,6 +63,7 @@ public class Inventory {
      * Note: chance defines the probability of getting a random item from the dictionary;
      * there is no way to get a specific item from the dictionary
      */
+    @JsonIgnore
     public void fillWithRandomItems(Item[] lootTable, int chance) {
         itemsArray = new Item[inventorySize];
         for (int i = 0; i < inventorySize; i++) {
@@ -64,6 +80,7 @@ public class Inventory {
      * Open inventory and set basic handler
      * @return scene
      */
+    @JsonIgnore
     public Scene openInventory() {
         updateInventory();
         scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
@@ -73,6 +90,7 @@ public class Inventory {
     /**
      * Update inventory
      */
+    @JsonIgnore
     public void updateInventory() {
         grid.getChildren().clear();
         drawInventory();
@@ -86,6 +104,7 @@ public class Inventory {
      * Close inventory
      * @param stage stage
      */
+    @JsonIgnore
     public void closeInventory(Stage stage) {
         clearSceneHandlers();
         stage.setScene(null);
@@ -99,6 +118,7 @@ public class Inventory {
      * @param item item to add
      * @return true if added, false if not
      */
+    @JsonIgnore
     public boolean addItem(Item item) {
         if (item == null) {
             return false;
@@ -117,6 +137,7 @@ public class Inventory {
      * @param index index of item
      * @return item
      */
+    @JsonIgnore
     public Item takeItem(int index) {
         if (index < 0 || index >= inventorySize) {
             return null;
@@ -131,6 +152,7 @@ public class Inventory {
      *
      * @param item item to remove
      */
+    @JsonIgnore
     public void removeItem(Item item) {
         if (item == null) {
             return;
@@ -142,33 +164,29 @@ public class Inventory {
             }
         }
     }
-    public boolean contains(Item item) {
-        for (int i = 0; i < inventorySize; i++) {
-            if (itemsArray[i] == item) {
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean containsWithSameName(Item item) {
+    @JsonIgnore
+    public Item getWithSameName(Item item) {
         for (int i = 0; i < inventorySize; i++) {
             if (itemsArray[i] != null) {
                 if (itemsArray[i].getName().equals(item.getName())) {
-                    return true;
+                    return itemsArray[i];
                 }
             }
         }
-        return false;
+        return null;
     }
+    @JsonSetter("itemsArray")
     public void setItemsArray(Item[] items) {
         itemsArray = items;
     }
+    @JsonIgnore
     public Item[] getItemsArray() {
         return itemsArray;
     }
     /**
      * Set basic handler for inventory: show item name on hover, select item on click.
      */
+    @JsonIgnore
     private void setSceneBasicHandler() {
          scene.setOnMouseMoved(e -> {
             grid.getChildren().remove(itemNameLabel);
@@ -196,6 +214,7 @@ public class Inventory {
     /**
      * Clear scene handlers
      */
+    @JsonIgnore
     protected void clearSceneHandlers() {
         scene.setOnMouseClicked(null);
         scene.setOnMouseMoved(null);
@@ -204,6 +223,7 @@ public class Inventory {
     /**
      * Set select handler for inventory: select item on click, deselect on second click.
      */
+    @JsonIgnore
     private void setSceneSelectHandler() {
         scene.setOnMouseClicked(e -> {
             int x = (int) (e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
@@ -229,6 +249,7 @@ public class Inventory {
     /**
      * Set deselect handler for inventory: deselect item on click, clear all buttons and reset handlers.
      */
+    @JsonIgnore
     private void setSceneDeselectHandler() {
         scene.setOnMouseClicked(e1 -> {
             int x2 = (int) (e1.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (64 + 20);
@@ -250,6 +271,7 @@ public class Inventory {
      * @param y actual y
      * @return slot
      */
+    @JsonIgnore
     protected Shape getSlot(int x, int y) {
         return grid.getChildren().stream()
                 .filter(node -> node instanceof Rectangle)
@@ -263,6 +285,7 @@ public class Inventory {
      * Create border for inventory
      * @return border
      */
+    @JsonIgnore
     private Shape getBorder() {
         int borderWidth = Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
         int borderHeight = inventorySize / Constants.INVENTORY_MAX_WIDTH * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + Constants.SLOT_GAP;
@@ -286,6 +309,7 @@ public class Inventory {
     /**
      * Draw inventory
      */
+    @JsonIgnore
     protected void drawInventory() {
         grid.getChildren().add(getBorder());
         grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
@@ -318,12 +342,13 @@ public class Inventory {
      * @param index index of selected item
      * @return take button
      */
+    @JsonIgnore
     private Button getTakeButton(int index) {
         Button takeButton = new Button("Take");
         int takeButtonGap = 1;
         takeButton.setPrefSize(100, 50);
         takeButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - takeButtonGap * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
-        takeButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + (index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
+        takeButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + ((double) index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         takeButton.setStyle("-fx-background-color: #484848; -fx-text-fill: #ffffff; -fx-font-size: 20;");
         EventHandler takeButtonHandler = e -> {
             addTakenItem(takeItem(getSelectedItemIndex()));
@@ -338,6 +363,7 @@ public class Inventory {
      * @param index index of selected item
      * @return buy button
      */
+    @JsonIgnore
     private Button getBuyButton(int index) {
         Button buyButton = getTakeButton(index);
         buyButton.setText("Buy");
@@ -348,12 +374,14 @@ public class Inventory {
     /**
      * Clear all buttons and reset handlers
      */
+    @JsonIgnore
     private void clearButton() {
         grid.getChildren().removeIf(node -> node instanceof Button);
         clearSceneHandlers();
         setSceneBasicHandler();
         updateInventory();
     }
+    @JsonIgnore
     protected int getSelectedItemIndex() {
         for (int i = 0; i < inventorySize; i++) {
             if (itemsArray[i] != null) {
@@ -364,18 +392,23 @@ public class Inventory {
         }
         return -1;
     }
+    @JsonIgnore
     protected Item getSelectedItem() {
         return selectedItem;
     }
+    @JsonIgnore
     protected void setSelectedItem(Item selectedItem) {
         this.selectedItem = selectedItem;
     }
+    @JsonIgnore
     public void addTakenItem(Item takenItem) {
         this.takenItems.add(takenItem);
     }
+    @JsonIgnore
     public List<Item> getTakenItems() {
         return takenItems;
     }
+    @JsonIgnore
     public void removeTakenItem(Item takenItem) {
         this.takenItems.remove(takenItem);
     }
@@ -384,11 +417,13 @@ public class Inventory {
      * Set round borders for slot and border
      * @param rectangle rectangle to set round borders
      */
+    @JsonIgnore
     protected void setRoundBorders(Rectangle rectangle) {
         //set round borders
         rectangle.setArcHeight(10);
         rectangle.setArcWidth(10);
     }
+    @JsonIgnore
     public void setInventoryLabel(String text) {
         inventoryLabel.setText(text);
     }

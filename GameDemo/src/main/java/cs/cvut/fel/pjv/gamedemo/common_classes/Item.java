@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,11 +13,12 @@ public class Item {
     @JsonProperty("texturePath")
     private final String texturePath;
     @JsonIgnore
-    private Constants.ItemType type;
+    private Constants.ItemType type;//remove unnecessary
     @JsonProperty("value")
     private int value;
 
-    public Item(String name, String texturePath, int value) {
+    @JsonCreator
+    public Item(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("value") int value) {
         this.name = name;
         this.texturePath = texturePath;
         this.value = value;
