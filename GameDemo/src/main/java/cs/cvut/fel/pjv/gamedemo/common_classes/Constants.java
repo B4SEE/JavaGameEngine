@@ -7,19 +7,25 @@ import java.util.Map;
  * Provide a single source of truth for all constants used in the game.
  */
 public class Constants {
+    public static final String PLAYER_TEXTURE_PATH = "player_front.png";
     public static final int MAX_TIME_LOOP_COUNTER = 10;
     public static final int TIME_TO_ESCAPE_SILENCE = 15;
+    public static final String[] HINTS = new String[]{
+        "You can use the WASD keys to move around.",
+        "You can use the 'R' key to interact with objects."
+    };
 
     public static final int TILE_WIDTH = 32;
     public static final int TILE_HEIGHT = 32;
     public static final int NULL_WAGON_ID = -1;
-    public static final int PLAYER_START_POS_X = 0;
-    public static final int PLAYER_START_POS_Y = 0;
+    public static final int PLAYER_START_POS_X = 350;
+    public static final int PLAYER_START_POS_Y = 200;
     public static final int PLAYER_BASIC_SPEED_X = 7;
     public static final int PLAYER_BASIC_SPEED_Y = 7;
     public static final int PLAYER_BASIC_DAMAGE = 5;
     public static final int PLAYER_HITBOX = 1;
     public static final int PLAYER_ATTACK_RANGE = 1;
+    public static final int PLAYER_COOLDOWN = 2;
     public static final int PLAYER_MAX_HEALTH = 100;//100
     public static final int PLAYER_MAX_HUNGER = 100;
     public static final int PLAYER_INVENTORY_SIZE = 20;
@@ -94,7 +100,8 @@ public class Constants {
     public static final int SLOT_GAP = 20;
     //item types
     public static final String VALID_TICKET = "VALID_TICKET";
-    public static final String[] WAGON_TYPES = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
+//    public static final String[] WAGON_TYPES = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
+    public static final String[] WAGON_TYPES = {"DEFAULT"};
     public static final int MAX_PREV_POS_LIST_SIZE = 10;
     public static final int MIN_TRAP_ENEMIES_COUNT = 1;
     public static final int MAX_TRAP_ENEMIES_COUNT = 5;

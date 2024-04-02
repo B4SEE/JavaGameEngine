@@ -63,9 +63,11 @@ public class Atmospheric {
             try {
                 gainControl.setValue(20f * (float) Math.log10(volume));
             } catch (Exception e) {
-                clip.stop();
-                clip.close();
-                clip = null;
+                if (volume == 0f) {
+                    clip.stop();
+                    clip.close();
+                    clip = null;
+                }
             }
         }
     }

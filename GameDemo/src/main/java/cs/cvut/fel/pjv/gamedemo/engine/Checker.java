@@ -245,6 +245,9 @@ public class Checker {
      * @return true if there is a collision, false otherwise
      */
     public static boolean checkCollision(Shape hitbox1, Shape hitbox2) {
+//        if (hitbox1 == null || hitbox2 == null) {
+//            return false;
+//        }
         Shape intersect = Shape.intersect(hitbox1, hitbox2);
         return !intersect.getBoundsInParent().isEmpty();
     }
