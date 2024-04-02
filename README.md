@@ -76,7 +76,7 @@ Completed documentation from the user's perspective.
 
 <details><summary>Click to expand</summary>
 
-- :construction: The game will be able to load a list of items from a file. These items will be given to the player at the beginning of the game. At the end of the game, the game will be able to save the list of items in the same format.
+- :heavy_check_mark: The game will be able to load a list of items from a file. These items will be given to the player at the beginning of the game. At the end of the game, the game will be able to save the list of items in the same format.
 
 
 - :heavy_check_mark: Each level will be described in an external file in a suitable format - it is up to you what format you choose. For demonstration purposes, just create one or two levels of the game to demonstrate the functionality of all the elements, inventory, making an item from resources, and overcoming obstacles.
