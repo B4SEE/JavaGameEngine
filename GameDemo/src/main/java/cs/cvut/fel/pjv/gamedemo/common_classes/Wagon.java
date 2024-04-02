@@ -1,5 +1,9 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
@@ -13,109 +17,128 @@ import java.util.Objects;
  * Class representing the wagon, holds all the objects, interactive objects and entities that are in the wagon at the moment.
  */
 public class Wagon {
+    @JsonProperty("id")
     private int id;
+    @JsonProperty("type")
     private String type;
-    private String texturePath;
+    @JsonProperty("doorLeft")
     private Door doorLeft;
+    @JsonProperty("doorRight")
     private Door doorRight;
+    @JsonProperty("doorLeftTarget")
     private Object doorLeftTarget;
+    @JsonProperty("doorRightTarget")
     private Object doorRightTarget;
+    @JsonProperty("entities")
     private List<Entity> entities = new ArrayList<>();
+    @JsonProperty("objectsArray")
     private Object[][] objectsArray;
+    @JsonIgnore
     private Object[] interactiveObjects;
+    @JsonProperty("interactiveObjectsLength")
+    private int interactiveObjectsLength;
+    @JsonProperty("seed")
     private String seed;
-
-
-    public Wagon(String type) {
-        this.type = type;
-    }
-
-    public Wagon(int id, String type, String texturePath) {
+    @JsonCreator
+    public Wagon(@JsonProperty("id") int id, @JsonProperty("type") String type) {
         this.id = id;
         this.type = type;
-        this.texturePath = texturePath;
     }
+    @JsonIgnore
     public int getId() {
         return id;
     }
-
+    @JsonIgnore
     public void setId(int id) {
         this.id = id;
     }
-
+    @JsonIgnore
     public String getType() {
         return type;
     }
-
+    @JsonIgnore
     public void setType(String type) {
         this.type = type;
     }
-
-    public String getTexturePath() {
-        return texturePath;
-    }
-
-    public void setTexturePath(String texturePath) {
-        this.texturePath = texturePath;
-    }
-
-    public Wagon(int id, String type, String texturePath, Door doorLeft, Door doorRight, List<Entity> entities, Object[][] objectsArray) {
-        this.id = id;
-        this.type = type;
-        this.texturePath = texturePath;
-        this.doorLeft = doorLeft;
-        this.doorRight = doorRight;
-        this.entities = entities;
-        this.objectsArray = objectsArray;
-    }
+    @JsonSetter("doorLeft")
     public void setDoorLeft(Door doorLeft) {
         this.doorLeft = doorLeft;
     }
+    @JsonSetter("doorRight")
     public void setDoorRight(Door doorRight) {
         this.doorRight = doorRight;
     }
-
+    @JsonIgnore
     public Door getDoorLeft() {
         return doorLeft;
     }
-
+    @JsonIgnore
     public Door getDoorRight() {
         return doorRight;
     }
-
+    @JsonSetter("doorLeftTarget")
+    public void setDoorLeftTarget(Object doorLeftTarget) {
+        this.doorLeftTarget = doorLeftTarget;
+    }
+    @JsonSetter("doorRightTarget")
+    public void setDoorRightTarget(Object doorRightTarget) {
+        this.doorRightTarget = doorRightTarget;
+    }
+    @JsonIgnore
     public Object getDoorLeftTarget() {
         return doorLeftTarget;
     }
-
+    @JsonIgnore
     public Object getDoorRightTarget() {
         return doorRightTarget;
     }
+    @JsonSetter("entities")
     public void setEntities(List<Entity> entities) {
         this.entities = entities;
     }
+    @JsonIgnore
     public List<Entity> getEntities() {
         return entities;
     }
+    @JsonSetter("objectsArray")
     public void setObjectsArray(Object[][] objectsArray) {
         this.objectsArray = objectsArray;
     }
-
+    @JsonIgnore
     public Object[][] getObjectsArray() {
         return objectsArray;
     }
-
-    public void setInteractiveObjects(Object[] interactiveObjects) {
-        this.interactiveObjects = interactiveObjects;
+    @JsonSetter("interactiveObjectsLength")
+    public void setInteractiveObjects(int interactiveObjectsLength) {
+        int count = interactiveObjectsLength;
+        this.interactiveObjects = new Object[count];
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                if (object.getId() == 2) {
+                    this.interactiveObjects[count - 1] = object;
+                    count--;
+                }
+            }
+        }
     }
-
+    @JsonIgnore
     public Object[] getInteractiveObjects() {
         return interactiveObjects;
     }
-
+    @JsonSetter("seed")
     public void setSeed(String seed) {
         this.seed = seed;
     }
-
+    @JsonIgnore
+    public void printAllObjects() {
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                System.out.print(object.getName() + " ");
+            }
+            System.out.println();
+        }
+    }
+    @JsonIgnore
     public String getSeed() {
         return seed;
     }
@@ -123,6 +146,7 @@ public class Wagon {
     /**
      * Generate the wagon
      */
+    @JsonIgnore
     public void generateWagon() {
         // Generate the wagon
         MapLoader mapLoader = new MapLoader();
@@ -131,6 +155,7 @@ public class Wagon {
         seed = mapLoader.parseMap(unparsedSeed);
         initWagon();
     }
+    @JsonIgnore
     public void generateNextWagon(Wagon wagon, boolean leftWagon) {//wagon - current wagon; leftWagon - if next wagon will be on the left side of the current wagon
         generateWagon();
 
@@ -158,6 +183,7 @@ public class Wagon {
     /**
      * Initialize the wagon; set the objects, interactive objects and entities.
      */
+    @JsonIgnore
     public void initWagon() {
         // Initialize the wagon
 
@@ -181,11 +207,6 @@ public class Wagon {
                 String letterID = subRows[j].substring(2, 4);
 
                 if (subRows[j].charAt(0) == Constants.FLOOR) {
-
-                    if (letterID.equals(Constants.TRAP)) {
-//                        System.out.println(subRows[j]);
-                    }
-
                     Object object = new Object(Character.getNumericValue(Character.getNumericValue(subRows[j].charAt(0))), Constants.OBJECT_NAMES.get(letterID), texture, letterID, 0, 0, 0, false);
 
                     objectsArray[i][j] = object;
@@ -250,6 +271,7 @@ public class Wagon {
 
         //initialise interactive objects
         interactiveObjects = new Object[interactiveObjectsCount];
+        interactiveObjectsLength = interactiveObjectsCount;
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
                 if (object.getId() == 2) {
@@ -298,7 +320,7 @@ public class Wagon {
                     if (letterID.equals(Constants.QUEST_SPAWN)) {
                         List<QuestNPC> availableQuestNPCs = Events.getAvailableQuestNPCs();
                         System.out.println("***" + availableQuestNPCs);
-                        if (availableQuestNPCs != null) {
+                        if (availableQuestNPCs != null && !availableQuestNPCs.isEmpty()) {
                             QuestNPC questNPC = Events.getAvailableQuestNPCs().get((int) (Math.random() * availableQuestNPCs.size()));
                             Events.removeQuestNPC(questNPC);
                             questNPC.setCurrentWagon(this);
@@ -311,6 +333,7 @@ public class Wagon {
             }
         }
     }
+    @JsonIgnore
     public int[][] getMapForPathFinder(boolean doorIsWalkable) {
         int[][] map = new int[objectsArray.length][objectsArray[0].length];
         for (int i = 0; i < objectsArray.length; i++) {
@@ -328,11 +351,13 @@ public class Wagon {
         }
         return map;
     }
+    @JsonIgnore
     public void addEntity(Entity entity) {
         entities.add(entity);
         System.out.println("Entity added to wagon " + id);
         System.out.println(java.util.Arrays.toString(entities.toArray()));
     }
+    @JsonIgnore
     public void removeTrap() {//removes only one trap per call
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
@@ -344,16 +369,4 @@ public class Wagon {
         }
 
     }
-
-//    private String setRandomTexture(String path) {
-//        File resourceDir = new File("default/");
-//        File[] files = resourceDir.listFiles();
-//        List<String> textures = new ArrayList<>();
-//        for (File file : files) {
-//            if (file.getName().contains(path)) {
-//                textures.add(file.getName());
-//            }
-//        }
-//        return textures.get((int) (Math.random() * textures.size()));
-//    }
 }

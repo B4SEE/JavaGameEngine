@@ -139,6 +139,23 @@ public class RandomHandler {
         }
         return listOfFilesThatStartWith;
     }
+    public static List<File> getListOfDirectoriesThatStartWith(String start, String path) {
+        //list all files from path directory
+        File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+        List<File> listOfFilesThatStartWith = new java.util.ArrayList<>();
+        if (listOfFiles != null) {
+            for (File file : listOfFiles) {
+                if (file.isDirectory()) {
+                    //check if file name starts with start
+                    if (file.getName().startsWith(start)) {
+                        listOfFilesThatStartWith.add(file);
+                    }
+                }
+            }
+        }
+        return listOfFilesThatStartWith;
+    }
     public static Item getRandomNecessaryToSpawnItem() {
         for (File file : getListOfFilesThatStartWith("necessary_to_spawn_item", "items/")) {
             try {
@@ -154,6 +171,9 @@ public class RandomHandler {
             }
         }
         return null;
+    }
+    public static String getRandomWagonType() {
+        return Constants.WAGON_TYPES[(int) (Math.random() * Constants.WAGON_TYPES.length)];
     }
     public static Item getRandomKey() {
         //constants.minvalue, constants.maxvalue
