@@ -21,22 +21,22 @@ public class Wagon {
     private int id;
     @JsonProperty("type")
     private String type;
-    @JsonProperty("doorLeft")
+    @JsonIgnore
     private Door doorLeft;
-    @JsonProperty("doorRight")
+    @JsonIgnore
     private Door doorRight;
-    @JsonProperty("doorLeftTarget")
+    @JsonIgnore
     private Object doorLeftTarget;
-    @JsonProperty("doorRightTarget")
+    @JsonIgnore
     private Object doorRightTarget;
     @JsonProperty("entities")
     private List<Entity> entities = new ArrayList<>();
     @JsonProperty("objectsArray")
     private Object[][] objectsArray;
     @JsonIgnore
+    private int interactiveObjectsCount = 0;
+    @JsonIgnore
     private Object[] interactiveObjects;
-    @JsonProperty("interactiveObjectsLength")
-    private int interactiveObjectsLength;
     @JsonProperty("seed")
     private String seed;
     @JsonCreator
@@ -60,14 +60,6 @@ public class Wagon {
     public void setType(String type) {
         this.type = type;
     }
-    @JsonSetter("doorLeft")
-    public void setDoorLeft(Door doorLeft) {
-        this.doorLeft = doorLeft;
-    }
-    @JsonSetter("doorRight")
-    public void setDoorRight(Door doorRight) {
-        this.doorRight = doorRight;
-    }
     @JsonIgnore
     public Door getDoorLeft() {
         return doorLeft;
@@ -75,14 +67,6 @@ public class Wagon {
     @JsonIgnore
     public Door getDoorRight() {
         return doorRight;
-    }
-    @JsonSetter("doorLeftTarget")
-    public void setDoorLeftTarget(Object doorLeftTarget) {
-        this.doorLeftTarget = doorLeftTarget;
-    }
-    @JsonSetter("doorRightTarget")
-    public void setDoorRightTarget(Object doorRightTarget) {
-        this.doorRightTarget = doorRightTarget;
     }
     @JsonIgnore
     public Object getDoorLeftTarget() {
@@ -102,24 +86,19 @@ public class Wagon {
     }
     @JsonSetter("objectsArray")
     public void setObjectsArray(Object[][] objectsArray) {
+        System.out.println(objectsArray.length);
         this.objectsArray = objectsArray;
+        countInteractiveObjects();
+        initWagonDoors();
+        initInteractiveObjects();
     }
     @JsonIgnore
     public Object[][] getObjectsArray() {
         return objectsArray;
     }
-    @JsonSetter("interactiveObjectsLength")
-    public void setInteractiveObjects(int interactiveObjectsLength) {
-        int count = interactiveObjectsLength;
-        this.interactiveObjects = new Object[count];
-        for (Object[] objects : objectsArray) {
-            for (Object object : objects) {
-                if (object.getId() == 2) {
-                    this.interactiveObjects[count - 1] = object;
-                    count--;
-                }
-            }
-        }
+    @JsonIgnore
+    public int getInteractiveObjectsCount() {
+        return interactiveObjectsCount;
     }
     @JsonIgnore
     public Object[] getInteractiveObjects() {
@@ -197,8 +176,6 @@ public class Wagon {
 
         objectsArray = new Object[rows.length][subRows.length];
 
-        int interactiveObjectsCount = 0;
-
         for (int i = 0; i < rows.length; i++) {
             subRows = rows[i].split(Constants.MAP_COLUMN_SEPARATOR);
             for (int j = 0; j < subRows.length; j++) {
@@ -214,7 +191,6 @@ public class Wagon {
                     continue;
                 }
                 if (subRows[j].charAt(0) == Constants.INTERACTIVE_OBJECT) {
-                    interactiveObjectsCount++;
                     if (letterID.equals(Constants.CHEST_OBJECT)) {
 //                        texture = setRandomTexture(Constants.INTERACTIVE_OBJECTS.get(letterID));
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
@@ -254,32 +230,14 @@ public class Wagon {
                 objectsArray[i][j] = object;
             }
         }
-        //set door targets (tile near the door)
-        for (Object[] objects : objectsArray) {
-            for (int j = 0; j < objects.length; j++) {
-                if (Objects.equals(objects[j].getTwoLetterId(), Constants.WAGON_DOOR)) {
-                    if (j == 0) {
-                        doorLeft = (Door) objects[j];
-                        doorLeftTarget = objects[j + 1];
-                    } else if (j == objects.length - 1) {
-                        doorRight = (Door) objects[j];
-                        doorRightTarget = objects[j - 2];
-                    }
-                }
-            }
-        }
+        countInteractiveObjects();
+
+        //set door and doors' targets (tile near the door)
+        initWagonDoors();
 
         //initialise interactive objects
-        interactiveObjects = new Object[interactiveObjectsCount];
-        interactiveObjectsLength = interactiveObjectsCount;
-        for (Object[] objects : objectsArray) {
-            for (Object object : objects) {
-                if (object.getId() == 2) {
-                    interactiveObjects[interactiveObjectsCount - 1] = object;
-                    interactiveObjectsCount--;
-                }
-            }
-        }
+        initInteractiveObjects();
+
         //initialise entities
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
@@ -329,6 +287,41 @@ public class Wagon {
                             entities.add(questNPC);
                         }
                     }
+                }
+            }
+        }
+    }
+    private void countInteractiveObjects() {
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                if (object.getId() == 2) {
+                    interactiveObjectsCount++;
+                }
+            }
+        }
+    }
+    private void initWagonDoors() {
+        for (Object[] objects : objectsArray) {
+            for (int j = 0; j < objects.length; j++) {
+                if (Objects.equals(objects[j].getTwoLetterId(), Constants.WAGON_DOOR)) {
+                    if (j == 0) {
+                        doorLeft = (Door) objects[j];
+                        doorLeftTarget = objects[j + 1];
+                    } else if (j == objects.length - 1) {
+                        doorRight = (Door) objects[j];
+                        doorRightTarget = objects[j - 2];
+                    }
+                }
+            }
+        }
+    }
+    private void initInteractiveObjects() {
+        interactiveObjects = new Object[interactiveObjectsCount];
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                if (object.getId() == 2) {
+                    interactiveObjects[interactiveObjectsCount - 1] = object;
+                    interactiveObjectsCount--;
                 }
             }
         }

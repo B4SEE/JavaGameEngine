@@ -154,7 +154,7 @@ public class GameLogic {
     }
 
     /**
-     * Check if all entities from trap event are dead.
+     * Check if all entities from trap event are dead and remove the trap if they are.
      */
     private void checkIfAllEnemiesAreDead() {
         int count = 0;
@@ -688,8 +688,10 @@ public class GameLogic {
         eventStartTime = 0;
         eventDuration = 0;
         if (door.getTargetId() == -1) {
+            System.out.println("generate next wagon");
             generateNextWagonAndOpenDoor(door);
         } else {
+            System.out.println("open existing wagon door");
             openExistingWagonDoor(door);
         }
     }
@@ -699,12 +701,11 @@ public class GameLogic {
      * @param door door to be opened
      */
     private void generateNextWagonAndOpenDoor(Door door) {
-        //            String[] wagonTypes = {"COMPARTMENT", "RESTAURANT", "SLEEPER", "CARGO", "DEFAULT"};
-        String[] wagonTypes = {"CARGO"};
-        //select random wagon type
-        String wagonType = wagonTypes[(int) (Math.random() * wagonTypes.length)];
+        String wagonType = RandomHandler.getRandomWagonType();
+        System.out.println(wagonType);
         Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
-        if (door == wagon.getDoorLeft()) {
+        if (door.getTargetId() == wagon.getDoorLeft().getTargetId()) {
+            System.out.println("left door");
             nextWagon.generateNextWagon(wagon, true);
             train.addWagon(nextWagon);
             isometric.initialiseWagon(nextWagon);
@@ -712,7 +713,8 @@ public class GameLogic {
             wagon.getDoorLeft().teleport(player);
             this.wagon = nextWagon;
             player.setCurrentWagon(wagon);
-        } else if (door == wagon.getDoorRight()) {
+        } else if (door.getTargetId() == wagon.getDoorRight().getTargetId()) {
+            System.out.println("right door");
             nextWagon.generateNextWagon(wagon, false);
             train.addWagon(nextWagon);
             isometric.initialiseWagon(nextWagon);

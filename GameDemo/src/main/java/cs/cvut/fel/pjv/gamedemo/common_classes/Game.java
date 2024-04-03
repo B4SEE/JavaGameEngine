@@ -1,9 +1,12 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
+import cs.cvut.fel.pjv.gamedemo.engine.EventsData;
 import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 import javafx.stage.Stage;
@@ -11,7 +14,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -81,6 +83,16 @@ public class Game {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //save Events: availableQuestNPCs, currentEvent, canSpawnLockedDoor, timeLoopCounter, nextEvent
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            FileWriter file = new FileWriter(path + "/events.json");
+            //Events class is static class, so there is need to save fields separately
+            EventsData eventsData = new EventsData(Events.getAvailableQuestNPCs(), Events.getCurrentEvent(), Events.canSpawnLockedDoor(), Events.getTimeLoopCounter(), Events.getNextEvent());
+            objectMapper.writeValue(file, eventsData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     @JsonIgnore
     public void loadGame() {
@@ -129,6 +141,13 @@ public class Game {
                     }
                 }
             }
+            //load events
+            EventsData eventsData = objectMapper.readValue(new File(lastSave.getPath() + "/events.json"), EventsData.class);
+            Events.setAvailableQuestNPCs(eventsData.getAvailableQuestNPCs());
+            Events.setCurrentEvent(eventsData.getCurrentEvent());
+            Events.setCanSpawnLockedDoor(eventsData.isCanSpawnLockedDoor());
+            Events.setTimeLoopCounter(eventsData.getTimeLoopCounter());
+            Events.setNextEvent(eventsData.getNextEvent());
         } catch (IOException e) {
             e.printStackTrace();
         }
