@@ -1,14 +1,16 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.EventsData;
 import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -17,7 +19,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-public class Game {
+public class GameSaver {
     @JsonIgnore
     private Stage stage;
     @JsonIgnore//player will be saved in player.json
@@ -26,9 +28,9 @@ public class Game {
     private Wagon currentWagon;
     @JsonProperty("train")
     private Train train;
-    public Game() {
+    public GameSaver() {
     }
-    public Game(Player player, Train train) {
+    public GameSaver(Player player, Train train) {
         this.player = player;
         this.currentWagon = player.getCurrentWagon();
         this.train = train;
@@ -123,7 +125,7 @@ public class Game {
             objectMapper.registerSubtypes(MeleeWeapon.class);
             objectMapper.registerSubtypes(Food.class);
             objectMapper.registerSubtypes(PlayerInventory.class);
-            Game game = objectMapper.readValue(new File(lastSave.getPath() + "/game.json"), Game.class);
+            GameSaver game = objectMapper.readValue(new File(lastSave.getPath() + "/game.json"), GameSaver.class);
             this.currentWagon = game.currentWagon;
             this.train = game.train;
             this.player = objectMapper.readValue(new File(lastSave.getPath() + "/player.json"), Player.class);
@@ -206,5 +208,13 @@ public class Game {
                 System.out.println("Failed to delete the file");
             }
         }
+    }
+
+
+    @JsonIgnore
+    public void resetGame() {
+        this.player = null;
+        this.currentWagon = null;
+        this.train = null;
     }
 }
