@@ -5,6 +5,7 @@ module cs.cvut.fel.pjv.gamedemo {
     requires java.desktop;
 
     opens cs.cvut.fel.pjv.gamedemo to javafx.fxml;
+    opens cs.cvut.fel.pjv.gamedemo.engine to com.fasterxml.jackson.databind;
     opens cs.cvut.fel.pjv.gamedemo.common_classes to com.fasterxml.jackson.databind;
 
     exports cs.cvut.fel.pjv.gamedemo;
