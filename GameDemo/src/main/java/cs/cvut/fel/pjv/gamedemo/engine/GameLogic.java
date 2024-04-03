@@ -15,7 +15,6 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class with the main game logic, handles the game state, player input and game events.
@@ -27,7 +26,7 @@ public class GameLogic {
     private Player player;
     private Wagon wagon;
     private Train train;
-    private long eventStartTime = 0;//TODO cannot save while the event is active
+    private long eventStartTime = 0;//TODO forbid saving the game during the trap event
     private int eventDuration;
     private String deathMessage = "";
     private AnimationTimer timer = new AnimationTimer() {
@@ -363,14 +362,7 @@ public class GameLogic {
     public void resumeGame() {
         timer.start();
     }
-    /**
-     * End the game.
-     */
-    public void endGame() {
-        pauseGame();
-        stage.close();
-        System.exit(0);
-    }
+
     /**
      * Stop the game.
      * Show the death scene.
@@ -530,6 +522,7 @@ public class GameLogic {
     private void openDialogue(Entity entity) {
         System.out.println(entity.getName());
         if (entity instanceof QuestNPC questNPC) {
+            System.out.println(questNPC.isQuestCompleted());
             questNPC.setQuestCompleted(questNPC.checkIfPlayerHasQuestItem(player));
             entity.setDialoguePath(entity.getDialoguePath());
             if (questNPC.isQuestCompleted()) {
@@ -704,7 +697,7 @@ public class GameLogic {
         String wagonType = RandomHandler.getRandomWagonType();
         System.out.println(wagonType);
         Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
-        if (door.getTargetId() == wagon.getDoorLeft().getTargetId()) {
+        if (door == wagon.getDoorLeft()) {
             System.out.println("left door");
             nextWagon.generateNextWagon(wagon, true);
             train.addWagon(nextWagon);
@@ -713,7 +706,7 @@ public class GameLogic {
             wagon.getDoorLeft().teleport(player);
             this.wagon = nextWagon;
             player.setCurrentWagon(wagon);
-        } else if (door.getTargetId() == wagon.getDoorRight().getTargetId()) {
+        } else if (door == wagon.getDoorRight()) {
             System.out.println("right door");
             nextWagon.generateNextWagon(wagon, false);
             train.addWagon(nextWagon);
@@ -882,7 +875,7 @@ public class GameLogic {
      * Save the game.
      */
     public void saveGame() {
-        Game game = new Game(player, train);
+        GameSaver game = new GameSaver(player, train);
         game.saveGame();
     }
     /**
@@ -890,20 +883,8 @@ public class GameLogic {
      */
     public void mainMenu() {
         isometric.clearAll();
-        GridPane grid = new GridPane();
-        grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
-        grid.setPrefSize(800, 800);
-        Label label = new Label("Main menu");
-        label.setStyle("-fx-font-size: 50; -fx-text-fill: #f55757;");
-        grid.add(label, 0, 0);
-        Scene mainMenuScene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+        Scene mainMenuScene = Game.getMainMenuScene();
         stage.setScene(mainMenuScene);
-        Button exitButton = new Button("Exit");
-        exitButton.setOnAction(actionEvent -> {
-            endGame();
-        });
-        exitButton.setStyle("-fx-font-size: 20; -fx-text-fill: #e31111;");
-        grid.add(exitButton, 0, 1);
     }
     /**
      * Update the entities.
