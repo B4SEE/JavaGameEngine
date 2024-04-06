@@ -8,6 +8,7 @@ import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
+import javafx.scene.shape.Shape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,8 @@ public class Wagon {
     private Object[] interactiveObjects;
     @JsonProperty("seed")
     private String seed;
+    @JsonIgnore
+    private Shape obstacles;
     @JsonCreator
     public Wagon(@JsonProperty("id") int id, @JsonProperty("type") String type) {
         this.id = id;
@@ -120,6 +123,14 @@ public class Wagon {
     @JsonIgnore
     public String getSeed() {
         return seed;
+    }
+    @JsonIgnore
+    public Shape getObstacles() {
+        return obstacles;
+    }
+    @JsonIgnore
+    public void setObstacles(Shape obstacles) {
+        this.obstacles = obstacles;
     }
 
     /**
@@ -291,6 +302,7 @@ public class Wagon {
             }
         }
     }
+    @JsonIgnore
     private void countInteractiveObjects() {
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
@@ -300,6 +312,7 @@ public class Wagon {
             }
         }
     }
+    @JsonIgnore
     private void initWagonDoors() {
         for (Object[] objects : objectsArray) {
             for (int j = 0; j < objects.length; j++) {
@@ -315,6 +328,7 @@ public class Wagon {
             }
         }
     }
+    @JsonIgnore
     private void initInteractiveObjects() {
         interactiveObjects = new Object[interactiveObjectsCount];
         for (Object[] objects : objectsArray) {
