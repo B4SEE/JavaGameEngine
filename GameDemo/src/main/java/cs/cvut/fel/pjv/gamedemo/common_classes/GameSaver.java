@@ -3,14 +3,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cs.cvut.fel.pjv.gamedemo.engine.Events;
-import cs.cvut.fel.pjv.gamedemo.engine.EventsData;
-import cs.cvut.fel.pjv.gamedemo.engine.GameLogic;
-import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
+import cs.cvut.fel.pjv.gamedemo.engine.*;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -125,16 +118,13 @@ public class GameSaver {
             objectMapper.registerSubtypes(MeleeWeapon.class);
             objectMapper.registerSubtypes(Food.class);
             objectMapper.registerSubtypes(PlayerInventory.class);
+            //
             GameSaver game = objectMapper.readValue(new File(lastSave.getPath() + "/game.json"), GameSaver.class);
             this.currentWagon = game.currentWagon;
             this.train = game.train;
             this.player = objectMapper.readValue(new File(lastSave.getPath() + "/player.json"), Player.class);
             this.player.setPlayerInventory(objectMapper.readValue(new File(lastSave.getPath() + "/player_inventory.json"), PlayerInventory.class));
             this.player.setCurrentWagon(currentWagon);
-            System.out.println("Game loaded successfully");
-            System.out.println("Player: " + player);
-            System.out.println("Current wagon: " + currentWagon);
-            System.out.println("Train: " + train);
             //set current wagon for all entities (it is not saved in json)
             for (Wagon wagon : train.getWagonsArray()) {
                 if (wagon != null) {
@@ -209,8 +199,6 @@ public class GameSaver {
             }
         }
     }
-
-
     @JsonIgnore
     public void resetGame() {
         this.player = null;
