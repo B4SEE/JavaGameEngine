@@ -10,9 +10,11 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +26,8 @@ public class GameLogic {
     private Stage stage;
     private long time;
     private Player player;
+    private List<Entity> leftWagonPursuers = new java.util.ArrayList<>();
+    private List<Entity> rightWagonPursuers = new java.util.ArrayList<>();
     private Wagon wagon;
     private Train train;
     private long eventStartTime = 0;//TODO forbid saving the game during the trap event
@@ -71,7 +75,6 @@ public class GameLogic {
      * Update the game state.
      */
     private void updateGame() {
-        isometric.updateTime(time);
         isometric.updateWalls();
         updateEntities();
         updatePlayer();
@@ -110,7 +113,7 @@ public class GameLogic {
                 case 4:
                     Events.setNextEvent(Constants.Event.SILENCE_EVENT);
                     eventDuration = Constants.TIME_TO_ESCAPE_SILENCE;
-                    Atmospheric.fadeOutMusic(0.05f);
+                    Atmospheric.fadeOutMusic(0.05);
 //                    System.out.println("Silence event");
                     break;
             }
@@ -239,9 +242,7 @@ public class GameLogic {
      */
     public void start() {
         isometric.start();
-//        for (Object object : this.wagon.getInteractiveObjects()) {
-//            System.out.println(object.getObjectHitbox());
-//        }
+        this.wagon.setObstacles(isometric.getWalls());
         timer.start();
     }
     /**
@@ -255,7 +256,7 @@ public class GameLogic {
      * Show the pause screen.
      */
     private void showPauseScreen() {
-        Atmospheric.fadeOutMusic(0.00f);
+        Atmospheric.fadeOutMusic(0.00);
         pauseGame();
         //save game scene
         Scene isoScene = stage.getScene();
@@ -371,7 +372,7 @@ public class GameLogic {
      */
     public void stopGame() {
         pauseGame();
-        Atmospheric.fadeOutMusic(0.00f);
+        Atmospheric.fadeOutMusic(0.00);
         //save game scene
         Scene isoScene = stage.getScene();
         //create grid and scene for death
@@ -404,32 +405,9 @@ public class GameLogic {
      */
     private void setPlayerHandle() {
         Scene scene = stage.getScene();
-        scene.setOnKeyReleased(keyEvent -> {
-            isometric.resetAimLine();
-            switch (keyEvent.getCode()) {
-                case W, S:
-                    isometric.updatePlayerDeltaY(0);
-                    break;
-                case A, D:
-                    isometric.updatePlayerDeltaX(0);
-                    break;
-            }
-        });
-        scene.setOnMouseClicked(mouseEvent -> {
-            if (player.getHandItem() instanceof Firearm firearm) {
-                player.shoot(firearm, wagon.getEntities(), (int) mouseEvent.getX(), (int) mouseEvent.getY(), time, isometric.getTwoAndTallerWalls());
-            } else {
-                isometric.resetAimLine();
-            }
-        });
-        scene.setOnMouseMoved(mouseEvent -> {
-            if (player.getHandItem() instanceof Firearm) {
-                isometric.drawPlayerFirearmAim((int) mouseEvent.getX(), (int) mouseEvent.getY());
-            } else {
-                isometric.resetAimLine();
-            }
-        });
-        scene.setOnKeyPressed(keyEvent -> {
+
+        //handle movement
+        EventHandler<? super KeyEvent> movement_handle = keyEvent -> {
             switch (keyEvent.getCode()) {
                 case W:
                     isometric.updatePlayerTexture("player_back.png");
@@ -447,74 +425,145 @@ public class GameLogic {
                     isometric.updatePlayerTexture("player_right.png");
                     isometric.updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
                     break;
-                case R:
-                    playerUseHand();
+            }
+            playPlayerFootsteps();
+        };
+        //handle movement keys released
+        EventHandler<? super KeyEvent> movement_stopped_handle = keyEvent -> {
+            switch (keyEvent.getCode()) {
+                case W, S:
+                    isometric.updatePlayerDeltaY(0);
                     break;
+                case A, D:
+                    isometric.updatePlayerDeltaX(0);
+                    break;
+            }
+            stopPlayerFootsteps();
+        };
+        //handle interaction with objects and entities
+        EventHandler<? super KeyEvent> interact_handle = keyEvent -> {
+            if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.E) {
+                if (Checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
+                    Object object = Checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
+                    if (Objects.equals(object.getTwoLetterId(), Constants.WAGON_DOOR)) {
+                        if (Events.getCurrentEvent() == Constants.Event.TRAP_EVENT) {
+                            ((Door) object).lock();//player cannot escape from the trap even if he has the key to open the door
+                        }
+                        if (((Door) object).isLocked()) {
+                            if (Checker.checkIfPlayerHasKeyInMainHand(player)) {
+                                player.getPlayerInventory().setMainHandItem(null);//remove the key from the player's main hand
+                                ((Door) object).unlock();
+                            }
+                        } else {
+                            if (Events.getTimeLoopCounter() > 0) {
+                                System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
+                                if (object == wagon.getDoorLeft()) {
+                                    Object actualTeleport = wagon.getDoorLeft().getTeleport();
+                                    wagon.getDoorLeft().setTeleport(wagon.getDoorRightTarget());
+                                    wagon.getDoorLeft().teleport(player);
+                                    wagon.getDoorLeft().setTeleport(actualTeleport);
+                                } else {
+                                    Object actualTeleport = wagon.getDoorRight().getTeleport();
+                                    wagon.getDoorRight().setTeleport(wagon.getDoorLeftTarget());
+                                    wagon.getDoorRight().teleport(player);
+                                    wagon.getDoorRight().setTeleport(actualTeleport);
+                                }
+                                Events.decrementTimeLoopCounter();
+                                if (Events.getTimeLoopCounter() == 0) {
+                                    Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
+                                    wagon.removeTrap();
+                                    eventStartTime = 0;
+                                    eventDuration = 0;
+                                }
+                                return;//do not teleport the player to the next wagon
+                            }
+                            System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
+                            openWagonDoor((Door) object);
+                        }
+                    }
+                    if (Objects.equals(object.getTwoLetterId(), Constants.CHEST_OBJECT)) {
+                        setInventoryHandle(object.getObjectInventory());
+                    }
+                    if (Objects.equals(object.getTwoLetterId(), Constants.LOCKABLE_DOOR)) {
+                        useLockableDoor(object);
+                        isometric.updateAll();
+                    }
+                }
+                if (Checker.checkIfPlayerCanSpeak(player, wagon.getEntities()) != null) {
+                    Entity entity = Checker.checkIfPlayerCanSpeak(player, wagon.getEntities());
+                    openDialogue(entity);
+                }
+            }
+            stopPlayerFootsteps();
+        };
+        //handle TAB, ESCAPE, R
+        EventHandler<? super KeyEvent> other_handle = keyEvent -> {
+            switch (keyEvent.getCode()) {
                 case TAB:
                     setPlayerInventoryHandle();
                     break;
                 case ESCAPE:
                     showPauseScreen();
                     break;
-                case E:
-                    if (Checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
-                        Object object = Checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
-                        if (Objects.equals(object.getTwoLetterId(), Constants.WAGON_DOOR)) {
-                            if (Events.getCurrentEvent() == Constants.Event.TRAP_EVENT) {
-                                ((Door) object).lock();//player cannot escape from the trap even if he has the key to open the door
-                            }
-                            if (((Door) object).isLocked()) {
-                                if (Checker.checkIfPlayerHasKeyInMainHand(player)) {
-                                    player.getPlayerInventory().setMainHandItem(null);//remove the key from the player's main hand
-                                    ((Door) object).unlock();
-                                }
-                            } else {
-                                if (Events.getTimeLoopCounter() > 0) {
-                                    System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
-                                    if (object == wagon.getDoorLeft()) {
-                                        //loop the doors: the left door teleports the player to the right door in the same wagon
-                                        //and the right door teleports the player to the left door in the same wagon
-                                        //the doors are looped until the time loop counter is 0
-                                        Object actualTeleport = wagon.getDoorLeft().getTeleport();
-                                        wagon.getDoorLeft().setTeleport(wagon.getDoorRightTarget());
-                                        wagon.getDoorLeft().teleport(player);
-                                        wagon.getDoorLeft().setTeleport(actualTeleport);
-                                    } else {
-                                        Object actualTeleport = wagon.getDoorRight().getTeleport();
-                                        wagon.getDoorRight().setTeleport(wagon.getDoorLeftTarget());
-                                        wagon.getDoorRight().teleport(player);
-                                        wagon.getDoorRight().setTeleport(actualTeleport);
-                                    }
-                                    Events.decrementTimeLoopCounter();
-                                    if (Events.getTimeLoopCounter() == 0) {
-                                        Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
-                                        wagon.removeTrap();
-                                        eventStartTime = 0;
-                                        eventDuration = 0;
-                                    }
-                                    return;//do not teleport the player to the next wagon
-                                }
-                                System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
-                                openWagonDoor((Door) object);
-                            }
-                        }
-                        if (Objects.equals(object.getTwoLetterId(), Constants.CHEST_OBJECT)) {
-                            setInventoryHandle(object.getObjectInventory());
-                        }
-                        if (Objects.equals(object.getTwoLetterId(),Constants.LOCKABLE_DOOR)) {
-                            useLockableDoor(object);
-                            isometric.updateAll();
-                        }
-                    }
-                    if (Checker.checkIfPlayerCanSpeak(player, wagon.getEntities()) != null) {
-                        Entity entity = Checker.checkIfPlayerCanSpeak(player, wagon.getEntities());
-                        openDialogue(entity);
-                    }
+                case R:
+                    playerUseHand();
+                    break;
             }
+        };
+
+        //add onKeyPressed handlers
+        scene.setOnKeyPressed(keyEvent -> {
+            movement_handle.handle(keyEvent);
+            interact_handle.handle(keyEvent);
+            other_handle.handle(keyEvent);
             isometric.updateWalls();
         });
+        //add onKeyReleased handlers
+        scene.setOnKeyReleased(keyEvent -> {
+            movement_stopped_handle.handle(keyEvent);
+            isometric.resetAimLine();
+        });
+        //add onMouseClicked handler
+        scene.setOnMouseClicked(mouseEvent -> {
+            if (player.getHandItem() instanceof Firearm firearm) {
+                player.shoot(firearm, wagon.getEntities(), (int) mouseEvent.getX(), (int) mouseEvent.getY(), time, isometric.getTwoAndTallerWalls());
+            } else {
+                isometric.resetAimLine();
+            }
+        });
+        //add onMouseMoved handler
+        scene.setOnMouseMoved(mouseEvent -> {
+            if (player.getHandItem() instanceof Firearm) {
+                isometric.drawPlayerFirearmAim((int) mouseEvent.getX(), (int) mouseEvent.getY());
+            } else {
+                isometric.resetAimLine();
+            }
+        });
+    }
+    private void playPlayerFootsteps() {
+        //TODO: play footstep sound
+//        Thread footstepLoop = new Thread(() -> {
+//            while (true) {
+//                try {
+//                    Atmospheric.playSound("resources/sounds/footstep_sounds/single_footstep_sound.wav");
+//                    Thread.sleep(Constants.PLAYER_BASIC_SPEED_X / 2 * 100);
+//                } catch (InterruptedException e) {
+//                    break;
+//                }
+//            }
+//        });
+//        player.setSoundThread(footstepLoop);
+//        player.getSoundThread().start();
     }
 
+    private void stopPlayerFootsteps() {
+        //TODO: stop footstep sound
+//        Thread footstepLoop = player.getSoundThread();
+//        if (footstepLoop != null) {
+//            player.getSoundThread().interrupt();
+//        }
+//        player.setSoundThread(null);
+    }
     /**
      * Open the dialogue with the entity.
      * @param entity entity to speak with
@@ -527,6 +576,7 @@ public class GameLogic {
             entity.setDialoguePath(entity.getDialoguePath());
             if (questNPC.isQuestCompleted()) {
                 entity.setDialoguePath(entity.getName() + "_completed.json");
+                player.getPlayerInventory().addItem(RandomHandler.getRandomFoodItem());
             }
             Dialogue questDialogue = new Dialogue(entity.getDialoguePath());
             questDialogue.setEntity(entity);
@@ -648,13 +698,11 @@ public class GameLogic {
      * @param dialogueEntity entity to speak with
      */
     private void handleDialogueAction(String action, Entity dialogueEntity) {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - check ticket
-        System.out.println(action);
         if (Objects.equals(action, "negative")) {
             dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
             if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
                 dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
             }
-            System.out.println(dialogueEntity.getNegativeCount());
         }
         if (Objects.equals(action, "fight")) {
             dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
@@ -694,27 +742,59 @@ public class GameLogic {
      * @param door door to be opened
      */
     private void generateNextWagonAndOpenDoor(Door door) {
-        String wagonType = RandomHandler.getRandomWagonType();
-        System.out.println(wagonType);
+//        String wagonType = RandomHandler.getRandomWagonType();
+        String wagonType = "CARGO";
         Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
+
         if (door == wagon.getDoorLeft()) {
-            System.out.println("left door");
-            nextWagon.generateNextWagon(wagon, true);
-            train.addWagon(nextWagon);
-            isometric.initialiseWagon(nextWagon);
-            isometric.updateAll();
-            wagon.getDoorLeft().teleport(player);
-            this.wagon = nextWagon;
-            player.setCurrentWagon(wagon);
+            generateAndOpenLeftWagon(nextWagon);
         } else if (door == wagon.getDoorRight()) {
-            System.out.println("right door");
-            nextWagon.generateNextWagon(wagon, false);
-            train.addWagon(nextWagon);
-            isometric.initialiseWagon(nextWagon);
-            isometric.updateAll();
-            wagon.getDoorRight().teleport(player);
-            this.wagon = nextWagon;
-            player.setCurrentWagon(wagon);
+            generateAndOpenRightWagon(nextWagon);
+        }
+    }
+    private void generateAndOpenLeftWagon(Wagon nextWagon) {
+        setPursuers(rightWagonPursuers);
+        System.out.println("right pursuers: " + rightWagonPursuers.size());
+
+        nextWagon.generateNextWagon(wagon, true);
+        train.addWagon(nextWagon);
+
+        isometric.initialiseWagon(nextWagon);
+        isometric.updateAll();
+        nextWagon.setObstacles(isometric.getWalls());
+
+        wagon.getDoorLeft().teleport(player);
+        this.wagon = nextWagon;
+        player.setCurrentWagon(wagon);
+    }
+
+    private void generateAndOpenRightWagon(Wagon nextWagon) {
+        setPursuers(leftWagonPursuers);
+        System.out.println("left wagon pursuers: " + leftWagonPursuers.size());
+
+        nextWagon.generateNextWagon(wagon, false);
+        train.addWagon(nextWagon);
+
+        isometric.initialiseWagon(nextWagon);
+        isometric.updateAll();
+        nextWagon.setObstacles(isometric.getWalls());
+
+        wagon.getDoorRight().teleport(player);
+        this.wagon = nextWagon;
+        player.setCurrentWagon(wagon);
+    }
+
+    private void setPursuers(List<Entity> wagonPursuers) {
+        System.out.println("set pursuers");
+        wagonPursuers.clear();
+        for (Entity entity : wagon.getEntities()) {
+            if (entity.getBehaviour() == Constants.Behaviour.AGGRESSIVE) {
+                if (entity.getIntelligence() == 2) {
+                    if (Checker.checkIfEntityCanSee(entity, player, isometric.getTwoAndTallerWalls(), time)) {
+                        wagonPursuers.add(entity);
+                    }
+                }
+            }
         }
     }
 
@@ -725,15 +805,19 @@ public class GameLogic {
     private void openExistingWagonDoor(Door door) {
         for (Wagon wagon : train.getWagonsArray()) {
             if (wagon.getId() == door.getTargetId()) {
-                if (door.getTargetId() == this.wagon.getDoorLeft().getTargetId()) {
+                if (door == this.wagon.getDoorLeft()) {
+                    setPursuers(rightWagonPursuers);
                     isometric.initialiseWagon(wagon);
                     isometric.updateAll();
+                    wagon.setObstacles(isometric.getWalls());
                     this.wagon.getDoorLeft().teleport(player);
                     this.wagon = wagon;
                     player.setCurrentWagon(wagon);
                 } else {
+                    setPursuers(leftWagonPursuers);
                     isometric.initialiseWagon(wagon);
                     isometric.updateAll();
+                    wagon.setObstacles(isometric.getWalls());
                     this.wagon.getDoorRight().teleport(player);
                     this.wagon = wagon;
                     player.setCurrentWagon(wagon);
@@ -941,6 +1025,14 @@ public class GameLogic {
                 }
             }
         }
+        if (leftWagonPursuers != null && !leftWagonPursuers.isEmpty()) {
+            System.out.println(leftWagonPursuers.getFirst().getName());
+            movePursuers(leftWagonPursuers, leftWagonPursuers.getFirst().getCurrentWagon().getDoorRightTarget(), leftWagonPursuers.getFirst().getCurrentWagon().getDoorRight());
+        }
+        if (rightWagonPursuers != null && !rightWagonPursuers.isEmpty()) {
+            System.out.println(rightWagonPursuers.getFirst().getName());
+            movePursuers(rightWagonPursuers, rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeftTarget(), rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeft());
+        }
     }
 
     /**
@@ -965,7 +1057,7 @@ public class GameLogic {
      */
     private void intelligenceOnePursue(Entity entity, Entity target) {
         int[][] map = wagon.getMapForPathFinder(false);
-        int[][] path = entity.findPath(map, wagon.getObjectsArray(), target, false);
+        int[][] path = entity.findPath(map, target.findOnWhatObject());
         pursue(entity, target, map, path);
     }
 
@@ -976,7 +1068,7 @@ public class GameLogic {
      */
     private void intelligenceTwoPursue(Entity entity, Entity target) {
         int[][] map = wagon.getMapForPathFinder(true);
-        int[][] path = entity.findPath(map, wagon.getObjectsArray(), target, false);
+        int[][] path = entity.findPath(map, target.findOnWhatObject());
         //open the door if the entity is near
         if (Checker.checkIfCanInteract(entity, wagon.getInteractiveObjects()) != null) {
             Object object = Checker.checkIfCanInteract(entity, wagon.getInteractiveObjects());
@@ -1000,14 +1092,7 @@ public class GameLogic {
         if (Checker.checkCollision(entity.getAttackRange(), target.getAttackRange())) {
             intelligenceZeroPursue(entity, target);
         } else {
-            int[] deltaXY = new int[0];
-            if (path.length >= 2) {
-                deltaXY = path[path.length - 2];
-            } else if (path.length == 1) {
-                deltaXY = path[0];
-            } else {
-                returnToStart(map, entity);
-            }
+            int[] deltaXY = getDeltaXY(entity, path, map);
             moveEntity(entity, deltaXY);
         }
     }
@@ -1021,7 +1106,7 @@ public class GameLogic {
         if (entity.getPositionX() == entity.getStartPositionX() && entity.getPositionY() == entity.getStartPositionY()) {
             return;
         }
-        int[][] path = entity.findPath(map, wagon.getObjectsArray(), entity, true);
+        int[][] path = entity.findPath(map, entity.getStartIndex());
         if (path.length == 0) {
             return;
         }
@@ -1053,7 +1138,82 @@ public class GameLogic {
         deltaX = deltaX > 0 ? -1 : 1;
         deltaY = deltaY > 0 ? -1 : 1;
 
+        if (entity.getCurrentWagon() != player.getCurrentWagon()) {
+            moveEntityInOtherWagon(entity, (int) deltaX, (int) deltaY);
+        } else {
+            isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+        }
+    }
+    private void moveEntityInOtherWagon(Entity entity, int deltaX, int deltaY) {
+        Shape oldWalls = isometric.getWalls();
+        isometric.setWalls(entity.getCurrentWagon().getObstacles());
         isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
+        isometric.setWalls(oldWalls);
+    }
+    private void movePursuers(List<Entity> pursuers, Object target, Door wagonDoor) {
+        System.out.println("Moving pursuers");
+        //get copy of the list to avoid ConcurrentModificationException
+        List<Entity> wagonPursuers = new LinkedList<>(pursuers);
+        for (Entity pursuer : wagonPursuers) {
+            if (pursuer != null) {
+                if (player.getCurrentWagon() == pursuer.getCurrentWagon()) {
+                    pursuers.remove(pursuer);
+                    continue;
+                }
+                if (target == null) {
+                    System.out.println("Target is null");
+                    return;
+                }
+                if (Checker.checkCollision(pursuer.getAttackRange(), target.getObjectHitbox())) {
+                    //might be unnecessary: pursuer will pursue the player to the next wagon, meaning the door is open and already generated;
+                    if (wagonDoor.isLocked()) {
+                        System.out.println("Door is locked");
+                        continue;
+                    }
+                    if (wagonDoor.getTargetId() == -1) {
+                        System.out.println("Door target id is -1");
+                        continue;
+                    }
+                    //teleport the pursuer to the next wagon
+                    System.out.println("Teleporting pursuer to the next wagon");
+                    wagonDoor.teleport(pursuer);
+                    //remove from original list and current wagon
+                    pursuers.remove(pursuer);
+                    pursuer.getCurrentWagon().getEntities().remove(pursuer);
+                    pursuer.setCurrentWagon(wagon);
+                    wagon.getEntities().add(pursuer);
+                    isometric.setEntities(wagon.getEntities());
+                    isometric.updateAll();
+                    continue;
+                }
+                //find target index
+                for (int i = 0; i < pursuer.getCurrentWagon().getObjectsArray().length; i++) {
+                    for (int j = 0; j < pursuer.getCurrentWagon().getObjectsArray()[i].length; j++) {
+                        if (pursuer.getCurrentWagon().getObjectsArray()[i][j] == target) {
+                            System.out.println("Target found");
+                            int[] targetIndex = {i, j};
+                            //find path
+                            int[][] path = pursuer.findPath(pursuer.getCurrentWagon().getMapForPathFinder(true), targetIndex);
+                            //move pursuer
+                            int[] deltaXY = getDeltaXY(pursuer, path, pursuer.getCurrentWagon().getMapForPathFinder(true));
+                            System.out.println("Pursuer moved");
+                            moveEntity(pursuer, deltaXY);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private int[] getDeltaXY(Entity entity, int[][] path, int[][] map) {
+        int[] deltaXY = new int[0];
+        if (path.length >= 2) {
+            deltaXY = path[path.length - 2];
+        } else if (path.length == 1) {
+            deltaXY = path[0];
+        } else {
+            returnToStart(map, entity);
+        }
+        return deltaXY;
     }
 
     /**
