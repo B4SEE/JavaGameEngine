@@ -4,11 +4,8 @@ import com.fasterxml.jackson.annotation.*;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
-import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
 import java.util.ArrayList;
@@ -41,7 +38,7 @@ public class Entity {
     @JsonProperty("initialBehaviour")
     private Constants.Behaviour initialBehaviour;
     @JsonProperty("intelligence")
-    private int intelligence = 0;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
+    private int intelligence = 2;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
     @JsonProperty("negativeThreshold")
     private int negativeThreshold = 2;
     @JsonProperty("negativeCount")
@@ -50,8 +47,8 @@ public class Entity {
     private double startPositionX;
     @JsonProperty("startPositionY")
     private double startPositionY;
-    @JsonProperty("targetIndex")
-    private int[] targetIndex;
+    @JsonIgnore
+    private int[] startIndex;
     @JsonIgnore
     private List<Point2D> previousPositions = new ArrayList<>();
     @JsonIgnore
@@ -96,6 +93,10 @@ public class Entity {
     private ImageView entityView;
     @JsonIgnore//to prevent infinite loop
     private Wagon currentWagon;
+    @JsonIgnore
+    private Thread soundThread;
+    @JsonIgnore
+    private Thread animationThread;
 
     @JsonCreator
     public Entity(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("type") Constants.EntityType type, @JsonProperty("positionX") double positionX, @JsonProperty("positionY") double positionY, @JsonProperty("hitBoxSize") int hitBoxSize, @JsonProperty("health") int health, @JsonProperty("damage") int damage) {
@@ -129,10 +130,6 @@ public class Entity {
         this.currentWagon = currentWagon;
     }
     @JsonIgnore
-    public void setNegativeThreshold(int negativeThreshold) {
-        this.negativeThreshold = negativeThreshold;
-    }
-    @JsonIgnore
     public int getNegativeThreshold() {
         return negativeThreshold;
     }
@@ -155,7 +152,7 @@ public class Entity {
         setType(Constants.EntityType.ENEMY);
         setBehaviour(Constants.Behaviour.AGGRESSIVE);
         setInitialBehaviour(getBehaviour());
-        intelligence = (int) (Math.random() * 2);
+//        intelligence = (int) (Math.random() * 2);
         setHeight(Constants.ENEMY_BASIC_HEIGHT);
         speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
         speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
@@ -184,7 +181,7 @@ public class Entity {
             dialoguePath = RandomHandler.getRandomDialogueThatStartsWith(name);
 //            System.out.println(randomHandler.getRandomDialogueThatStartsWith(name));
         }
-        negativeThreshold = (int) (Math.random() * 10 + 1);
+        negativeThreshold = 1;//(int) (Math.random() * 10 + 1);
     }
     @JsonIgnore
     public void setAsDefaultPlayer() {
@@ -268,11 +265,11 @@ public class Entity {
     }
     @JsonIgnore
     public void setStartIndex(int[] startIndex) {
-        this.targetIndex = startIndex;
+        this.startIndex = startIndex;
     }
     @JsonIgnore
     public int[] getStartIndex() {
-        return targetIndex;
+        return startIndex;
     }
     @JsonIgnore
     public void setPositionX(double positionX) {
@@ -422,6 +419,23 @@ public class Entity {
     public Wagon getCurrentWagon() {
         return currentWagon;
     }
+    @JsonIgnore
+    public void setSoundThread(Thread soundThread) {
+        this.soundThread = soundThread;
+    }
+    @JsonIgnore
+    public Thread getSoundThread() {
+        return soundThread;
+    }
+    @JsonIgnore
+    public void setAnimationThread(Thread animationThread) {
+        this.animationThread = animationThread;
+    }
+    @JsonIgnore
+    public Thread getAnimationThread() {
+        return animationThread;
+    }
+
 
     /**
      * Decreases the health of the entity by the specified amount.
@@ -494,26 +508,20 @@ public class Entity {
         }
     }
     @JsonIgnore
-    public int[][] findPath(int[][] map, Object[][] objectsArray, Entity target, boolean returnToStart) {
-        if (targetIndex == null) {
-            targetIndex = findOnWhatObject(this, objectsArray);
+    public int[][] findPath(int[][] map, int[] targetIndex) {
+        if (this.startIndex == null) {
+            this.startIndex = findOnWhatObject();
         }
 
         int[][] path;
+        int[] startPosition = findOnWhatObject();
 
-        int[] startPosition = findOnWhatObject(this, objectsArray);
-        int[] targetPosition = findOnWhatObject(target, objectsArray);
-
-        if (startPosition == null || targetPosition == null) {
+        if (startPosition == null || targetIndex == null) {
             return null;
         }
 
-        if (returnToStart) {
-            targetPosition = targetIndex;
-        }
-
         PathFinder.Pair src = new PathFinder.Pair(startPosition[0], startPosition[1]);
-        PathFinder.Pair dest = new PathFinder.Pair(targetPosition[0], targetPosition[1]);
+        PathFinder.Pair dest = new PathFinder.Pair(targetIndex[0], targetIndex[1]);
 
         PathFinder pathFinder = new PathFinder();
         path = pathFinder.aStarSearch(map, map.length, map[0].length, src, dest);
@@ -521,12 +529,13 @@ public class Entity {
         return path;
     }
     @JsonIgnore
-    public int[] findOnWhatObject(Entity target, Object[][] objectsArray) {
+    public int[] findOnWhatObject() {
+        Object[][] objectsArray = currentWagon.getObjectsArray();
         for (int i = 0; i < objectsArray.length; i++) {
             for (int j = 0; j < objectsArray[0].length; j++) {
                 if (objectsArray[i][j] != null) {
                     //reduce the hitbox size of the object to make it easier to find the object
-                    if (Checker.checkCollision(target.getTrackPoint(), objectsArray[i][j].getObjectHitbox())) {
+                    if (Checker.checkCollision(this.getTrackPoint(), objectsArray[i][j].getObjectHitbox())) {
                         int[] result = new int[2];
                         result[0] = i;
                         result[1] = j;
