@@ -224,13 +224,5 @@ public class RandomHandler {
                 inventory.addItem(null);
             }
         }
-//        System.out.println("Inventory filled with random items: ");
-//        for (Item item : inventory.getItemsArray()) {
-//            if (item != null) {
-//                System.out.println(item.getName());
-//            } else {
-//                System.out.println("null");
-//            }
-//        }
     }
 }

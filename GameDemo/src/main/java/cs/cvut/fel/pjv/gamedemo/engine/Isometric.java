@@ -33,23 +33,9 @@ public class Isometric {
     private final Pane grid = new Pane();
     private Label hint = new Label();
     private Line aimLine = new Line();
-    private long time;
     private Scene isoScene;
     public Isometric() {
     }
-    /**
-     * Update the time.
-     * @param time the current time (in seconds)
-     * <br>
-     * <br>
-     * Note: the time is updated automatically by the AnimationTimer every INTERVAL nanoseconds;
-     * the time is used for entity cooldowns and player death handling;
-     * Isometric class does not have its own timer
-     */
-    public void updateTime(long time) {
-        this.time = time;
-    }
-
     /**
      * Remove dead entities from the grid.
      */
@@ -149,7 +135,6 @@ public class Isometric {
         playerDeltaX = 0;
         playerDeltaY = 0;
         hint = new Label();
-        time = 0;
     }
     /**
      * Initialise the main stage.
@@ -787,5 +772,11 @@ public class Isometric {
      */
     public Shape getTwoAndTallerWalls() {
         return twoAndTallerWalls;
+    }
+    public Shape getWalls() {
+        return walls;
+    }
+    public void setWalls(Shape walls) {
+        this.walls = walls;
     }
 }

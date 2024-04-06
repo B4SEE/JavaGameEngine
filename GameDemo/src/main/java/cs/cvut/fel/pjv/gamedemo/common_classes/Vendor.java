@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
-public class Vendor extends Entity {
+public class Vendor extends Entity {//fix json
     @JsonProperty("vendorInventory")
     private Inventory vendorInventory;
     public Vendor(String name, String texturePath) {
