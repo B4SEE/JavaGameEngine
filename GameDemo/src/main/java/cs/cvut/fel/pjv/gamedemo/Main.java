@@ -14,7 +14,7 @@ public class Main extends Application {
         // Load and start the game
 //        Platform.setImplicitExit(false);//do not close the game when the window is closed
         Atmospheric.resetAll();
-        Atmospheric.updateBackgroundMusic();
+//        Atmospheric.updateBackgroundMusic();
         Game.setStage(stage);
         Game.start();
     }

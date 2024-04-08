@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import cs.cvut.fel.pjv.gamedemo.engine.Checker;
-import cs.cvut.fel.pjv.gamedemo.engine.Events;
-import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
-import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
+import cs.cvut.fel.pjv.gamedemo.engine.*;
 import javafx.scene.shape.Shape;
 
 import java.util.ArrayList;
@@ -260,7 +257,7 @@ public class Wagon {
                         String name = names[(int) (Math.random() * names.length)];
                         Entity enemy = new Entity(name, name + "_front.png");//works, but entities are all in the same position
                         enemy.setCurrentWagon(this);
-                        enemy.setAsDefaultEnemy();
+                        EntitiesCreator.setAsDefaultEnemy(enemy);
                         enemy.setPositionX(300);
                         enemy.setPositionY(240);
                         entities.add(enemy);
@@ -271,7 +268,7 @@ public class Wagon {
                         String name = names[(int) (Math.random() * names.length)];
                         Entity npc = new Entity(name, name + "_front.png");
                         npc.setCurrentWagon(this);
-                        npc.setAsDefaultNPC();
+                        EntitiesCreator.setAsDefaultNPC(npc);
                         npc.setPositionX(500);
                         npc.setPositionY(240);
                         entities.add(npc);
@@ -292,6 +289,7 @@ public class Wagon {
                         if (availableQuestNPCs != null && !availableQuestNPCs.isEmpty()) {
                             QuestNPC questNPC = Events.getAvailableQuestNPCs().get((int) (Math.random() * availableQuestNPCs.size()));
                             Events.removeQuestNPC(questNPC);
+                            questNPC.writeQuestItemToNecessaryToSpawnItems();
                             questNPC.setCurrentWagon(this);
                             questNPC.setPositionX(500);
                             questNPC.setPositionY(240);

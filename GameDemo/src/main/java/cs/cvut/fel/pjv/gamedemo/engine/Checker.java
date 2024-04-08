@@ -183,7 +183,7 @@ public class Checker {
     }
     public static boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
         Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 80, aimX, aimY);
-        aimLine.setStrokeWidth(10);
+        aimLine.setStrokeWidth(7);
         Circle shootHitbox = (Circle) target.getHitbox();
         shootHitbox.setStroke(Color.RED);
         shootHitbox.setStrokeWidth(7);
@@ -245,9 +245,6 @@ public class Checker {
      * @return true if there is a collision, false otherwise
      */
     public static boolean checkCollision(Shape hitbox1, Shape hitbox2) {
-//        if (hitbox1 == null || hitbox2 == null) {
-//            return false;
-//        }
         Shape intersect = Shape.intersect(hitbox1, hitbox2);
         return !intersect.getBoundsInParent().isEmpty();
     }

@@ -1,12 +1,19 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 /**
  * Represents an item in the game.
  */
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        property = "class"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Food.class, name = "Food"),
+        @JsonSubTypes.Type(value = MeleeWeapon.class, name = "MeleeWeapon"),
+        @JsonSubTypes.Type(value = Firearm.class, name = "Firearm")
+})
 public class Item {
     @JsonProperty("name")
     private final String name;

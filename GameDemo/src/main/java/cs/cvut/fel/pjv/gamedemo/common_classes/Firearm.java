@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,7 +10,8 @@ public class Firearm extends Item {
     @JsonProperty("shootingSpeed")
     private int shootingSpeed;
 
-    public Firearm(String name, String texturePath, int damage, int shootingSpeed) {
+    @JsonCreator
+    public Firearm(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("damage") int damage, @JsonProperty("shootingSpeed") int shootingSpeed) {
         super(name, texturePath, Constants.ItemType.FIREARM);
         this.damage = damage;
         this.shootingSpeed = shootingSpeed;

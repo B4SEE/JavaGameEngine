@@ -779,4 +779,12 @@ public class Isometric {
     public void setWalls(Shape walls) {
         this.walls = walls;
     }
+
+    public int getPlayerDeltaX() {
+        return playerDeltaX;
+    }
+
+    public int getPlayerDeltaY() {
+        return playerDeltaY;
+    }
 }

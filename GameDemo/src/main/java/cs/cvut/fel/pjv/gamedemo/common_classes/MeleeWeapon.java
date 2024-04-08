@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,8 +12,8 @@ public class MeleeWeapon extends Item {
     private int damage;
     @JsonProperty("attackSpeed")
     private final int attackSpeed;
-
-    public MeleeWeapon(String name, String texturePath, int damage, int attackSpeed) {
+    @JsonCreator
+    public MeleeWeapon(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("damage") int damage, @JsonProperty("attackSpeed") int attackSpeed) {
         super(name, texturePath, Constants.ItemType.MELEE_WEAPON);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
