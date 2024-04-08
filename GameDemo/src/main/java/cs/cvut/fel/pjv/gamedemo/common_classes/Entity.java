@@ -130,6 +130,10 @@ public class Entity {
         this.currentWagon = currentWagon;
     }
     @JsonIgnore
+    public void setNegativeThreshold(int negativeThreshold) {
+        this.negativeThreshold = negativeThreshold;
+    }
+    @JsonIgnore
     public int getNegativeThreshold() {
         return negativeThreshold;
     }
@@ -140,60 +144,6 @@ public class Entity {
     @JsonIgnore
     public int getNegativeCount() {
         return negativeCount;
-    }
-
-    /**
-     * Sets the entity as the default enemy.
-     * Speed and health are set to random values within the specified range.
-     * Note: hitbox size, attack range size, damage and cooldown are set to default values, but it will be changed in the future (randomized).
-     */
-    @JsonIgnore
-    public void setAsDefaultEnemy() {
-        setType(Constants.EntityType.ENEMY);
-        setBehaviour(Constants.Behaviour.AGGRESSIVE);
-        setInitialBehaviour(getBehaviour());
-//        intelligence = (int) (Math.random() * 2);
-        setHeight(Constants.ENEMY_BASIC_HEIGHT);
-        speed_x = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN);
-        speed_y = (int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN);
-        int maxHealth = (int) (Math.random() * (Constants.ENEMY_BASIC_MAX_HEALTH_MAX - Constants.ENEMY_BASIC_MAX_HEALTH_MIN) + Constants.ENEMY_BASIC_MAX_HEALTH_MIN);
-        maxHealth = (maxHealth / 10) * 10;
-        this.maxHealth = maxHealth;
-        setHealth(maxHealth);
-        setHitBoxSize(Constants.ENEMY_BASIC_HITBOX);
-        setAttackRangeSize(Constants.ENEMY_BASIC_ATTACK_RANGE);
-        setDamage(Constants.ENEMY_BASIC_DAMAGE);
-        setCooldown(Constants.ENEMY_BASIC_COOLDOWN);
-    }
-
-    /**
-     * Sets the entity as the default NPC.
-     * Speed and health are set to random values within the specified range.
-     * Note: hitbox size, attack range size, damage and cooldown are set to default values, but it will be changed in the future (randomized).
-     */
-    @JsonIgnore
-    public void setAsDefaultNPC() {
-        setAsDefaultEnemy();
-        setType(Constants.EntityType.NPC);
-        setBehaviour(Constants.Behaviour.NEUTRAL);
-        setInitialBehaviour(getBehaviour());
-        if (dialoguePath == null) {
-            dialoguePath = RandomHandler.getRandomDialogueThatStartsWith(name);
-//            System.out.println(randomHandler.getRandomDialogueThatStartsWith(name));
-        }
-        negativeThreshold = 1;//(int) (Math.random() * 10 + 1);
-    }
-    @JsonIgnore
-    public void setAsDefaultPlayer() {
-        setType(Constants.EntityType.PLAYER);
-        setBehaviour(Constants.Behaviour.NEUTRAL);
-        setInitialBehaviour(getBehaviour());
-        setHealth(Constants.PLAYER_MAX_HEALTH);
-        setDamage(Constants.PLAYER_BASIC_DAMAGE);
-        setHitBoxSize(Constants.PLAYER_HITBOX);
-        setAttackRangeSize(Constants.PLAYER_ATTACK_RANGE);
-        setCooldown(Constants.PLAYER_COOLDOWN);
-        setHeight(2);
     }
     @JsonIgnore
     public String getName() {
@@ -358,6 +308,10 @@ public class Entity {
     @JsonIgnore
     public int getHealth() {
         return health;
+    }
+    @JsonIgnore
+    public void setMaxHealth(int maxHealth) {
+        this.maxHealth = maxHealth;
     }
     @JsonIgnore
     public int getMaxHealth() {
