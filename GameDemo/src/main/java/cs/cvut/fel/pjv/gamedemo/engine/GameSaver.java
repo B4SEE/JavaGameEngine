@@ -1,9 +1,9 @@
-package cs.cvut.fel.pjv.gamedemo.common_classes;
+package cs.cvut.fel.pjv.gamedemo.engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cs.cvut.fel.pjv.gamedemo.engine.*;
+import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -174,6 +174,7 @@ public class GameSaver {
     @JsonIgnore
     private void createPlayer() {
         this.player = new Player(Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y);
+        player.getPlayerInventory().setAmmo(50);
     }
     @JsonIgnore
     private void createWagon() {
