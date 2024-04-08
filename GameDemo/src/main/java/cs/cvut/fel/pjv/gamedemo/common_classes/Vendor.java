@@ -3,6 +3,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 public class Vendor extends Entity {//fix json
     @JsonProperty("vendorInventory")
@@ -28,7 +29,7 @@ public class Vendor extends Entity {//fix json
     }
     @JsonIgnore
     public void setAsDefaultVendor() {
-        super.setAsDefaultNPC();
+        EntitiesCreator.setAsDefaultNPC(this);
         super.setType(Constants.EntityType.VENDOR);
         if (vendorInventory == null) {
             int randomInventorySize = (int) (Math.random() * 20 + 1);

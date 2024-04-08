@@ -1,7 +1,9 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.*;
+import cs.cvut.fel.pjv.gamedemo.engine.Atmospheric;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 import javafx.scene.shape.Shape;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class Player extends Entity {
     @JsonCreator
     public Player(@JsonProperty("positionX") int positionX, @JsonProperty("positionY") int positionY) {
         super("PLAYER", Constants.PLAYER_TEXTURE_PATH);
-        super.setAsDefaultPlayer();
+        EntitiesCreator.setAsDefaultPlayer(this);
         super.setPositionX(positionX);
         super.setPositionY(positionY);
         this.hunger = Constants.PLAYER_MAX_HUNGER;
@@ -164,8 +166,9 @@ public class Player extends Entity {
         }
         System.out.println("Shooting");
         playerInventory.setAmmo(playerInventory.getAmmo() - 1);
+        Atmospheric.playSound("resources/sounds/gun/gunshot.wav");
         for (Entity target : targets) {
-            if (target != null && target.isAlive() && Checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time) && playerInventory.getAmmo() >= 0) {
+            if (target != null && target.isAlive() && Checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time)) {
                 target.takeDamage(firearm.getDamage());
                 System.out.println("Target health: " + target.getHealth());
                 for (Entity entity : targets) {
@@ -173,10 +176,8 @@ public class Player extends Entity {
                         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                     }
                 }
-                //sound of shooting
                 return;
             }
         }
-        //sound of missed shot
     }
 }

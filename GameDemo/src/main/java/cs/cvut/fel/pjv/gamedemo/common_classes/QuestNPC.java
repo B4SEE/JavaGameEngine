@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 
 import java.io.FileWriter;
@@ -14,23 +15,19 @@ public class QuestNPC extends Entity {
 
     public QuestNPC(String name, String texturePath) {
         super(name, texturePath);
-        super.setAsDefaultNPC();
+        EntitiesCreator.setAsDefaultNPC(this);
         super.setType(Constants.EntityType.QUEST_NPC);
         setDialoguePath(name + "_start.json");
         String nameWithoutSpaces = name.replaceAll("\\s", "");
         this.questItem = RandomHandler.getQuestItem(nameWithoutSpaces);
-        writeQuestItemToNecessaryToSpawnItems();
     }
     @JsonCreator
     public QuestNPC(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("questCompleted") boolean questCompleted, @JsonProperty("questItem") Item questItem) {
         super(name, texturePath);
-        super.setAsDefaultNPC();
+        EntitiesCreator.setAsDefaultNPC(this);
         super.setType(Constants.EntityType.QUEST_NPC);
         this.questCompleted = questCompleted;
         this.questItem = questItem;
-        if (!questCompleted) {
-            writeQuestItemToNecessaryToSpawnItems();
-        }
     }
     @JsonIgnore
     public Item getQuestItem() {
@@ -57,7 +54,7 @@ public class QuestNPC extends Entity {
         return false;
     }
     @JsonIgnore
-    private void writeQuestItemToNecessaryToSpawnItems() {
+    public void writeQuestItemToNecessaryToSpawnItems() {
         //write to necessary_to_spawn_item.json
         try {
             ObjectMapper objectMapper = new ObjectMapper();
