@@ -10,6 +10,7 @@ import java.io.File;
 
 public class Atmospheric {
     private static MediaPlayer backgroundMusic;
+    private static MediaView viewer = new MediaView();
     private static final double normalVolume = 0.5;
     public static void updateBackgroundMusic() {
         int chance = (int) (Math.random() * 100);
@@ -132,6 +133,8 @@ public class Atmospheric {
             Media sound = new Media(soundFile.toURI().toString());
             MediaPlayer mediaPlayer = new MediaPlayer(sound);
             mediaPlayer.setVolume(normalVolume);
+            System.out.println("Playing sound: " + pathFile);
+            viewer.setMediaPlayer(mediaPlayer);//to avoid garbage collection
             mediaPlayer.play();
         }).start();
     }
