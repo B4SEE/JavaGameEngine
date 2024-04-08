@@ -91,14 +91,11 @@ public class GameLogic {
     private void generateAndSetTrap() {
         if (eventStartTime == 0) {
             eventStartTime = time;
-            //time to escape from the trap (to another wagon)
             eventDuration = Constants.TIME_TO_ESCAPE_TRAP;
-            //set trap event: 1 - trap with enemies, 2 - trap with boss, 3 - trap with time loop, 4 - silence
             int trapType = (int) (Math.random() * 4) + 1;
             switch (trapType) {
                 case 1:
                     Events.setNextEvent(Constants.Event.TRAP_EVENT);
-//                    System.out.println("Trap event");
                     break;
                 case 2:
                     Events.setNextEvent(Constants.Event.TRAP_EVENT);
@@ -107,18 +104,15 @@ public class GameLogic {
                 case 3:
                     Events.setNextEvent(Constants.Event.TIME_LOOP_EVENT);
                     int randomCounter = (int) (Math.random() * Constants.MAX_TIME_LOOP_COUNTER);
-//                    System.out.println("Time loop event. Number of loops: " + randomCounter);
                     Events.setTimeLoopCounter(randomCounter);
                     break;
                 case 4:
                     Events.setNextEvent(Constants.Event.SILENCE_EVENT);
                     eventDuration = Constants.TIME_TO_ESCAPE_SILENCE;
                     Atmospheric.fadeOutMusic(0.05);
-//                    System.out.println("Silence event");
                     break;
             }
         }
-        //if the player does not escape from the trap in time (checked inside activateTrap()), activate the event
         activateTrap();
     }
 
@@ -186,7 +180,7 @@ public class GameLogic {
             String[] names = Constants.WAGON_TYPE_ENEMIES.get(wagon.getType());
             String name = names[(int) (Math.random() * names.length)];
             Entity enemy = new Entity(name, name + "_front.png");
-            enemy.setAsDefaultEnemy();
+            EntitiesCreator.setAsDefaultEnemy(enemy);
             enemy.setPositionX(player.getPositionX());
             enemy.setPositionY(player.getPositionY());
             wagon.addEntity(enemy);
@@ -211,11 +205,8 @@ public class GameLogic {
     private void showHint() {
         Object interactiveObject = Checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
         if (interactiveObject instanceof Door door && door.isLocked()) {
-            if (player.getHandItem() != null && player.getHandItem().getType() == Constants.ItemType.KEY) {
-                isometric.updateHint("Press E to unlock", (int) player.getPositionX(), (int) player.getPositionY() - 25);
-            } else {
-                isometric.updateHint("Locked", (int) player.getPositionX(), (int) player.getPositionY() - 25);
-            }
+            String hint = (player.getHandItem() != null && player.getHandItem().getType() == Constants.ItemType.KEY) ? "Press E to unlock" : "Locked";
+            isometric.updateHint(hint, (int) player.getPositionX(), (int) player.getPositionY() - 25);
         } else if (interactiveObject != null) {
             isometric.updateHint("Press E to open", (int) player.getPositionX(), (int) player.getPositionY() - 25);
         } else if (Checker.checkIfPlayerCanSpeak(player, wagon.getEntities()) != null) {
@@ -410,23 +401,23 @@ public class GameLogic {
         EventHandler<? super KeyEvent> movement_handle = keyEvent -> {
             switch (keyEvent.getCode()) {
                 case W:
-                    isometric.updatePlayerTexture("player_back.png");
+                    if (!player.getTexturePath().contains("back")) isometric.updatePlayerTexture("player_back.png");
                     isometric.updatePlayerDeltaY(-Constants.PLAYER_BASIC_SPEED_Y);
                     break;
                 case S:
-                    isometric.updatePlayerTexture("player_front.png");
+                    if (!player.getTexturePath().contains("front")) isometric.updatePlayerTexture("player_front.png");
                     isometric.updatePlayerDeltaY(Constants.PLAYER_BASIC_SPEED_Y);
                     break;
                 case A:
-                    isometric.updatePlayerTexture("player_left.png");
+                    if (!player.getTexturePath().contains("left")) isometric.updatePlayerTexture("player_left.png");
                     isometric.updatePlayerDeltaX(-Constants.PLAYER_BASIC_SPEED_X);
                     break;
                 case D:
-                    isometric.updatePlayerTexture("player_right.png");
+                    if (!player.getTexturePath().contains("right")) isometric.updatePlayerTexture("player_right.png");
                     isometric.updatePlayerDeltaX(Constants.PLAYER_BASIC_SPEED_X);
                     break;
             }
-            playPlayerFootsteps();
+            if (isometric.getPlayerDeltaX() != 0 || isometric.getPlayerDeltaY() != 0) playPlayerFootsteps();
         };
         //handle movement keys released
         EventHandler<? super KeyEvent> movement_stopped_handle = keyEvent -> {
@@ -438,50 +429,18 @@ public class GameLogic {
                     isometric.updatePlayerDeltaX(0);
                     break;
             }
-            stopPlayerFootsteps();
+            if (isometric.getPlayerDeltaX() == 0 && isometric.getPlayerDeltaY() == 0) stopPlayerFootsteps();
         };
         //handle interaction with objects and entities
         EventHandler<? super KeyEvent> interact_handle = keyEvent -> {
             if (Objects.requireNonNull(keyEvent.getCode()) == KeyCode.E) {
                 if (Checker.checkIfCanInteract(player, wagon.getInteractiveObjects()) != null) {
                     Object object = Checker.checkIfCanInteract(player, wagon.getInteractiveObjects());
-                    if (Objects.equals(object.getTwoLetterId(), Constants.WAGON_DOOR)) {
-                        if (Events.getCurrentEvent() == Constants.Event.TRAP_EVENT) {
-                            ((Door) object).lock();//player cannot escape from the trap even if he has the key to open the door
-                        }
-                        if (((Door) object).isLocked()) {
-                            if (Checker.checkIfPlayerHasKeyInMainHand(player)) {
-                                player.getPlayerInventory().setMainHandItem(null);//remove the key from the player's main hand
-                                ((Door) object).unlock();
-                            }
-                        } else {
-                            if (Events.getTimeLoopCounter() > 0) {
-                                System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
-                                if (object == wagon.getDoorLeft()) {
-                                    Object actualTeleport = wagon.getDoorLeft().getTeleport();
-                                    wagon.getDoorLeft().setTeleport(wagon.getDoorRightTarget());
-                                    wagon.getDoorLeft().teleport(player);
-                                    wagon.getDoorLeft().setTeleport(actualTeleport);
-                                } else {
-                                    Object actualTeleport = wagon.getDoorRight().getTeleport();
-                                    wagon.getDoorRight().setTeleport(wagon.getDoorLeftTarget());
-                                    wagon.getDoorRight().teleport(player);
-                                    wagon.getDoorRight().setTeleport(actualTeleport);
-                                }
-                                Events.decrementTimeLoopCounter();
-                                if (Events.getTimeLoopCounter() == 0) {
-                                    Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
-                                    wagon.removeTrap();
-                                    eventStartTime = 0;
-                                    eventDuration = 0;
-                                }
-                                return;//do not teleport the player to the next wagon
-                            }
-                            System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
-                            openWagonDoor((Door) object);
-                        }
+                    if (object instanceof Door door) {
+                        handleWagonDoor(door);
                     }
                     if (Objects.equals(object.getTwoLetterId(), Constants.CHEST_OBJECT)) {
+                        stopPlayerFootsteps();
                         setInventoryHandle(object.getObjectInventory());
                     }
                     if (Objects.equals(object.getTwoLetterId(), Constants.LOCKABLE_DOOR)) {
@@ -490,19 +449,21 @@ public class GameLogic {
                     }
                 }
                 if (Checker.checkIfPlayerCanSpeak(player, wagon.getEntities()) != null) {
+                    stopPlayerFootsteps();
                     Entity entity = Checker.checkIfPlayerCanSpeak(player, wagon.getEntities());
                     openDialogue(entity);
                 }
             }
-            stopPlayerFootsteps();
         };
         //handle TAB, ESCAPE, R
         EventHandler<? super KeyEvent> other_handle = keyEvent -> {
             switch (keyEvent.getCode()) {
                 case TAB:
+                    stopPlayerFootsteps();
                     setPlayerInventoryHandle();
                     break;
                 case ESCAPE:
+                    stopPlayerFootsteps();
                     showPauseScreen();
                     break;
                 case R:
@@ -510,7 +471,7 @@ public class GameLogic {
                     break;
             }
         };
-
+        //add scene handlers
         //add onKeyPressed handlers
         scene.setOnKeyPressed(keyEvent -> {
             movement_handle.handle(keyEvent);
@@ -541,37 +502,89 @@ public class GameLogic {
         });
     }
     private void playPlayerFootsteps() {
-        //TODO: play footstep sound
-//        Thread footstepLoop = new Thread(() -> {
-//            while (true) {
-//                try {
+        //do not start a new thread if the previous one is still running
+        if (player.getSoundThread() != null) {
+            return;
+        }
+
+        Thread footstepLoop = new Thread(() -> {
+            String prev = "_1";
+            while (true) {
+                String texturePath = player.getTexturePath();
+                // Change texture path based on player movement
+                if (!texturePath.contains("_1") && !texturePath.contains("_2")) {//if the texture is normal
+                    player.setTexturePath(texturePath.replace(".png", prev + ".png"));
+                    prev = (prev.equals("_1")) ? "_2" : "_1";
+                } else {
+                    player.setTexturePath(texturePath.contains("_1") ? texturePath.replace("_1", "_2") : texturePath.replace("_2", "_1"));
+                }
+                //TODO play sound
 //                    Atmospheric.playSound("resources/sounds/footstep_sounds/single_footstep_sound.wav");
-//                    Thread.sleep(Constants.PLAYER_BASIC_SPEED_X / 2 * 100);
-//                } catch (InterruptedException e) {
-//                    break;
-//                }
-//            }
-//        });
-//        player.setSoundThread(footstepLoop);
-//        player.getSoundThread().start();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        });
+
+        player.setSoundThread(footstepLoop);
+        player.getSoundThread().start();
     }
 
     private void stopPlayerFootsteps() {
-        //TODO: stop footstep sound
-//        Thread footstepLoop = player.getSoundThread();
-//        if (footstepLoop != null) {
-//            player.getSoundThread().interrupt();
-//        }
-//        player.setSoundThread(null);
+        //stop the previous thread if it exists
+        if (player.getSoundThread() != null) player.getSoundThread().interrupt();
+        //reset the texture
+        player.setTexturePath(player.getTexturePath().replaceAll("_[12]", ""));
+        //set the thread to null
+        player.setSoundThread(null);
+    }
+    private void handleWagonDoor(Door object) {
+        if (Events.getCurrentEvent() == Constants.Event.TRAP_EVENT) {
+            object.lock();//player cannot escape from the trap even if he has the key to open the door
+        }
+        if (object.isLocked()) {
+            if (Checker.checkIfPlayerHasKeyInMainHand(player)) {
+                player.getPlayerInventory().setMainHandItem(null);//remove the key from the player's main hand
+                object.unlock();
+            }
+        } else {
+            if (Events.getTimeLoopCounter() > 0) {
+                handleTimeLoop(object);
+                return;//do not teleport the player to the next wagon
+            }
+            System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
+            openWagonDoor(object);
+        }
+    }
+    private void handleTimeLoop(Door object) {
+        System.out.println("Time loop counter: " + Events.getTimeLoopCounter());
+        if (object == wagon.getDoorLeft()) {
+            Object actualTeleport = wagon.getDoorLeft().getTeleport();
+            wagon.getDoorLeft().setTeleport(wagon.getDoorRightTarget());
+            wagon.getDoorLeft().teleport(player);
+            wagon.getDoorLeft().setTeleport(actualTeleport);
+        } else {
+            Object actualTeleport = wagon.getDoorRight().getTeleport();
+            wagon.getDoorRight().setTeleport(wagon.getDoorLeftTarget());
+            wagon.getDoorRight().teleport(player);
+            wagon.getDoorRight().setTeleport(actualTeleport);
+        }
+        Events.decrementTimeLoopCounter();
+        if (Events.getTimeLoopCounter() == 0) {
+            Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
+            wagon.removeTrap();
+            eventStartTime = 0;
+            eventDuration = 0;
+        }
     }
     /**
      * Open the dialogue with the entity.
      * @param entity entity to speak with
      */
     private void openDialogue(Entity entity) {
-        System.out.println(entity.getName());
         if (entity instanceof QuestNPC questNPC) {
-            System.out.println(questNPC.isQuestCompleted());
             questNPC.setQuestCompleted(questNPC.checkIfPlayerHasQuestItem(player));
             entity.setDialoguePath(entity.getDialoguePath());
             if (questNPC.isQuestCompleted()) {
@@ -581,9 +594,7 @@ public class GameLogic {
             Dialogue questDialogue = new Dialogue(entity.getDialoguePath());
             questDialogue.setEntity(entity);
             setDialogueHandle(questDialogue, entity);
-            if (!questNPC.isQuestCompleted()) {
-                questNPC.setDialoguePath(entity.getName() + "_default.json");
-            }
+            if (!questNPC.isQuestCompleted()) questNPC.setDialoguePath(entity.getName() + "_default.json");
         } else {
             Dialogue dialogue = new Dialogue(entity.getDialoguePath());
             dialogue.setEntity(entity);
@@ -598,15 +609,10 @@ public class GameLogic {
      */
     private void setDialogueHandle(Dialogue dialogue, Entity dialogueEntity) {
         Scene scene = stage.getScene();
-
         resetSceneHandlers(scene);
-
         pauseGame();
-
         Scene dialogueScene = dialogue.openDialogue();
-
         stage.setScene(dialogueScene);
-
         //add other onKeyReleased handlers
         EventHandler<? super KeyEvent> prev_handle = dialogueScene.getOnKeyReleased();
         dialogueScene.setOnKeyReleased(keyEvent -> {
@@ -661,7 +667,6 @@ public class GameLogic {
                         List<Item> addedItems = new ArrayList<>();
                         for (Item item : itemsToRemove) {
                             if (player.getPlayerInventory().getMoney() >= item.getValue()) {
-                                System.out.println("Enough money");
                                 if (player.getPlayerInventory().addItem(item)) {
                                     inventory.removeTakenItem(item);
                                     player.getPlayerInventory().setMoney(player.getPlayerInventory().getMoney() - item.getValue());
@@ -674,7 +679,6 @@ public class GameLogic {
                                 }
                             } else {
                                 //if the player does not have enough money, the vendor gets negative points
-                                System.out.println("Not enough money");
                                 vendor.setNegativeCount(vendor.getNegativeCount() + 1);
                                 System.out.println(vendor.getNegativeCount());
                                 System.out.println(vendor.getNegativeThreshold());
@@ -698,15 +702,20 @@ public class GameLogic {
      * @param dialogueEntity entity to speak with
      */
     private void handleDialogueAction(String action, Entity dialogueEntity) {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - check ticket
+        // Handle negative response
         if (Objects.equals(action, "negative")) {
             dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
             if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
                 dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
             }
         }
+
+        // Handle fight response
         if (Objects.equals(action, "fight")) {
             dialogueEntity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
         }
+
+        // Handle checking ticket response
         if (Objects.equals(action, "check ticket")) {
             if (Checker.checkIfPlayerHasTicket(player.getPlayerInventory().getItemsArray())) {
                 dialogueEntity.setBehaviour(Constants.Behaviour.NEUTRAL);
