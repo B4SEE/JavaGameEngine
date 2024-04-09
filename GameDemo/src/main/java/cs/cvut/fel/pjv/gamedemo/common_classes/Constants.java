@@ -80,7 +80,8 @@ public class Constants {
         ENEMY,
         NPC,
         VENDOR,
-        QUEST_NPC
+        QUEST_NPC,
+        CONDUCTOR
     }
     //char constants for map's int codes
     public static final String MAP_COLUMN_SEPARATOR = "_";
