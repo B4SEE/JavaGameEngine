@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -26,10 +27,12 @@ public class GameSaver {
     private int currentWagonIndex;
     public GameSaver() {
     }
-    public GameSaver(Player player, Train train) {
+    @JsonIgnore
+    public GameSaver(Player player, Train train, int currentWagonIndex) {
         this.player = player;
-        this.currentWagon = player.getCurrentWagon();
         this.train = train;
+        this.currentWagonIndex = currentWagonIndex;
+        setCurrentWagon(train.getWagonsArray()[currentWagonIndex]);
     }
     @JsonIgnore
     public void setStage(Stage stage) {
@@ -184,6 +187,7 @@ public class GameSaver {
     private void createPlayer() {
         this.player = new Player(Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y);
         player.getPlayerInventory().setAmmo(50);
+        player.getPlayerInventory().addItem(RandomHandler.getRandomFirearmItem());
     }
     @JsonIgnore
     private void createWagon() {
@@ -198,8 +202,10 @@ public class GameSaver {
         conductor.setCurrentWagon(currentWagon);
         conductor.setPositionX(currentWagon.getDoorRightTarget().getIsoX());
         conductor.setPositionY(currentWagon.getDoorRightTarget().getIsoY());
-        conductor.setSpeedX(8);
-        conductor.setSpeedY(8);
+        conductor.setHitBoxSize(1);//hitbox 1 for all entities (works the best, especially when entities move)
+        conductor.setAttackRangeSize(2);
+        conductor.setSpeedX(3);
+        conductor.setSpeedY(3);
         currentWagon.addEntity(conductor);
         System.out.println("Conductor added to the wagon");
     }
