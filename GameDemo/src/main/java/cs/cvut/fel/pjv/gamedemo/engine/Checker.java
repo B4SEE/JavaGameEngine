@@ -3,7 +3,9 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import javafx.geometry.Point2D;
+import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -245,7 +247,9 @@ public class Checker {
      * @return true if there is a collision, false otherwise
      */
     public static boolean checkCollision(Shape hitbox1, Shape hitbox2) {
-        Shape intersect = Shape.intersect(hitbox1, hitbox2);
+        Shape shape1 = Shape.union(hitbox1, hitbox1);
+        Shape shape2 = Shape.union(hitbox2, hitbox2);
+        Shape intersect = Shape.intersect(shape1, shape2);
         return !intersect.getBoundsInParent().isEmpty();
     }
     public static int[] getCollisionPoint(Shape hitbox1, Shape hitbox2) {
