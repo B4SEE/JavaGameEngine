@@ -69,4 +69,12 @@ public class Train {
         }
         return maxId;
     }
+    public Wagon getWagonById(int id) {
+        for (Wagon wagon : wagonsArray) {
+            if (wagon != null && wagon.getId() == id) {
+                return wagon;
+            }
+        }
+        return null;
+    }
 }
