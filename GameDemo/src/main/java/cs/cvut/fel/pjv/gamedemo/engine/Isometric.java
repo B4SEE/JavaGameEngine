@@ -214,7 +214,7 @@ public class Isometric {
     public void setEntityBoxes(Entity entity) {
         entity.setHitbox(getEntityHitBox((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
         entity.setTrackPoint(getEntityTrackPoint((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight()));
-        entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), 1));
+        entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getAttackRangeSize()));
     }
     /**
      * Reset the entities.
@@ -230,9 +230,7 @@ public class Isometric {
             entity.setHealth(entity.getMaxHealth());
             entity.setPositionX(entity.getStartPositionX());
             entity.setPositionY(entity.getStartPositionY());
-            entity.setHitbox(getEntityHitBox((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getHitBoxSize()));
-            entity.setTrackPoint(getEntityTrackPoint((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight()));
-            entity.setAttackRange(getEntityAttackRange((int) entity.getPositionX(), (int) entity.getPositionY(), entity.getHeight(), entity.getAttackRangeSize()));
+            setEntityBoxes(entity);
             entity.setBehaviour(entity.getInitialBehaviour());
         }
     }
@@ -649,7 +647,6 @@ public class Isometric {
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
         circle.setRadius((double) (hitBoxSize * Constants.TILE_WIDTH) / 4 + 2);
-//        circle.setStyle("-fx-opacity: 0");
         circle.setStyle("-fx-stroke: #693131; -fx-stroke-width: 2; -fx-fill: #693131; -fx-opacity: 1");
         return circle;
     }
