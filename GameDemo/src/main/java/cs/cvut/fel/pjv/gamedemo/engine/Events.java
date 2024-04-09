@@ -18,6 +18,7 @@ public class Events {
     private static boolean canSpawnLockedDoor = false;
     private static int timeLoopCounter = 0;
     private static Constants.Event nextEvent;
+    private static boolean canSaveGame = true;
     public Events(){
     }
     public static List<QuestNPC> getAvailableQuestNPCs() {
@@ -58,5 +59,11 @@ public class Events {
     }
     public static void setAvailableQuestNPCs(List<QuestNPC> availableQuestNPCs) {
         Events.availableQuestNPCs = availableQuestNPCs;
+    }
+    public static boolean canSaveGame() {
+        return canSaveGame;
+    }
+    public static void setCanSaveGame(boolean canSaveGame) {
+        Events.canSaveGame = canSaveGame;
     }
 }
