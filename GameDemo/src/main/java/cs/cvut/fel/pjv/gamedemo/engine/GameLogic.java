@@ -28,7 +28,7 @@ public class GameLogic {
     private Player player;
     private final List<Entity> leftWagonPursuers = new java.util.ArrayList<>();//TODO forbid saving during pursuit (player should escape first)
     private final List<Entity> rightWagonPursuers = new java.util.ArrayList<>();
-    private List<Entity> conductors = new java.util.ArrayList<>();
+    private Entity conductor;//first conductor - normal, second - vendor; first always locks left doors, second - unlocks right doors
     private Wagon wagon;
     private final Train train;
     private long eventStartTime = 0;//TODO forbid saving the game during the trap event
@@ -235,13 +235,24 @@ public class GameLogic {
     public void start() {
         isometric.start();
         this.wagon.setObstacles(isometric.getWalls());
-        conductors = new LinkedList<>(wagon.getEntities());
-        conductors.removeIf(entity -> entity.getType() != Constants.EntityType.CONDUCTOR);
-        for (Entity conductor : conductors) {
-            conductor.setPositionX(wagon.getDoorRightTarget().getIsoX());
-            conductor.setPositionY(wagon.getDoorRightTarget().getIsoY() - 64);
+        //update all wagons
+        for (Wagon wagon : train.getWagonsArray()) {
+            if (wagon != null) {
+                isometric.initialiseWagon(wagon);
+                wagon.setObstacles(isometric.getWalls());
+                for (Entity entity : wagon.getEntities()) {
+                    if (entity.getType() == Constants.EntityType.CONDUCTOR) {
+                        conductor = entity;
+                        if (conductor.getPositionX() == 0 || conductor.getPositionY() == 0) {
+                            conductor.setPositionX(wagon.getDoorRightTarget().getIsoX());
+                            conductor.setPositionY(wagon.getDoorRightTarget().getIsoY() - 64);
+                        }
+                    }
+                }
+                isometric.updateAll();
+            }
         }
-        isometric.setEntities(wagon.getEntities());
+        isometric.initialiseWagon(wagon);
         isometric.updateAll();
         timer.start();
     }
@@ -794,6 +805,7 @@ public class GameLogic {
         isometric.initialiseWagon(nextWagon);
         isometric.updateAll();
         nextWagon.setObstacles(isometric.getWalls());
+        nextWagon.getDoorRight().unlock();//player already unlocked the door
 
         wagon.getDoorLeft().teleport(player);
         this.wagon = nextWagon;
@@ -810,6 +822,7 @@ public class GameLogic {
         isometric.initialiseWagon(nextWagon);
         isometric.updateAll();
         nextWagon.setObstacles(isometric.getWalls());
+        nextWagon.getDoorLeft().unlock();//player already unlocked the door
 
         wagon.getDoorRight().teleport(player);
         this.wagon = nextWagon;
@@ -822,7 +835,7 @@ public class GameLogic {
         for (Entity entity : wagon.getEntities()) {
             if (entity.getBehaviour() == Constants.Behaviour.AGGRESSIVE) {
                 if (entity.getIntelligence() == 2) {
-                    if (Checker.checkIfEntityCanSee(entity, player, isometric.getTwoAndTallerWalls(), time)) {
+                    if (Checker.checkIfEntityRemember(entity, player, isometric.getTwoAndTallerWalls(), time)) {
                         wagonPursuers.add(entity);
                     }
                 }
@@ -991,7 +1004,7 @@ public class GameLogic {
      * Save the game.
      */
     public void saveGame() {
-        GameSaver game = new GameSaver(player, train);
+        GameSaver game = new GameSaver(player, train, train.indexOf(wagon));
         game.saveGame();
     }
     /**
@@ -1036,7 +1049,7 @@ public class GameLogic {
             for (Entity entity : wagon.getEntities()) {
                 if (entity != null && entity.isAlive() && Objects.equals(entity.getBehaviour(), Constants.Behaviour.AGGRESSIVE)) {
                     //check if the entity can see the player
-                    if (!Checker.checkIfEntityCanSee(entity, player, isometric.getTwoAndTallerWalls(), time)) {
+                    if (!Checker.checkIfEntityRemember(entity, player, isometric.getTwoAndTallerWalls(), time)) {
                         returnToStart(wagon.getMapForPathFinder(false), entity);
                         return;
                     }
@@ -1059,13 +1072,13 @@ public class GameLogic {
         }
         if (!leftWagonPursuers.isEmpty()) {
             System.out.println(leftWagonPursuers.getFirst().getName());
-            movePursuers(leftWagonPursuers, leftWagonPursuers.getFirst().getCurrentWagon().getDoorRightTarget(), leftWagonPursuers.getFirst().getCurrentWagon().getDoorRight());
+            movePursuers(leftWagonPursuers, leftWagonPursuers.getFirst().getCurrentWagon().getDoorRight());
         }
         if (!rightWagonPursuers.isEmpty()) {
             System.out.println(rightWagonPursuers.getFirst().getName());
-            movePursuers(rightWagonPursuers, rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeftTarget(), rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeft());
+            movePursuers(rightWagonPursuers, rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeft());
         }
-        moveConductors();
+        moveConductor();
     }
 
     /**
@@ -1183,7 +1196,7 @@ public class GameLogic {
         isometric.updateEntityPosition(entity, deltaX, deltaY, entity.getSpeedX(), entity.getSpeedX());
         isometric.setWalls(oldWalls);
     }
-    private void movePursuers(List<Entity> pursuers, Object target, Door wagonDoor) {
+    private void movePursuers(List<Entity> pursuers, Door wagonDoor) {
         System.out.println("Moving pursuers");
         //get copy of the list to avoid ConcurrentModificationException
         List<Entity> wagonPursuers = new LinkedList<>(pursuers);
@@ -1193,20 +1206,7 @@ public class GameLogic {
                     pursuers.remove(pursuer);
                     continue;
                 }
-                if (target == null) {
-                    System.out.println("Target is null");
-                    return;
-                }
                 if (Checker.checkCollision(pursuer.getAttackRange(), wagonDoor.getObjectHitbox())) {
-                    //might be unnecessary: pursuer will pursue the player to the next wagon, meaning the door is open and already generated;
-                    if (wagonDoor.isLocked()) {
-                        System.out.println("Door is locked");
-                        continue;
-                    }
-                    if (wagonDoor.getTargetId() == -1) {
-                        System.out.println("Door target id is -1");
-                        continue;
-                    }
                     //teleport the pursuer to the next wagon
                     System.out.println("Teleporting pursuer to the next wagon");
                     wagonDoor.teleport(pursuer);
@@ -1220,80 +1220,23 @@ public class GameLogic {
                     continue;
                 }
                 //find target index
-                for (int i = 0; i < pursuer.getCurrentWagon().getObjectsArray().length; i++) {
-                    for (int j = 0; j < pursuer.getCurrentWagon().getObjectsArray()[i].length; j++) {
-                        if (pursuer.getCurrentWagon().getObjectsArray()[i][j] == target) {
-                            System.out.println("Target found");
-                            int[] targetIndex = {i, j};
-                            //find path
-                            int[][] path = pursuer.findPath(pursuer.getCurrentWagon().getMapForPathFinder(true), targetIndex);
-                            //move pursuer
-                            int[] deltaXY = getDeltaXY(pursuer, path, pursuer.getCurrentWagon().getMapForPathFinder(true));
-                            System.out.println("Pursuer moved");
-                            moveEntity(pursuer, deltaXY);
-                        }
-                    }
-                }
+                moveTowardsDoor(pursuer, wagonDoor);
             }
         }
     }
-    private void moveConductors() {
-        if (!conductors.isEmpty()) {
-            for (Entity conductor : conductors) {
-                if (conductor != null) {
-                    Door wagonDoor = conductor.getCurrentWagon().getDoorLeft();
-                    if (Checker.checkCollision(conductor.getAttackRange(), wagonDoor.getObjectHitbox())) {
-                        System.out.println("door collision");
-                        //conductors can open the door if it is locked or if the next wagon is not generated
-                        if (wagonDoor.isLocked()) {
-                            System.out.println("door is locked");
-                            wagonDoor.unlock();
-                            continue;
-                        }
-                        if (wagonDoor.getTargetId() == -1) {
-                            System.out.println("generate next wagon");
-                            String wagonType = "CARGO";
-                            Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
-
-                            nextWagon.generateNextWagon(conductor.getCurrentWagon(), true);
-                            train.addWagon(nextWagon);
-                            //initialise the next wagon
-                            isometric.initialiseWagon(nextWagon);
-                            isometric.updateAll();
-                            nextWagon.setObstacles(isometric.getWalls());
-                            //set original/player's wagon
-                            isometric.initialiseWagon(wagon);
-                            isometric.updateAll();
-                            continue;
-                        }
-                        System.out.println("open existing wagon door");
-                        System.out.println("From " + conductor.getPositionX() + " " + conductor.getPositionY());
-                        wagonDoor.teleport(conductor);
-                        Wagon nextWagon = train.getWagonById(wagonDoor.getTargetId());
-                        conductor.getCurrentWagon().getEntities().remove(conductor);
-                        conductor.setCurrentWagon(nextWagon);
-                        nextWagon.getEntities().add(conductor);
-                        //update all hitboxes
-                        isometric.setEntities(conductor.getCurrentWagon().getEntities());
-                        isometric.updateAll();
-                        isometric.setEntities(wagon.getEntities());
-                        isometric.updateAll();
-                    }
-                    //find target index
-                    for (int i = 0; i < conductor.getCurrentWagon().getObjectsArray().length; i++) {
-                        for (int j = 0; j < conductor.getCurrentWagon().getObjectsArray()[i].length; j++) {
-                            if (conductor.getCurrentWagon().getObjectsArray()[i][j] == wagonDoor) {
-                                int[] targetIndex = {i, j};
-                                //find path
-                                int[][] path = conductor.findPath(conductor.getCurrentWagon().getMapForPathFinder(true), targetIndex);
-                                //move conductor
-                                int[] deltaXY = getDeltaXY(conductor, path, conductor.getCurrentWagon().getMapForPathFinder(true));
-                                moveEntity(conductor, deltaXY);
-                            }
-                        }
-                    }
+    private void moveConductor() {
+        if (conductor != null) {
+            Door wagonDoor = conductor.getCurrentWagon().getDoorLeft();
+            if (Checker.checkCollision(conductor.getAttackRange(), wagonDoor.getObjectHitbox())) {
+                if (wagonDoor.isLocked()) {
+                    wagonDoor.unlock();
                 }
+                if (wagonDoor.getTargetId() == -1) {
+                    generateNextWagonByConductor(conductor);
+                }
+                openExistingWagonDoorByConductor(conductor);
             }
+            handleConductor(conductor);
         }
     }
     private int[] getDeltaXY(Entity entity, int[][] path, int[][] map) {
@@ -1317,5 +1260,127 @@ public class GameLogic {
         scene.setOnMouseClicked(null);
         scene.setOnMouseMoved(null);
         scene.setOnKeyPressed(null);
+    }
+
+    /**
+     * Handle conductor's logic.
+     * @param conductor conductor to be handled
+     * Logic:
+     * <ul>
+     *    <li>If the player is near, conductor will start dialogue and check the ticket.</li>
+     *    <li>If the player does not have the ticket, the conductor becomes aggressive.</li>
+     *    <li>If conductor is aggressive, he will not start dialogue.</li>
+     *    <li>If conductor is aggressive and the player is in the same wagon, he will pursue the player.</li>
+     *    <li>If conductor is aggressive and the player is in another wagon, conductor will move normally.</li>
+     *    <li>Forbid the player to go behind the conductor (conductor will lock doors behind him).</li>
+     * </ul>
+     * Note: There is a small (very small) chance for the conductor to become neutral again if the player is <b>not</b> in the same wagon.
+     */
+    private void handleConductor(Entity conductor) {
+        Constants.Behaviour conductorBehaviour = conductor.getBehaviour();
+        Wagon conductorWagon = conductor.getCurrentWagon();
+        Wagon playerWagon = player.getCurrentWagon();
+        Door leftDoor = conductorWagon.getDoorLeft();
+        Door rightDoor = conductorWagon.getDoorRight();
+
+        if (conductorBehaviour == Constants.Behaviour.NEUTRAL) {
+            if (conductorWagon.getId() == playerWagon.getId()) {
+                if (Checker.checkIfConductorNearPlayer(conductor, player)) {
+                    //openDialogue(conductor);
+                    //TODO: play conductor sound (read first sentence)
+                }
+            }
+            moveTowardsDoor(conductor, leftDoor);
+        } else {
+            if (conductorWagon.getId() == playerWagon.getId()) {
+                intelligenceTwoPursue(conductor, player);
+            } else {
+                moveTowardsDoor(conductor, leftDoor);
+            }
+        }
+
+        if (!rightDoor.isLocked()) rightDoor.lock();
+        if (Checker.checkIfEntityStuck(conductor)) handleConductorStuck(conductor);
+    }
+
+    /**
+     * Move entity towards the door.
+     * @param entity entity to be moved
+     * @param wagonDoor door to be reached
+     */
+    private void moveTowardsDoor(Entity entity, Door wagonDoor) {
+        for (int i = 0; i < entity.getCurrentWagon().getObjectsArray().length; i++) {
+            for (int j = 0; j < entity.getCurrentWagon().getObjectsArray()[i].length; j++) {
+                if (entity.getCurrentWagon().getObjectsArray()[i][j] == wagonDoor) {
+                    int[] targetIndex = {i, j};
+                    int[][] path = entity.findPath(entity.getCurrentWagon().getMapForPathFinder(true), targetIndex);
+                    int[] deltaXY = getDeltaXY(entity, path, entity.getCurrentWagon().getMapForPathFinder(true));
+                    moveEntity(entity, deltaXY);
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate the next wagon and teleport the conductor to the next wagon.
+     * @param conductor conductor to be teleported
+     */
+    private void generateNextWagonByConductor(Entity conductor) {
+        String wagonType = "CARGO";
+        Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
+        nextWagon.generateNextWagon(conductor.getCurrentWagon(), true);
+        train.addWagon(nextWagon);
+        //initialise the next wagon
+        isometric.initialiseWagon(nextWagon);
+        isometric.updateAll();
+        nextWagon.setObstacles(isometric.getWalls());
+        //set original/player's wagon
+        isometric.initialiseWagon(wagon);
+        isometric.updateAll();
+    }
+
+    /**
+     * Open the existing wagon door and teleport the conductor to the next wagon.
+     * @param conductor conductor to be teleported
+     */
+    private void openExistingWagonDoorByConductor(Entity conductor) {
+        Door wagonDoor = conductor.getCurrentWagon().getDoorLeft();
+        wagonDoor.teleport(conductor);
+        Wagon nextWagon = train.getWagonById(wagonDoor.getTargetId());
+        conductor.getCurrentWagon().getEntities().remove(conductor);
+        conductor.setCurrentWagon(nextWagon);
+        nextWagon.getEntities().add(conductor);
+        //update all hitboxes
+        isometric.setEntities(conductor.getCurrentWagon().getEntities());
+        isometric.updateAll();
+        isometric.setEntities(wagon.getEntities());
+        isometric.updateAll();
+    }
+
+    /**
+     * Handle the stuck conductor.
+     * If the conductor is stuck, change strategy: speed up if the player is in the same wagon,
+     * teleport to the next wagon if the player is in another wagon.
+     * @param conductor conductor to be handled
+     */
+    private void handleConductorStuck(Entity conductor) {
+        if (conductor.getCurrentWagon().getId() == player.getCurrentWagon().getId()) {
+            int originalSpeedX = conductor.getSpeedX();
+            int originalSpeedY = conductor.getSpeedY();
+            conductor.setSpeedX(originalSpeedX * 2);
+            conductor.setSpeedY(originalSpeedY * 2);
+            intelligenceTwoPursue(conductor, player);
+            conductor.setSpeedX(originalSpeedX);
+            conductor.setSpeedY(originalSpeedY);
+        } else {
+            if (conductor.getCurrentWagon().getDoorLeft().getTargetId() == -1) {
+                generateNextWagonByConductor(conductor);
+            } else if (time % 5 == 0) {
+                openExistingWagonDoorByConductor(conductor);
+                if (Math.random() < 0.05) {
+                    conductor.setBehaviour(Constants.Behaviour.NEUTRAL);
+                }
+            }
+        }
     }
 }
