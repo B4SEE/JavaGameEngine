@@ -77,4 +77,12 @@ public class Train {
         }
         return null;
     }
+    public int indexOf(Wagon wagon) {
+        for (int i = 0; i < wagonsArray.length; i++) {
+            if (wagonsArray[i] == wagon) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
