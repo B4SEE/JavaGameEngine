@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.stage.Stage;
@@ -17,10 +18,12 @@ public class GameSaver {
     private Stage stage;
     @JsonIgnore//player will be saved in player.json
     private Player player;
-    @JsonProperty("currentWagon")
+    @JsonIgnore
     private Wagon currentWagon;
     @JsonProperty("train")
     private Train train;
+    @JsonProperty("currentWagonIndex")
+    private int currentWagonIndex;
     public GameSaver() {
     }
     public GameSaver(Player player, Train train) {
@@ -39,6 +42,14 @@ public class GameSaver {
     @JsonIgnore
     public Wagon getCurrentWagon() {
         return currentWagon;
+    }
+    @JsonSetter("currentWagonIndex")
+    public void setCurrentWagonIndex(int currentWagonIndex) {
+        this.currentWagonIndex = currentWagonIndex;
+    }
+    @JsonSetter("train")
+    public void setTrain(Train train) {
+        this.train = train;
     }
     @JsonIgnore
     public void saveGame() {
@@ -120,19 +131,17 @@ public class GameSaver {
             objectMapper.registerSubtypes(PlayerInventory.class);
             //
             GameSaver game = objectMapper.readValue(new File(lastSave.getPath() + "/game.json"), GameSaver.class);
-            this.currentWagon = game.currentWagon;
-            this.train = game.train;
-            this.player = objectMapper.readValue(new File(lastSave.getPath() + "/player.json"), Player.class);
-            this.player.setPlayerInventory(objectMapper.readValue(new File(lastSave.getPath() + "/player_inventory.json"), PlayerInventory.class));
-            this.player.setCurrentWagon(currentWagon);
+            train = game.train;
             //set current wagon for all entities (it is not saved in json)
             for (Wagon wagon : train.getWagonsArray()) {
                 if (wagon != null) {
-                    for (Entity entity : wagon.getEntities()) {
-                        entity.setCurrentWagon(wagon);
-                    }
+                    wagon.updateEntities();
                 }
             }
+            currentWagon = train.getWagonsArray()[game.currentWagonIndex];
+            player = objectMapper.readValue(new File(lastSave.getPath() + "/player.json"), Player.class);
+            player.setPlayerInventory(objectMapper.readValue(new File(lastSave.getPath() + "/player_inventory.json"), PlayerInventory.class));
+            player.setCurrentWagon(currentWagon);
             //load events
             EventsData eventsData = objectMapper.readValue(new File(lastSave.getPath() + "/events.json"), EventsData.class);
             Events.setAvailableQuestNPCs(eventsData.getAvailableQuestNPCs());
@@ -182,6 +191,17 @@ public class GameSaver {
         Wagon wagon = new Wagon(0, randomWagonType);
         wagon.generateWagon();
         this.currentWagon = wagon;
+        //place conductor in the wagon
+        Entity conductor = new Entity("Conductor", "zombie_front.png");
+        EntitiesCreator.setAsDefaultNPC(conductor);
+        conductor.setType(Constants.EntityType.CONDUCTOR);
+        conductor.setCurrentWagon(currentWagon);
+        conductor.setPositionX(currentWagon.getDoorRightTarget().getIsoX());
+        conductor.setPositionY(currentWagon.getDoorRightTarget().getIsoY());
+        conductor.setSpeedX(8);
+        conductor.setSpeedY(8);
+        currentWagon.addEntity(conductor);
+        System.out.println("Conductor added to the wagon");
     }
     @JsonIgnore
     private void createTrain() {
