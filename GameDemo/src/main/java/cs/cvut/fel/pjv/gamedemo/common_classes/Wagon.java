@@ -372,6 +372,11 @@ public class Wagon {
                 }
             }
         }
-
+    }
+    @JsonIgnore
+    public void updateEntities() {
+        for (Entity entity : entities) {
+            entity.setCurrentWagon(this);
+        }
     }
 }
