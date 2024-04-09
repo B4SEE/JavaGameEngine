@@ -3,16 +3,12 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import javafx.geometry.Point2D;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -170,21 +166,24 @@ public class Checker {
         }
         return null;
     }
-    public static boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacle, long time) {
-        Line sightLine = new Line(entity.getPositionX() + 32, entity.getPositionY() + 80, target.getPositionX() + 32, target.getPositionY() + 80);
-        if (checkCollision(sightLine, obstacle)) {
+    public static boolean checkIfEntityRemember(Entity entity, Entity target, Shape obstacle, long time) {
+        if (!checkIfEntityCanSee(entity, target, obstacle)) {//if the entity cannot see the target, check if it remembers the target
             if ((time - entity.getWhenStartedPursuing() != 0 && (time - entity.getWhenStartedPursuing()) % 13 == 0) || entity.getWhenStartedPursuing() == 0) {
                 entity.setWhenStartedPursuing(0);
                 return false;
             }
-        } else {
-            entity.setWhenStartedPursuing(time);
-            return true;
         }
+        //entity can see the target
+        entity.setWhenStartedPursuing(time);
         return true;
     }
+    public static boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacle) {
+        Line sightLine = new Line(entity.getPositionX() + 32, entity.getPositionY() + 80, target.getPositionX() + 32, target.getPositionY() + 80);
+        sightLine.setStrokeWidth(7);
+        return !checkCollision(sightLine, obstacle);
+    }
     public static boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
-        Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 80, aimX, aimY);
+        Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 64, aimX, aimY);
         aimLine.setStrokeWidth(7);
         Circle shootHitbox = (Circle) target.getHitbox();
         shootHitbox.setStroke(Color.RED);
@@ -276,5 +275,18 @@ public class Checker {
      */
     public static boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
         return (entity.getPositionY() + (double) Constants.TILE_HEIGHT / 2 + entity.getHeight() * Constants.TILE_HEIGHT < (objectIsoXY[1] - Constants.TILE_HEIGHT + objectTexture.getHeight()));
+    }
+
+    public static boolean checkIfConductorNearPlayer(Entity conductor, Player player) {
+        //create shape/line along conductor's y-axis and check if it intersects with player's hitbox
+        Line conductorLine = new Line(conductor.getPositionX(), 0, conductor.getPositionX(), 1000);
+        Shape playerHitbox = player.getHitbox();
+        Shape conductorHitbox = conductor.getHitbox();
+        //check if player is near the conductor
+        if (checkCollision(conductorLine, playerHitbox) || checkCollision(conductorLine, conductorHitbox)) {
+            System.out.println("Conductor can feel player's presence");
+            return true;
+        }
+        return false;
     }
 }

@@ -107,7 +107,7 @@ public class Constants {
     public static final int MIN_TRAP_ENEMIES_COUNT = 1;
     public static final int MAX_TRAP_ENEMIES_COUNT = 5;
 
-    public static final int MAX_COUNTER = 5;
+    public static final int MAX_COUNTER = 20;
 //    public static final String[] QUEST_NPC_NAMES = {"ticketless_elder", "lost_toy_lady", "eco_freak"};
     public static final String[] QUEST_NPC_NAMES = {"lost_toy_lady"};
     public enum Event {

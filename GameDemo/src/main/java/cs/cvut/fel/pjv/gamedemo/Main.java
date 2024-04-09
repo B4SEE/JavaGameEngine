@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo;
 
+import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import cs.cvut.fel.pjv.gamedemo.engine.Atmospheric;
 import cs.cvut.fel.pjv.gamedemo.engine.Game;
 import javafx.application.Application;

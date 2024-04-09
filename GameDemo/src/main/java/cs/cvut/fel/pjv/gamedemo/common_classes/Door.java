@@ -48,7 +48,6 @@ public class Door extends Object {
         double objectIsoX = teleport.getIsoX();
         double objectIsoY = teleport.getIsoY();
         int height = entity.getHeight();
-        System.out.println("Teleporting to " + objectIsoX + " " + objectIsoY);
         entity.setPositionX((int) objectIsoX);
         entity.setPositionY((int) objectIsoY - height * 32);
         System.out.println("Teleporting to " + objectIsoX + " " + objectIsoY);

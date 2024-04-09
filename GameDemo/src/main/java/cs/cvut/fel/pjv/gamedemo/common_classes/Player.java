@@ -172,7 +172,7 @@ public class Player extends Entity {
                 target.takeDamage(firearm.getDamage());
                 System.out.println("Target health: " + target.getHealth());
                 for (Entity entity : targets) {
-                    if (Checker.checkIfEntityCanSee(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
+                    if (Checker.checkIfEntityRemember(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
                         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                     }
                 }

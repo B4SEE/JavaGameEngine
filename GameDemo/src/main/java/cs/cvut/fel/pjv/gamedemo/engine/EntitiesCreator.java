@@ -37,9 +37,9 @@ public class EntitiesCreator {
         entity.setType(Constants.EntityType.NPC);
         entity.setBehaviour(Constants.Behaviour.NEUTRAL);
         entity.setInitialBehaviour(entity.getBehaviour());
-        if (entity.getDialoguePath() == null) {
-            entity.setDialoguePath(RandomHandler.getRandomDialogueThatStartsWith(entity.getName()));
-        }
+//        if (entity.getDialoguePath() == null) {
+//            entity.setDialoguePath(RandomHandler.getRandomDialogueThatStartsWith(entity.getName()));
+//        }
         entity.setNegativeThreshold((int) (Math.random() * 10 + 1));
     }
 
