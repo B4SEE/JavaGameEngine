@@ -23,17 +23,18 @@ import java.util.Objects;
  */
 public class GameLogic {
     private final Isometric isometric;
-    private Stage stage;
+    private final Stage stage;
     private long time;
     private Player player;
-    private List<Entity> leftWagonPursuers = new java.util.ArrayList<>();
-    private List<Entity> rightWagonPursuers = new java.util.ArrayList<>();
+    private final List<Entity> leftWagonPursuers = new java.util.ArrayList<>();//TODO forbid saving during pursuit (player should escape first)
+    private final List<Entity> rightWagonPursuers = new java.util.ArrayList<>();
+    private List<Entity> conductors = new java.util.ArrayList<>();
     private Wagon wagon;
-    private Train train;
+    private final Train train;
     private long eventStartTime = 0;//TODO forbid saving the game during the trap event
     private int eventDuration;
     private String deathMessage = "";
-    private AnimationTimer timer = new AnimationTimer() {
+    private final AnimationTimer timer = new AnimationTimer() {
         final long INTERVAL = 1_000_000_000_000L;
         long lastTime = -1;
         /**
@@ -234,6 +235,14 @@ public class GameLogic {
     public void start() {
         isometric.start();
         this.wagon.setObstacles(isometric.getWalls());
+        conductors = new LinkedList<>(wagon.getEntities());
+        conductors.removeIf(entity -> entity.getType() != Constants.EntityType.CONDUCTOR);
+        for (Entity conductor : conductors) {
+            conductor.setPositionX(wagon.getDoorRightTarget().getIsoX());
+            conductor.setPositionY(wagon.getDoorRightTarget().getIsoY() - 64);
+        }
+        isometric.setEntities(wagon.getEntities());
+        isometric.updateAll();
         timer.start();
     }
     /**
@@ -276,28 +285,42 @@ public class GameLogic {
             resumeGame();
         });
         saveButton.setOnAction(actionEvent -> {
-            saveGame();
-            Button continueButton = new Button("Continue");
-            Button mainMenuButton1 = new Button("Main menu");
-            continueButton.setOnAction(actionEvent1 -> {
-                stage.setScene(isoScene);
-                resumeGame();
-            });
-            mainMenuButton1.setOnAction(actionEvent1 -> {
-                stage.setScene(null);
-                mainMenu();
-            });
-            Label label1 = new Label("Game saved");
-            label1.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-            GridPane grid1 = new GridPane();
-            grid1.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
-            grid1.setPrefSize(800, 800);
-            grid1.add(label1, 0, 0);
-            grid1.add(continueButton, 0, 1);
-            grid1.add(mainMenuButton1, 0, 2);
-            grid1.add(exitButton, 0, 3);
-            Scene scene1 = new Scene(grid1, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
-            stage.setScene(scene1);
+            if (Events.canSaveGame()) {
+                saveGame();
+                Button continueButton = new Button("Continue");
+                Button mainMenuButton1 = new Button("Main menu");
+                continueButton.setOnAction(actionEvent1 -> {
+                    stage.setScene(isoScene);
+                    resumeGame();
+                });
+                mainMenuButton1.setOnAction(actionEvent1 -> {
+                    stage.setScene(null);
+                    mainMenu();
+                });
+                Label label1 = new Label("Game saved");
+                label1.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+                GridPane grid1 = new GridPane();
+                grid1.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
+                grid1.setPrefSize(800, 800);
+                grid1.add(label1, 0, 0);
+                grid1.add(continueButton, 0, 1);
+                grid1.add(mainMenuButton1, 0, 2);
+                grid1.add(exitButton, 0, 3);
+                Scene scene1 = new Scene(grid1, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+                stage.setScene(scene1);
+            } else {
+                Label label1 = new Label("You cannot save the game now");
+                label1.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+                GridPane grid1 = new GridPane();
+                grid1.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
+                grid1.setPrefSize(800, 800);
+                grid1.add(label1, 0, 0);
+                grid1.add(resumeButton, 0, 1);
+                grid1.add(mainMenuButton, 0, 2);
+                grid1.add(exitButton, 0, 3);
+                Scene scene1 = new Scene(grid1, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+                stage.setScene(scene1);
+            }
         });
         mainMenuButton.setOnAction(actionEvent -> {
             Button confirmButton = new Button("Confirm");
@@ -756,12 +779,12 @@ public class GameLogic {
         Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
 
         if (door == wagon.getDoorLeft()) {
-            generateAndOpenLeftWagon(nextWagon);
+            generateLeftWagon(nextWagon);
         } else if (door == wagon.getDoorRight()) {
-            generateAndOpenRightWagon(nextWagon);
+            generateRightWagon(nextWagon);
         }
     }
-    private void generateAndOpenLeftWagon(Wagon nextWagon) {
+    private void generateLeftWagon(Wagon nextWagon) {
         setPursuers(rightWagonPursuers);
         System.out.println("right pursuers: " + rightWagonPursuers.size());
 
@@ -777,7 +800,7 @@ public class GameLogic {
         player.setCurrentWagon(wagon);
     }
 
-    private void generateAndOpenRightWagon(Wagon nextWagon) {
+    private void generateRightWagon(Wagon nextWagon) {
         setPursuers(leftWagonPursuers);
         System.out.println("left wagon pursuers: " + leftWagonPursuers.size());
 
@@ -1034,14 +1057,15 @@ public class GameLogic {
                 }
             }
         }
-        if (leftWagonPursuers != null && !leftWagonPursuers.isEmpty()) {
+        if (!leftWagonPursuers.isEmpty()) {
             System.out.println(leftWagonPursuers.getFirst().getName());
             movePursuers(leftWagonPursuers, leftWagonPursuers.getFirst().getCurrentWagon().getDoorRightTarget(), leftWagonPursuers.getFirst().getCurrentWagon().getDoorRight());
         }
-        if (rightWagonPursuers != null && !rightWagonPursuers.isEmpty()) {
+        if (!rightWagonPursuers.isEmpty()) {
             System.out.println(rightWagonPursuers.getFirst().getName());
             movePursuers(rightWagonPursuers, rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeftTarget(), rightWagonPursuers.getFirst().getCurrentWagon().getDoorLeft());
         }
+        moveConductors();
     }
 
     /**
@@ -1173,7 +1197,7 @@ public class GameLogic {
                     System.out.println("Target is null");
                     return;
                 }
-                if (Checker.checkCollision(pursuer.getAttackRange(), target.getObjectHitbox())) {
+                if (Checker.checkCollision(pursuer.getAttackRange(), wagonDoor.getObjectHitbox())) {
                     //might be unnecessary: pursuer will pursue the player to the next wagon, meaning the door is open and already generated;
                     if (wagonDoor.isLocked()) {
                         System.out.println("Door is locked");
@@ -1207,6 +1231,65 @@ public class GameLogic {
                             int[] deltaXY = getDeltaXY(pursuer, path, pursuer.getCurrentWagon().getMapForPathFinder(true));
                             System.out.println("Pursuer moved");
                             moveEntity(pursuer, deltaXY);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private void moveConductors() {
+        if (!conductors.isEmpty()) {
+            for (Entity conductor : conductors) {
+                if (conductor != null) {
+                    Door wagonDoor = conductor.getCurrentWagon().getDoorLeft();
+                    if (Checker.checkCollision(conductor.getAttackRange(), wagonDoor.getObjectHitbox())) {
+                        System.out.println("door collision");
+                        //conductors can open the door if it is locked or if the next wagon is not generated
+                        if (wagonDoor.isLocked()) {
+                            System.out.println("door is locked");
+                            wagonDoor.unlock();
+                            continue;
+                        }
+                        if (wagonDoor.getTargetId() == -1) {
+                            System.out.println("generate next wagon");
+                            String wagonType = "CARGO";
+                            Wagon nextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
+
+                            nextWagon.generateNextWagon(conductor.getCurrentWagon(), true);
+                            train.addWagon(nextWagon);
+                            //initialise the next wagon
+                            isometric.initialiseWagon(nextWagon);
+                            isometric.updateAll();
+                            nextWagon.setObstacles(isometric.getWalls());
+                            //set original/player's wagon
+                            isometric.initialiseWagon(wagon);
+                            isometric.updateAll();
+                            continue;
+                        }
+                        System.out.println("open existing wagon door");
+                        System.out.println("From " + conductor.getPositionX() + " " + conductor.getPositionY());
+                        wagonDoor.teleport(conductor);
+                        Wagon nextWagon = train.getWagonById(wagonDoor.getTargetId());
+                        conductor.getCurrentWagon().getEntities().remove(conductor);
+                        conductor.setCurrentWagon(nextWagon);
+                        nextWagon.getEntities().add(conductor);
+                        //update all hitboxes
+                        isometric.setEntities(conductor.getCurrentWagon().getEntities());
+                        isometric.updateAll();
+                        isometric.setEntities(wagon.getEntities());
+                        isometric.updateAll();
+                    }
+                    //find target index
+                    for (int i = 0; i < conductor.getCurrentWagon().getObjectsArray().length; i++) {
+                        for (int j = 0; j < conductor.getCurrentWagon().getObjectsArray()[i].length; j++) {
+                            if (conductor.getCurrentWagon().getObjectsArray()[i][j] == wagonDoor) {
+                                int[] targetIndex = {i, j};
+                                //find path
+                                int[][] path = conductor.findPath(conductor.getCurrentWagon().getMapForPathFinder(true), targetIndex);
+                                //move conductor
+                                int[] deltaXY = getDeltaXY(conductor, path, conductor.getCurrentWagon().getMapForPathFinder(true));
+                                moveEntity(conductor, deltaXY);
+                            }
                         }
                     }
                 }
