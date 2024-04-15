@@ -176,12 +176,18 @@ public class RandomHandler {
         return Constants.WAGON_TYPES[(int) (Math.random() * Constants.WAGON_TYPES.length)];
     }
     public static Item getRandomKey() {
-        //constants.minvalue, constants.maxvalue
-        int value = Math.max(Constants.MIN_KEY_VALUE, (int) (Math.random() * Constants.MAX_KEY_VALUE));
-        return new Item("key", "orange.png", value);//TODO get random texture that starts with *name*
+        if (Events.canSpawnKey()) {
+            int value = Math.max(Constants.MIN_KEY_VALUE, (int) (Math.random() * Constants.MAX_KEY_VALUE));
+            List<File> names = getListOfFilesThatStartWith("key", "textures/default/items/misc");
+            String name = names.get((int) (Math.random() * names.size())).getName();
+            Item key = new Item("Key", "textures/default/items/misc/" + name, Constants.ItemType.KEY);
+            key.setValue(value);
+            return key;
+        }
+        return null;
     }
     public static File getRandomMusicFile(String path) {
-        File folder = new File("resources/sounds/" + path);
+        File folder = new File("game_resources/sounds/" + path);
         System.out.println(folder.getPath());
         List<File> listOfFiles = new java.util.ArrayList<>();
         for (File file : Objects.requireNonNull(folder.listFiles())) {
@@ -216,6 +222,7 @@ public class RandomHandler {
                         inventory.addItem(getRandomNecessaryToSpawnItem());
                         break;
                     case 6:
+                        System.out.println("Key added");
                         inventory.addItem(getRandomKey());
                         Events.setCanSpawnLockedDoor(true);
                         break;

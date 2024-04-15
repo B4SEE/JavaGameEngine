@@ -46,6 +46,14 @@ public class GameSaver {
     public Wagon getCurrentWagon() {
         return currentWagon;
     }
+    @JsonIgnore
+    public Player getPlayer() {
+        return player;
+    }
+    @JsonIgnore
+    public Train getTrain() {
+        return train;
+    }
     @JsonSetter("currentWagonIndex")
     public void setCurrentWagonIndex(int currentWagonIndex) {
         this.currentWagonIndex = currentWagonIndex;
@@ -96,8 +104,16 @@ public class GameSaver {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/events.json");
-            //Events class is static class, so there is need to save fields separately
-            EventsData eventsData = new EventsData(Events.getAvailableQuestNPCs(), Events.getCurrentEvent(), Events.canSpawnLockedDoor(), Events.getTimeLoopCounter(), Events.getNextEvent());
+            EventsData eventsData = new EventsData();
+            eventsData.setAvailableQuestNPCs(Events.getAvailableQuestNPCs());
+            eventsData.setCurrentEvent(Events.getCurrentEvent());
+            eventsData.setCanSpawnLockedDoor(Events.canSpawnLockedDoor());
+            eventsData.setTimeLoopCounter(Events.getTimeLoopCounter());
+            eventsData.setNextEvent(Events.getNextEvent());
+            eventsData.setPlayerKidnapped(Events.isPlayerKidnapped());
+            eventsData.setPlayerKilledGuard(Events.isPlayerKilledGuard());
+            eventsData.setCanSpawnKey(Events.canSpawnKey());
+            eventsData.setShouldCallGuard(Events.shouldCallGuard());
             objectMapper.writeValue(file, eventsData);
         } catch (IOException e) {
             e.printStackTrace();
@@ -152,6 +168,10 @@ public class GameSaver {
             Events.setCanSpawnLockedDoor(eventsData.isCanSpawnLockedDoor());
             Events.setTimeLoopCounter(eventsData.getTimeLoopCounter());
             Events.setNextEvent(eventsData.getNextEvent());
+            Events.setPlayerKidnapped(eventsData.isPlayerKidnapped());
+            Events.setPlayerKilledGuard(eventsData.isPlayerKilledGuard());
+            Events.setCanSpawnKey(eventsData.isCanSpawnKey());
+            Events.setShouldCallGuard(eventsData.isShouldCallGuard());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,41 +196,31 @@ public class GameSaver {
         gameLogic.start();
     }
     @JsonIgnore
-    private void prepareEvents() {//only for new game
+    public void prepareEvents() {//only for new game
         for (String name : Constants.QUEST_NPC_NAMES) {
-            Events.addQuestNPC(new QuestNPC(name, name + "_front.png"));
+            Events.addQuestNPC(new QuestNPC(name, "textures/default/entities/npcs/quest/" + name + "_front.png"));
             System.out.println("Quest NPC added: " + name);
         }
         Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
+        Events.setCanSpawnKey(false);
     }
     @JsonIgnore
-    private void createPlayer() {
+    public void createPlayer() {
         this.player = new Player(Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y);
-        player.getPlayerInventory().setAmmo(50);
+        player.getPlayerInventory().setAmmo(150);
         player.getPlayerInventory().addItem(RandomHandler.getRandomFirearmItem());
+        player.getPlayerInventory().addItem(RandomHandler.getRandomKey());
     }
     @JsonIgnore
-    private void createWagon() {
+    public void createWagon() {
         String randomWagonType = RandomHandler.getRandomWagonType();
         Wagon wagon = new Wagon(0, randomWagonType);
         wagon.generateWagon();
+        wagon.getDoorRight().lock();
         this.currentWagon = wagon;
-        //place conductor in the wagon
-        Entity conductor = new Entity("Conductor", "zombie_front.png");
-        EntitiesCreator.setAsDefaultNPC(conductor);
-        conductor.setType(Constants.EntityType.CONDUCTOR);
-        conductor.setCurrentWagon(currentWagon);
-        conductor.setPositionX(currentWagon.getDoorRightTarget().getIsoX());
-        conductor.setPositionY(currentWagon.getDoorRightTarget().getIsoY());
-        conductor.setHitBoxSize(1);//hitbox 1 for all entities (works the best, especially when entities move)
-        conductor.setAttackRangeSize(2);
-        conductor.setSpeedX(3);
-        conductor.setSpeedY(3);
-        currentWagon.addEntity(conductor);
-        System.out.println("Conductor added to the wagon");
     }
     @JsonIgnore
-    private void createTrain() {
+    public void createTrain() {
         Train train = new Train();
         train.addWagon(currentWagon);
         this.train = train;

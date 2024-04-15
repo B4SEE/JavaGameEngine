@@ -326,6 +326,7 @@ public class Inventory {
             grid.getChildren().add(rectangle);
 
             if (itemsArray[i] != null) {
+                System.out.println(itemsArray[i].getTexturePath());
                 ImageView imageView = new ImageView(itemsArray[i].getTexturePath());
                 imageView.setFitHeight(Constants.SLOT_SIZE);
                 imageView.setFitWidth(Constants.SLOT_SIZE);

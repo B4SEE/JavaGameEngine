@@ -166,7 +166,7 @@ public class Player extends Entity {
         }
         System.out.println("Shooting");
         playerInventory.setAmmo(playerInventory.getAmmo() - 1);
-        Atmospheric.playSound("resources/sounds/gun/gunshot.wav");
+        Atmospheric.playSound("game_resources/sounds/gun/gunshot.wav");
         for (Entity target : targets) {
             if (target != null && target.isAlive() && Checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time)) {
                 target.takeDamage(firearm.getDamage());
