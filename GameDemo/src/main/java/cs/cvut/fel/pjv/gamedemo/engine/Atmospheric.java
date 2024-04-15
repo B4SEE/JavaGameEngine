@@ -10,6 +10,8 @@ import java.io.File;
 
 public class Atmospheric {
     private static MediaPlayer backgroundMusic;
+    private static boolean bossMusicPlaying = false;
+    private static boolean pauseScreenMusicPlaying = false;
     private static MediaView viewer = new MediaView();
     private static final double normalVolume = 0.5;
     public static void updateBackgroundMusic() {
@@ -22,18 +24,26 @@ public class Atmospheric {
             System.out.println("Atmospheric music is playing.");
             //get random atmospheric music
             File musicFile = RandomHandler.getRandomMusicFile("background/");
+            File musicFile2 = RandomHandler.getRandomMusicFile("pauseScreen/");//take music files from pause screen music too
+            File randomMusicFile = Math.random() < 0.5 ? musicFile : musicFile2;
             //play music
-            playMusic(musicFile);
+            playMusic(randomMusicFile, 0);
         }
     }
-    public static void playMusic(File musicFile) {
+    public static void playMusic(File musicFile, int loops) {
         Media sound = new Media(musicFile.toURI().toString());
         backgroundMusic = new MediaPlayer(sound);
-        backgroundMusic.setVolume(normalVolume);
+        backgroundMusic.setVolume(0.00);
+        backgroundMusic.setCycleCount(loops);
         backgroundMusic.play();
+        //fade in music
+        resetVolume();
     }
     public static void fadeOutMusic(double minVolume) {
         //fade out music with parallel thread (to avoid pausing the game)
+        if (backgroundMusic == null) {
+            return;
+        }
         new Thread(() -> {
             double volume = getVolume();
             while (volume > minVolume) {
@@ -44,6 +54,10 @@ public class Atmospheric {
                 }
                 volume -= 0.005;
                 setVolume(volume);
+            }
+            if (minVolume == 0.00) {
+                backgroundMusic.stop();
+                backgroundMusic = null;
             }
             System.out.println("Music faded out.");
         }).start();
@@ -73,7 +87,7 @@ public class Atmospheric {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        volume[0] -= 0.01;
+                        volume[0] -= 0.007;
                         setVolume(volume[0]);
                     }
                     System.out.println("Music faded out.");
@@ -86,7 +100,7 @@ public class Atmospheric {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        volume[0] += 0.01;
+                        volume[0] += 0.007;
                         setVolume(volume[0]);
                     }
                     System.out.println("Music faded in.");
@@ -137,5 +151,56 @@ public class Atmospheric {
             viewer.setMediaPlayer(mediaPlayer);//to avoid garbage collection
             mediaPlayer.play();
         }).start();
+    }
+    public static void startBossMusic(String bossName) {
+        //play boss music
+        if (bossMusicPlaying) {
+            return;
+        }
+        if (backgroundMusic != null) {
+            backgroundMusic.stop();
+        }
+        bossMusicPlaying = true;
+        File musicFile = RandomHandler.getRandomMusicFile("bosses/" + bossName + "/");
+        playMusic(musicFile, 30);
+    }
+    public static void stopBossMusic() {
+        if (bossMusicPlaying) {
+            fadeOutMusic(0.00);
+            bossMusicPlaying = false;
+        }
+    }
+    public static void playPauseScreenMusic() {
+        if (pauseScreenMusicPlaying) {
+            return;
+        }
+        if (bossMusicPlaying) {
+            return;//do not play pause screen music if boss music is playing
+        }
+        if (backgroundMusic != null) {
+            fadeOutMusic(0.00);
+        }
+        pauseScreenMusicPlaying = true;
+        //play with delay
+        Thread pauseScreenMusicThread = new Thread(() -> {
+            try {
+                Thread.sleep(7000);//delay
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (pauseScreenMusicPlaying) {
+                File musicFile = RandomHandler.getRandomMusicFile("pauseScreen/");
+                playMusic(musicFile, 30);
+            }
+        });
+        pauseScreenMusicThread.start();
+    }
+    public static void stopPauseScreenMusic() {
+        if (pauseScreenMusicPlaying) {
+            pauseScreenMusicPlaying = false;
+        }
+        if (backgroundMusic != null && !bossMusicPlaying) {
+            fadeOutMusic(0.00);
+        }
     }
 }
