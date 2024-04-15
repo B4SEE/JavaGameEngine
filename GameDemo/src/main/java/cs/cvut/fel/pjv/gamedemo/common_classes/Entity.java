@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.*;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
 import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 import javafx.geometry.Point2D;
@@ -38,7 +39,7 @@ public class Entity {
     @JsonProperty("initialBehaviour")
     private Constants.Behaviour initialBehaviour;
     @JsonProperty("intelligence")
-    private int intelligence = 2;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
+    private int intelligence = 0;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
     @JsonProperty("negativeThreshold")
     private int negativeThreshold = 2;
     @JsonProperty("negativeCount")
@@ -99,16 +100,13 @@ public class Entity {
     private Thread animationThread;
 
     @JsonCreator
-    public Entity(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("type") Constants.EntityType type, @JsonProperty("positionX") double positionX, @JsonProperty("positionY") double positionY, @JsonProperty("hitBoxSize") int hitBoxSize, @JsonProperty("health") int health, @JsonProperty("damage") int damage) {
+    public Entity(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("type") Constants.EntityType type, @JsonProperty("positionX") double positionX, @JsonProperty("positionY") double positionY) {
         this.name = name;
         this.texturePath = texturePath;
         this.type = type;
         this.positionX = positionX;
         this.positionY = positionY;
-        this.hitBoxSize = hitBoxSize;
-        this.health = health;
         this.maxHealth = health;
-        this.damage = damage;
     }
 
     public Entity(String name, String texturePath) {
@@ -261,7 +259,7 @@ public class Entity {
     public int getSpeedY() {
         return speed_y;
     }
-    @JsonIgnore
+    @JsonSetter("hitBoxSize")
     public void setHitBoxSize(int hitBoxSize) {
         this.hitBoxSize = hitBoxSize;
     }
@@ -317,7 +315,7 @@ public class Entity {
     public int getMaxHealth() {
         return maxHealth;
     }
-    @JsonIgnore
+    @JsonSetter("damage")
     public void setDamage(int damage) {
         this.damage = damage;
     }
@@ -401,6 +399,7 @@ public class Entity {
         health -= damage;
         if (Objects.equals(this.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
             this.setBehaviour(Constants.Behaviour.AGGRESSIVE);
+            Events.setShouldCallGuard(true);
         }
     }
     /**
