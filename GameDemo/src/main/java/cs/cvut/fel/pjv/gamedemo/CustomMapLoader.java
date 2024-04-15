@@ -389,6 +389,8 @@ public class CustomMapLoader extends Application {
     }
 
     private boolean loadTxtMap(String map, String filename) {
+        //load random objects
+        map = MapLoader.parseMap(map);
         //check if the map is valid
         if (!Checker.checkMap(map)) {
             return false;
