@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -12,7 +13,8 @@ public class Vendor extends Entity {//fix json
         super(name, texturePath);
         setAsDefaultVendor();
     }
-    public Vendor(String name, String texturePath, int inventorySize) {
+    @JsonCreator
+    public Vendor(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("inventorySize") int inventorySize) {
         super(name, texturePath);
         setAsDefaultVendor();
         this.vendorInventory = new Inventory(inventorySize);
