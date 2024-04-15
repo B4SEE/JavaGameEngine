@@ -16,6 +16,7 @@ import java.util.Objects;
  * Class with all checking methods.
  */
 public class Checker {
+
      /**
      * Check if map is valid.
      * @param map - map to check
@@ -37,22 +38,12 @@ public class Checker {
         }
         return checkHowManyDoors(lines);
     }
-    public static boolean checkIfWagonHasTrap(Object[][] objects) {
-        if (objects == null) {
-            return false;
-        }
-        //check if the wagon has a trap
-        for (Object[] objectArray : objects) {
-            for (Object object : objectArray) {
-                if (object != null) {
-                    if (object.getTwoLetterId().equals(Constants.TRAP)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+
+    /**
+     * Check if lines are the same length.
+     * @param lines - lines to check
+     * @return - true if lines are the same length, false otherwise
+     */
     private static boolean checkLinesLength(String[] lines) {
         //check if all map lines are the same length
         int lineLength = lines[0].length();
@@ -67,6 +58,12 @@ public class Checker {
         System.out.println("lines checked");
         return true;
     }
+
+    /**
+     * Check if map codes are valid.
+     * @param lines - lines to check
+     * @return - true if map codes are valid, false otherwise
+     */
     private static boolean checkMapCodes(String[] lines) {
         //check if all map codes have the same number of characters (4)
         for (String row : lines) {
@@ -81,6 +78,12 @@ public class Checker {
         }
         return checkIfCodeIsInDictionary(lines);
     }
+
+    /**
+     * Check if the code is in the dictionary.
+     * @param lines - lines to check
+     * @return - true if the code is in the dictionary, false otherwise
+     */
     private static boolean checkIfCodeIsInDictionary(String[] lines) {
         //check if all map codes are valid (are in Constant dictionaries)
         for (String row : lines) {
@@ -114,12 +117,12 @@ public class Checker {
         }
         return true;
     }
-    public static boolean checkIfPlayerHasKeyInMainHand(Player player) {
-        if (player.getPlayerInventory().getMainHandItem() != null) {
-            return player.getPlayerInventory().getMainHandItem().getType().equals(Constants.ItemType.KEY);
-        }
-        return false;
-    }
+
+    /**
+     * Check how many wagon doors are in the map.
+     * @param lines - lines to check
+     * @return - true if there are two doors, false otherwise
+     */
     private static boolean checkHowManyDoors(String[] lines) {
         int doors = 0;
         for (String row : lines) {
@@ -136,6 +139,29 @@ public class Checker {
         System.out.println(lines.length);
         return doors == 2;
     }
+
+    /**
+     * Check if the wagon has a trap.
+     * @param objects - objects in the wagon
+     * @return - true if the wagon has a trap, false otherwise
+     */
+    public static boolean checkIfWagonHasTrap(Object[][] objects) {
+        if (objects == null) {
+            return false;
+        }
+        //check if the wagon has a trap
+        for (Object[] objectArray : objects) {
+            for (Object object : objectArray) {
+                if (object != null) {
+                    if (object.getTwoLetterId().equals(Constants.TRAP)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Check if the player can interact with the objects.
      * @return the object the player can interact with, null otherwise
@@ -151,6 +177,84 @@ public class Checker {
         }
         return null;
     }
+
+    /**
+     * Check if entity remembers the target.
+     * @param entity the entity
+     * @param target the target
+     * @param obstacles obstacles
+     * @param time the time
+     * @return true if the entity remembers the target, false otherwise
+     * <br>
+     * <br>
+     * Note: the entity remembers the target if it can see it
+     */
+    public static boolean checkIfEntityRemember(Entity entity, Entity target, Shape obstacles, long time) {
+        if (!checkIfEntityCanSee(entity, target, obstacles)) {
+            if ((time - entity.getWhenStartedPursuing() != 0 && (time - entity.getWhenStartedPursuing()) % 13 == 0) || entity.getWhenStartedPursuing() == 0) {
+                entity.setWhenStartedPursuing(0);
+                return false;
+            }
+        } else {
+            entity.setWhenStartedPursuing(time);
+            return true;
+        }
+        return true;
+    }
+
+    /**
+     * Check if entity can see the target.
+     * @param entity the entity
+     * @param target the target
+     * @param obstacles obstacles
+     * @return true if the entity can see the target, false otherwise
+     */
+    public static boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacles) {
+        Line sightLine = new Line(entity.getPositionX() + 32, entity.getPositionY() + 80, target.getPositionX() + 32, target.getPositionY() + 80);
+        sightLine.setStrokeWidth(7);
+        return !checkCollision(sightLine, obstacles);
+    }
+
+    /**
+     * Check if entity stuck.
+     * @param entity the entity
+     * @return true if the entity is stuck, false otherwise
+     */
+    public static boolean checkIfEntityStuck(Entity entity) {
+        Point2D currentPosition = new Point2D(entity.getPositionX(), entity.getPositionY());
+        if (entity.getPreviousPositions().contains(currentPosition)) {
+            entity.setCounter(entity.getCounter() + 1);
+        } else {
+            entity.getPreviousPositions().add(currentPosition);
+        }
+        if (entity.getPreviousPositions().size() > Constants.MAX_PREV_POS_LIST_SIZE) {
+            entity.getPreviousPositions().removeFirst();
+        }
+        return entity.getCounter() > Constants.MAX_COUNTER;
+    }
+
+    /**
+     * Check if the player is near the conductor.
+     * @param conductor the conductor
+     * @param player the player
+     * @return true if the player is near the conductor, false otherwise
+     * <br>
+     * <br>
+     * Note: the conductor can "feel" the player along its y-axis
+     */
+    public static boolean checkIfConductorNearPlayer(Entity conductor, Player player) {
+        Line conductorLine = new Line(conductor.getPositionX(), 0, conductor.getPositionX(), 1000);
+        Shape playerHitbox = player.getHitbox();
+        Shape conductorHitbox = conductor.getHitbox();
+        return checkCollision(conductorLine, playerHitbox) || checkCollision(conductorLine, conductorHitbox);
+    }
+
+    /**
+     * Check if the player can speak with the entities.
+     * @param player the player
+     * @param entities the entities
+     * @return the entity the player can speak with, null otherwise
+     */
     public static Entity checkIfPlayerCanSpeak(Player player, List<Entity> entities) {
         if (entities == null) {
             return null;
@@ -166,22 +270,17 @@ public class Checker {
         }
         return null;
     }
-    public static boolean checkIfEntityRemember(Entity entity, Entity target, Shape obstacle, long time) {
-        if (!checkIfEntityCanSee(entity, target, obstacle)) {//if the entity cannot see the target, check if it remembers the target
-            if ((time - entity.getWhenStartedPursuing() != 0 && (time - entity.getWhenStartedPursuing()) % 13 == 0) || entity.getWhenStartedPursuing() == 0) {
-                entity.setWhenStartedPursuing(0);
-                return false;
-            }
-        }
-        //entity can see the target
-        entity.setWhenStartedPursuing(time);
-        return true;
-    }
-    public static boolean checkIfEntityCanSee(Entity entity, Entity target, Shape obstacle) {
-        Line sightLine = new Line(entity.getPositionX() + 32, entity.getPositionY() + 80, target.getPositionX() + 32, target.getPositionY() + 80);
-        sightLine.setStrokeWidth(7);
-        return !checkCollision(sightLine, obstacle);
-    }
+
+    /**
+     * Check if player can shoot.
+     * @param player the player
+     * @param aimX the x coordinate of the aim
+     * @param aimY the y coordinate of the aim
+     * @param target the target
+     * @param obstacles obstacles
+     * @param time the time
+     * @return true if the player can shoot, false otherwise
+     */
     public static boolean checkIfPlayerCanShoot(Player player, int aimX, int aimY, Entity target, Shape obstacles, long time) {
         Line aimLine = new Line(player.getPositionX() + 32, player.getPositionY() + 64, aimX, aimY);
         aimLine.setStrokeWidth(7);
@@ -189,46 +288,28 @@ public class Checker {
         shootHitbox.setStroke(Color.RED);
         shootHitbox.setStrokeWidth(7);
         shootHitbox.setRadius(12);
-        System.out.println(shootHitbox.getRadius());
-        System.out.println(((Circle) target.getHitbox()).getRadius());
-        System.out.println("aim line: " + aimLine.getStartX() + " " + aimLine.getStartY() + " " + aimLine.getEndX() + " " + aimLine.getEndY());
         if (!checkCollision(aimLine, obstacles)) {
             if (player.getCooldown() == 0) {
                 player.setCanAttack(true);
-                System.out.println("can attack");
             }
             if (player.getCanAttack()) {
                 player.setCanAttack(false);
                 player.setWhenAttacked(time);
-                System.out.println("attacked");
                 return checkCollision(aimLine, shootHitbox);
             }
             if (!player.getCanAttack() && (time - player.getWhenAttacked() != 0) && (time - player.getWhenAttacked()) % player.getCooldown() == 0) {
-                System.out.println("can attack again");
                 player.setCanAttack(true);
                 player.setWhenAttacked(0);
             }
         }
         return false;
     }
-    public static boolean checkIfEntityStuck(Entity entity) {
-        Point2D currentPosition = new Point2D(entity.getPositionX(), entity.getPositionY());
-        //check if the entity has already visited the current position
-        if (entity.getPreviousPositions().contains(currentPosition)) {
-            //increase the counter
-            entity.setCounter(entity.getCounter() + 1);
-//                        System.out.println("Entity revisited position: " + currentPosition);
-        } else {
-            //add the current position to the list of previous positions
-            entity.getPreviousPositions().add(currentPosition);
-        }
-        //remove the oldest position (so the list does not grow indefinitely)
-        if (entity.getPreviousPositions().size() > Constants.MAX_PREV_POS_LIST_SIZE) {
-            entity.getPreviousPositions().removeFirst(); // Remove the oldest position
-        }
-        //check if entity is stuck
-        return entity.getCounter() > Constants.MAX_COUNTER;
-    }
+
+    /**
+     * Check if player has a valid ticket.
+     * @param itemsArray the items array
+     * @return true if the player has a valid ticket, false otherwise
+     */
     public static boolean checkIfPlayerHasTicket(Item[] itemsArray) {
         for (Item item : itemsArray) {
             if (item != null) {
@@ -239,6 +320,19 @@ public class Checker {
         }
         return false;
     }
+
+    /**
+     * Check if the player has a key in the main hand.
+     * @param player - player to check
+     * @return - true if the player has a key in the main hand, false otherwise
+     */
+    public static boolean checkIfPlayerHasKeyInMainHand(Player player) {
+        if (player.getPlayerInventory().getMainHandItem() != null) {
+            return player.getPlayerInventory().getMainHandItem().getType().equals(Constants.ItemType.KEY);
+        }
+        return false;
+    }
+
     /**
      * Check if there is a collision between two shapes.
      * @param hitbox1 the first hitbox
@@ -251,6 +345,13 @@ public class Checker {
         Shape intersect = Shape.intersect(shape1, shape2);
         return !intersect.getBoundsInParent().isEmpty();
     }
+
+    /**
+     * Get the collision point between two shapes.
+     * @param hitbox1 the first hitbox
+     * @param hitbox2 the second hitbox
+     * @return the collision point
+     */
     public static int[] getCollisionPoint(Shape hitbox1, Shape hitbox2) {
         Shape intersect = Shape.intersect(hitbox1, hitbox2);
         if (!intersect.getBoundsInParent().isEmpty()) {
@@ -267,6 +368,7 @@ public class Checker {
     public static boolean checkX(Entity entity, double[] objectIsoXY) {
         return (objectIsoXY[0] > entity.getPositionX() - Constants.TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * Constants.TILE_WIDTH);
     }
+
     /**
      * Check if the y position of the object is lower than the player's y position.
      * @param objectIsoXY the object's isometric x and y position
@@ -275,18 +377,5 @@ public class Checker {
      */
     public static boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
         return (entity.getPositionY() + (double) Constants.TILE_HEIGHT / 2 + entity.getHeight() * Constants.TILE_HEIGHT < (objectIsoXY[1] - Constants.TILE_HEIGHT + objectTexture.getHeight()));
-    }
-
-    public static boolean checkIfConductorNearPlayer(Entity conductor, Player player) {
-        //create shape/line along conductor's y-axis and check if it intersects with player's hitbox
-        Line conductorLine = new Line(conductor.getPositionX(), 0, conductor.getPositionX(), 1000);
-        Shape playerHitbox = player.getHitbox();
-        Shape conductorHitbox = conductor.getHitbox();
-        //check if player is near the conductor
-        if (checkCollision(conductorLine, playerHitbox) || checkCollision(conductorLine, conductorHitbox)) {
-            System.out.println("Conductor can feel player's presence");
-            return true;
-        }
-        return false;
     }
 }
