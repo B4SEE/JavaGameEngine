@@ -1,39 +1,39 @@
 {
   "melee_items": [
     {
-      "name": "Sword",
-      "texturePath": "orange.png",
-      "value": 10.00,
+      "name": "Swiss knife",
+      "texturePath": "textures/default/items/weapons/melee/swiss_knife.png",
+      "value": 15.00,
+      "damage": 3.00,
+      "attackSpeed": 0.00
+    },
+    {
+      "name": "Knuckles",
+      "texturePath": "textures/default/items/weapons/melee/knuckles.png",
+      "value": 20.00,
       "damage": 20.00,
       "attackSpeed": 1.00
     },
     {
-      "name": "Knife",
-      "texturePath": "orange.png",
-      "value": 15.00,
+      "name": "Improved knuckles",
+      "texturePath": "textures/default/items/weapons/melee/improved_knuckles.png",
+      "value": 20.00,
+      "damage": 23.00,
+      "attackSpeed": 1.00
+    },
+    {
+      "name": "Wooden baseball bat",
+      "texturePath": "textures/default/items/weapons/melee/wooden_baseball_bat.png",
+      "value": 20.00,
       "damage": 25.00,
-      "attackSpeed": 1.00
+      "attackSpeed": 2.00
     },
     {
-      "name": "Axe",
-      "texturePath": "orange.png",
-      "value": 12.00,
-      "damage": 22.00,
-      "attackSpeed": 1.00
-    },
-    {
-      "name": "Mace",
-      "texturePath": "orange.png",
-      "value": 8.00,
-      "damage": 18.00,
-      "attackSpeed": 1.00
-    },
-    {
-      "name": "Spear",
-      "texturePath": "orange.png",
-      "value": 6.00,
-      "damage": 16.00,
-      "attackSpeed": 1.00
+      "name": "Metal baseball bat",
+      "texturePath": "textures/default/items/weapons/melee/metal_baseball_bat.png",
+      "value": 30.00,
+      "damage": 35.00,
+      "attackSpeed": 3.00
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "dialogues": [
+    {
+      "id": "dialogue1",
+      "text": "I'm not talking to you.",
+      "options": []
+    }
+  ]
+}

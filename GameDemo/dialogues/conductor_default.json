@@ -1,0 +1,18 @@
+{
+  "dialogues": [
+    {
+      "id": "dialogue1",
+      "text": "ticket",
+      "options": [
+        {
+          "text": "sure",
+          "action": "check ticket"
+        },
+        {
+          "text": "i don't have it",
+          "action": "negative"
+        }
+      ]
+    }
+    ]
+}

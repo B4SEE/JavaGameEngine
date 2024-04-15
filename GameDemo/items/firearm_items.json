@@ -4,35 +4,35 @@
       "name": "Pistol",
       "texturePath": "orange.png",
       "value": 10.00,
-      "damage": 20.00,
+      "damage": 500.00,
       "shootingSpeed": 1.00
     },
     {
       "name": "Standard Rifle",
       "texturePath": "orange.png",
-      "value": 15.00,
-      "damage": 25.00,
+      "value": 40.00,
+      "damage": 500.00,
       "shootingSpeed": 1.00
     },
     {
       "name": "Shotgun",
       "texturePath": "orange.png",
       "value": 12.00,
-      "damage": 22.00,
+      "damage": 500.00,
       "shootingSpeed": 1.00
     },
     {
       "name": "Sniper Rifle",
       "texturePath": "orange.png",
       "value": 8.00,
-      "damage": 18.00,
+      "damage": 500.00,
       "shootingSpeed": 1.00
     },
     {
       "name": "Submachine Gun",
       "texturePath": "orange.png",
       "value": 6.00,
-      "damage": 16.00,
+      "damage": 500.00,
       "shootingSpeed": 1.00
     }
   ]

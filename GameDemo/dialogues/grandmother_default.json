@@ -1,0 +1,18 @@
+{
+  "dialogues": [
+    {
+      "id": "dialogue1",
+      "text": "Hello, how can I help you today?",
+      "options": [
+        {
+          "text": "Do you sell any products?",
+          "action": "trade"
+        },
+        {
+          "text": "Nothing, thanks.",
+          "nextDialogue": "dialogue3"
+        }
+      ]
+    }
+    ]
+}
