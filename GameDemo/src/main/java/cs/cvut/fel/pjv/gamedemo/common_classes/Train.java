@@ -3,6 +3,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import cs.cvut.fel.pjv.gamedemo.engine.Events;
 
 /**
  * Represents a train with wagons.
@@ -42,18 +43,25 @@ public class Train {
     public void removeWagon(Wagon wagon) {//when wagon deleted, other wagon door that leads to it will have empty targetId (will behave as locked, new wagon will not generate)
                                             //it could be solved, but it is not necessary for the game (player will not be able to enter the wagon behind the conductor (removed wagon))
         for (int i = 0; i < wagonsArray.length; i++) {
+            Entity conductor = null;
             if (wagonsArray[i] == wagon) {
+                if (Events.isConductorSpawned()) {
+                    if (wagon.getConductor() != null) {
+                        System.out.println("Conductor moved to the nearest wagon.");
+                        conductor = wagon.getConductor();
+                        getWagonById(findMinWagonId()).getEntities().add(conductor);
+                        conductor.setCurrentWagon(getWagonById(findMinWagonId()));
+                    }
+                }
                 wagonsArray[i] = null;
             }
         }
-        //TODO
-        //if there is conductor in the wagon, move him to the nearest wagon (next with the lowest id)
     }
     @JsonIgnore
-    private int findMinWagonId() {
+    public int findMinWagonId() {
         int minId = wagonsArray[0].getId();
         for (int i = 1; i < wagonsArray.length; i++) {
-            if (wagonsArray[i].getId() < minId) {
+            if (wagonsArray[i] != null && wagonsArray[i].getId() < minId) {
                 minId = wagonsArray[i].getId();
             }
         }
