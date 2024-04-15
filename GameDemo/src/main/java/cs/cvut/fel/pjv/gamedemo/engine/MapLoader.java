@@ -14,7 +14,7 @@ public class MapLoader {
      * @param path - path to the file
      * @return - the map
      */
-    public String load(String path) {
+    public static String load(String path) {
         File file = new File(path);
         StringBuilder map = new StringBuilder();
         try {
@@ -33,7 +33,7 @@ public class MapLoader {
      * Parse the map; replace the random objects with the actual objects.
      * @param seed - the map
      */
-    public String parseMap(String seed) {
+    public static String parseMap(String seed) {
         String result = "";
         try {
             String[] rows = seed.split(Constants.MAP_ROW_SEPARATOR);
