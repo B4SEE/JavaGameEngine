@@ -7,9 +7,12 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import cs.cvut.fel.pjv.gamedemo.engine.*;
 import javafx.scene.shape.Shape;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Class representing the wagon, holds all the objects, interactive objects and entities that are in the wagon at the moment.
@@ -136,10 +139,9 @@ public class Wagon {
     @JsonIgnore
     public void generateWagon() {
         // Generate the wagon
-        MapLoader mapLoader = new MapLoader();
         String path = RandomHandler.getRandomWagonTypeLayout(type);
-        String unparsedSeed = mapLoader.load(path);
-        seed = mapLoader.parseMap(unparsedSeed);
+        String unparsedSeed = MapLoader.load(path);
+        seed = MapLoader.parseMap(unparsedSeed);
         initWagon();
     }
     @JsonIgnore
@@ -211,7 +213,7 @@ public class Wagon {
                     if (letterID.equals(Constants.LOCKABLE_DOOR)) {
                         texture = Constants.INTERACTIVE_OBJECTS.get(letterID);
                         Object object = new Object(Character.getNumericValue(subRows[j].charAt(0)), Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID), texture, letterID, 0, 0, 0, true);
-                        object.setHeight(2);
+                        object.setHeight(Character.getNumericValue(subRows[j].charAt(1)));
                         objectsArray[i][j] = object;
                     }
                     if (letterID.equals(Constants.WAGON_DOOR)) {
@@ -252,25 +254,21 @@ public class Wagon {
                 String letterID = object.getTwoLetterId();
                 if (object.getHeight() == 0) {
                     if (letterID.equals(Constants.ENEMY_SPAWN)) {
-                        //pick random name from dictionary
-                        String[] names = Constants.WAGON_TYPE_ENEMIES.get(type);
-                        String name = names[(int) (Math.random() * names.length)];
-                        Entity enemy = new Entity(name, name + "_front.png");//works, but entities are all in the same position
+                        //pick random creator from the list of creators for the specific type of wagon
+                        Method[] enemyCreators = Constants.WAGON_TYPE_ENEMIES.get(type);
+                        Method enemyCreator = enemyCreators[(int) (Math.random() * enemyCreators.length)];
+                        Entity enemy = null;
+                        try {
+                            enemy = (Entity) enemyCreator.invoke(EntitiesCreator.class);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
                         enemy.setCurrentWagon(this);
-                        EntitiesCreator.setAsDefaultEnemy(enemy);
-                        enemy.setPositionX(300);
-                        enemy.setPositionY(240);
                         entities.add(enemy);
                     }
                     if (letterID.equals(Constants.NPC_SPAWN)) {
-                        //pick random name from dictionary
-                        String[] names = Constants.WAGON_TYPE_NPC.get(type);
-                        String name = names[(int) (Math.random() * names.length)];
-                        Entity npc = new Entity(name, name + "_front.png");
-                        npc.setCurrentWagon(this);
-                        EntitiesCreator.setAsDefaultNPC(npc);
-                        npc.setPositionX(500);
-                        npc.setPositionY(240);
+                        //create random NPC
+                        Entity npc = EntitiesCreator.createNPC(type);
                         entities.add(npc);
                     }
                     if (letterID.equals(Constants.VENDOR_SPAWN)) {
@@ -279,21 +277,17 @@ public class Wagon {
                         System.out.println("vendor_" + name);
                         Vendor vendor = new Vendor("vendor_" + name, "zombie" + "_front.png");
                         vendor.setCurrentWagon(this);
-                        vendor.setPositionX(500);
-                        vendor.setPositionY(240);
                         entities.add(vendor);
                     }
                     if (letterID.equals(Constants.QUEST_SPAWN)) {
                         List<QuestNPC> availableQuestNPCs = Events.getAvailableQuestNPCs();
-                        System.out.println("***" + availableQuestNPCs);
                         if (availableQuestNPCs != null && !availableQuestNPCs.isEmpty()) {
                             QuestNPC questNPC = Events.getAvailableQuestNPCs().get((int) (Math.random() * availableQuestNPCs.size()));
                             Events.removeQuestNPC(questNPC);
                             questNPC.writeQuestItemToNecessaryToSpawnItems();
                             questNPC.setCurrentWagon(this);
-                            questNPC.setPositionX(500);
-                            questNPC.setPositionY(240);
                             entities.add(questNPC);
+                            System.out.println("Quest NPC spawned");
                         }
                     }
                 }
@@ -374,9 +368,37 @@ public class Wagon {
         }
     }
     @JsonIgnore
+    public Object getTrap() {
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                if (object.getTwoLetterId().equals(Constants.TRAP)) {
+                    return object;
+                }
+            }
+        }
+        return null;
+    }
+    @JsonIgnore
     public void updateEntities() {
         for (Entity entity : entities) {
             entity.setCurrentWagon(this);
         }
+    }
+
+    public Entity getConductor() {
+        for (Entity entity : entities) {
+            if (entity.getType().equals(Constants.EntityType.CONDUCTOR) && Objects.equals(entity.getName(), Constants.CONDUCTOR)) {
+                return entity;
+            }
+        }
+        return null;
+    }
+    public Entity getGrandmother() {
+        for (Entity entity : entities) {
+            if (entity.getType().equals(Constants.EntityType.CONDUCTOR) && Objects.equals(entity.getName(), Constants.GRANDMOTHER)) {
+                return entity;
+            }
+        }
+        return null;
     }
 }
