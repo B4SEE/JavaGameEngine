@@ -19,6 +19,14 @@ public class Events {
     private static int timeLoopCounter = 0;
     private static Constants.Event nextEvent;
     private static boolean canSaveGame = true;
+    private static boolean isBossFight = false;
+    private static boolean conductorSpawned = false;
+    private static boolean grandmotherSpawned = false;
+    private static boolean playerKidnapped = false;
+    private static boolean guardCalled = false;
+    private static boolean playerKilledGuard = false;
+    private static boolean canSpawnKey = true;
+    private static boolean shouldCallGuard = false;
     public Events(){
     }
     public static List<QuestNPC> getAvailableQuestNPCs() {
@@ -65,5 +73,69 @@ public class Events {
     }
     public static void setCanSaveGame(boolean canSaveGame) {
         Events.canSaveGame = canSaveGame;
+    }
+
+    public static boolean isBossFight() {
+        return isBossFight;
+    }
+
+    public static void setBossFight(boolean bossFight) {
+        isBossFight = bossFight;
+    }
+
+    public static boolean isConductorSpawned() {
+        return conductorSpawned;
+    }
+
+    public static void setConductorSpawned(boolean conductorSpawned) {
+        Events.conductorSpawned = conductorSpawned;
+    }
+
+    public static boolean isGrandmotherSpawned() {
+        return grandmotherSpawned;
+    }
+
+    public static void setGrandmotherSpawned(boolean grandmotherSpawned) {
+        Events.grandmotherSpawned = grandmotherSpawned;
+    }
+
+    public static boolean isPlayerKidnapped() {
+        return playerKidnapped;
+    }
+
+    public static void setPlayerKidnapped(boolean playerKidnapped) {
+        Events.playerKidnapped = playerKidnapped;
+    }
+
+    public static boolean isGuardCalled() {
+        return guardCalled;
+    }
+
+    public static void setGuardCalled(boolean guardCalled) {
+        Events.guardCalled = guardCalled;
+    }
+
+    public static boolean isPlayerKilledGuard() {
+        return playerKilledGuard;
+    }
+
+    public static void setPlayerKilledGuard(boolean playerKilledGuard) {
+        Events.playerKilledGuard = playerKilledGuard;
+    }
+
+    public static boolean canSpawnKey() {
+        return canSpawnKey;
+    }
+
+    public static void setCanSpawnKey(boolean canSpawnKey) {
+        Events.canSpawnKey = canSpawnKey;
+    }
+
+    public static boolean shouldCallGuard() {
+        return shouldCallGuard;
+    }
+
+    public static void setShouldCallGuard(boolean shouldCallGuard) {
+        Events.shouldCallGuard = shouldCallGuard;
     }
 }
