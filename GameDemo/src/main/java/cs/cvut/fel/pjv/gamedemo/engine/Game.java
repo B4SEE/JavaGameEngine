@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
+import cs.cvut.fel.pjv.gamedemo.CustomMapLoader;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,48 +16,44 @@ public class Game {
     }
     public static void start() {
         game.setStage(stage);
-        stage.setScene(getMainMenuScene());
+        stage.setScene(showMainMenuScene());
         stage.show();
     }
-    public static Scene getMainMenuScene() {
-        GridPane grid = new GridPane();
-        grid.setStyle("-fx-background-color: #000000; -fx-border-color: #ffffff;");
-        grid.setPrefSize(800, 800);
+    public static Scene showMainMenuScene() {
+        Atmospheric.playPauseScreenMusic();
 
-        Label label = new Label("Main menu");
-        label.setStyle("-fx-font-size: 50; -fx-text-fill: #f55757;");
+        GUI.initMainMenu();
 
-        grid.add(label, 0, 0);
-        Scene mainMenuScene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
-
-        Button startNewGameButton = new Button("Start new game");
-        startNewGameButton.setOnAction(actionEvent -> {
+        GUI.startNewGameButton.setOnAction(actionEvent -> {
+            Atmospheric.stopPauseScreenMusic();
             game.resetGame();
             game.setStage(stage);
             game.startGame();
         });
 
-        Button loadGameButton = new Button("Load game");
-        loadGameButton.setOnAction(actionEvent -> {
+        GUI.loadGameButton.setOnAction(actionEvent -> {
             game.resetGame();
             game.setStage(stage);
             game.loadGame();
             game.startGame();
         });
 
-        Button exitButton = new Button("Exit");
-        exitButton.setOnAction(actionEvent -> {
+        GUI.mapLoadButton.setOnAction(actionEvent -> {
+            CustomMapLoader mapLoader = new CustomMapLoader();
+            try {
+                mapLoader.start(stage);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        GUI.exitButton.setOnAction(actionEvent -> {
             System.exit(0);
         });
 
-        startNewGameButton.setStyle("-fx-font-size: 20; -fx-text-fill: #e38f11;");
-        loadGameButton.setStyle("-fx-font-size: 20; -fx-text-fill: #70e311;");
-        exitButton.setStyle("-fx-font-size: 20; -fx-text-fill: #e31111;");
-
-        grid.add(startNewGameButton, 0, 1);
-        grid.add(loadGameButton, 0, 2);
-        grid.add(exitButton, 0, 3);
-
-        return mainMenuScene;
+        return GUI.mainMenuScene;
+    }
+    public static GameSaver getGameSaver() {
+        return game;
     }
 }
