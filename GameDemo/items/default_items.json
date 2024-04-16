@@ -6,24 +6,19 @@
       "value": 10.00
     },
     {
-      "name": "Pen",
+      "name": "Toolbox",
       "texturePath": "orange.png",
-      "value": 15.00
+      "value": 30.00
     },
     {
-      "name": "Golden ring",
+      "name": "Razor blade",
       "texturePath": "orange.png",
-      "value": 12.00
+      "value": 3.00
     },
     {
-      "name": "Watch",
+      "name": "Some garbage",
       "texturePath": "orange.png",
-      "value": 8.00
-    },
-    {
-      "name": "Glasses",
-      "texturePath": "orange.png",
-      "value": 6.00
+      "value": 0.00
     }
   ]
 }
