@@ -186,14 +186,6 @@ public class Constants {
         VALID_TICKET,
         KEY
     }
-    public static final Map <String, String> ITEM_TEXTURES = Map.ofEntries(
-            Map.entry("block", "textures/default/objects/normal_objects/walls/block_wall.png"),
-            Map.entry("seat", "textures/default/objects/normal_objects/decorations/seat_1.png"),
-            Map.entry("box", "textures/default/objects/interactive_objects/chest_object/chest_object_1.png")
-    );
-    public static final Map <List<String>, String> CRAFT_RECIPES = Map.ofEntries(
-            Map.entry(List.of("block", "seat"), "box")
-    );
 
     //Train
     public static final int TRAIN_WAGONS = 10;
