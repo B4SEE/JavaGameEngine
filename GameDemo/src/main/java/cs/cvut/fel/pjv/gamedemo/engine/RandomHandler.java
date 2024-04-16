@@ -3,6 +3,8 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class RandomHandler {
+    private static final Logger logger = LogManager.getLogger(RandomHandler.class);
     public  RandomHandler() {
     }
     public static String getRandomDialogueThatStartsWith(String start) {
@@ -29,9 +32,6 @@ public class RandomHandler {
             }
         }
         randomDialogue = listOfFilesThatStartWith.get((int) (Math.random() * listOfFilesThatStartWith.size())).getName();
-        System.out.println("--------------------");
-        System.out.println(randomDialogue);
-        System.out.println("--------------------");
         return randomDialogue;
     }
     public static Item getRandomDefaultItem() {
@@ -43,8 +43,9 @@ public class RandomHandler {
             JsonNode items = rootNode.get("default_items");
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             item = new Item(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("value").asInt());
+            logger.info("Default item generated");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while reading default items: " + e);
         }
         return item;
     }
@@ -59,8 +60,9 @@ public class RandomHandler {
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             food = new Food(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("nourishment").asInt());
             food.setValue(randomItem.get("value").asInt());
+            logger.info("Food item generated");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while reading food items: " + e);
         }
         return food;
     }
@@ -74,8 +76,9 @@ public class RandomHandler {
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             melee = new MeleeWeapon(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("damage").asInt(), randomItem.get("attackSpeed").asInt());
             melee.setValue(randomItem.get("value").asInt());
+            logger.info("Melee item generated");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while reading melee items: " + e);
         }
         return melee;
     }
@@ -90,8 +93,9 @@ public class RandomHandler {
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             firearm = new Firearm(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("damage").asInt(), randomItem.get("shootingSpeed").asInt());
             firearm.setValue(randomItem.get("value").asInt());
+            logger.info("Firearm generated");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while reading firearm items: " + e);
         }
         return firearm;
     }
@@ -105,8 +109,9 @@ public class RandomHandler {
             JsonNode rootNode = objectMapper.readTree(jsonData);
             JsonNode item = rootNode.get("quest_item_data");
             questItem = new Item(item.get("name").asText(), item.get("texturePath").asText(), item.get("value").asInt());
+            logger.info("Quest item generated");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while reading quest item: " + e);
         }
         return questItem;
     }
@@ -118,8 +123,6 @@ public class RandomHandler {
         listOfFilesThatStartWith.addAll(getListOfFilesThatStartWith(wagonType, "maps/custom"));
         //get path
         randomWagon = listOfFilesThatStartWith.get((int) (Math.random() * listOfFilesThatStartWith.size())).getPath();
-        System.out.println(listOfFilesThatStartWith);
-        System.out.println(randomWagon);
         return randomWagon;
     }
     public static List<File> getListOfFilesThatStartWith(String start, String path) {
@@ -156,6 +159,20 @@ public class RandomHandler {
         }
         return listOfFilesThatStartWith;
     }
+    public static List<File> getAllFilesFromDirectory(String path) {
+        //list all files from path directory
+        File folder = new File(path);
+        File[] files = folder.listFiles();
+        List<File> listOfFiles = new java.util.ArrayList<>();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    listOfFiles.add(file);
+                }
+            }
+        }
+        return listOfFiles;
+    }
     public static Item getRandomNecessaryToSpawnItem() {
         for (File file : getListOfFilesThatStartWith("necessary_to_spawn_item", "items/")) {
             try {
@@ -165,9 +182,10 @@ public class RandomHandler {
                 Item item = new Item(rootNode.get("name").asText(), rootNode.get("texturePath").asText(), rootNode.get("value").asInt());
                 //delete the file
                 file.delete();
+                logger.info("Necessary to spawn item generated");
                 return item;
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error while reading necessary to spawn item: " + e);
             }
         }
         return null;
@@ -182,13 +200,13 @@ public class RandomHandler {
             String name = names.get((int) (Math.random() * names.size())).getName();
             Item key = new Item("Key", "textures/default/items/misc/" + name, Constants.ItemType.KEY);
             key.setValue(value);
+            logger.info("Key generated");
             return key;
         }
         return null;
     }
     public static File getRandomMusicFile(String path) {
         File folder = new File("game_resources/sounds/" + path);
-        System.out.println(folder.getPath());
         List<File> listOfFiles = new java.util.ArrayList<>();
         for (File file : Objects.requireNonNull(folder.listFiles())) {
             if (file.isFile()) {
@@ -198,6 +216,7 @@ public class RandomHandler {
         return listOfFiles.get((int) (Math.random() * listOfFiles.size()));
     }
     public static void fillInventoryWithRandomItems(Inventory inventory) {
+        logger.info("Filling inventory with random items...");
         for (int k = 0; k < inventory.inventorySize; k++) {
             //generate random chance for each item
             int chance = (int) (Math.random() * 100);
@@ -222,7 +241,6 @@ public class RandomHandler {
                         inventory.addItem(getRandomNecessaryToSpawnItem());
                         break;
                     case 6:
-                        System.out.println("Key added");
                         inventory.addItem(getRandomKey());
                         Events.setCanSpawnLockedDoor(true);
                         break;
@@ -231,5 +249,6 @@ public class RandomHandler {
                 inventory.addItem(null);
             }
         }
+        logger.info("Inventory filled with random items");
     }
 }
