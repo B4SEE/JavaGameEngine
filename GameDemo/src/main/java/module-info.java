@@ -4,6 +4,7 @@ module cs.cvut.fel.pjv.gamedemo {
     requires javafx.media;
     requires com.fasterxml.jackson.databind;
     requires java.desktop;
+    requires log4j;
 
     opens cs.cvut.fel.pjv.gamedemo to javafx.fxml;
     opens cs.cvut.fel.pjv.gamedemo.engine to com.fasterxml.jackson.databind;
