@@ -10,7 +10,7 @@
       "name": "Apple",
       "texturePath": "orange.png",
       "value": 15.00,
-      "nourishment": 10.00
+      "nourishment": 5.00
     },
     {
       "name": "Chocolate Bar",
@@ -19,16 +19,10 @@
       "nourishment": 8.00
     },
     {
-      "name": "Sandwich",
+      "name": "Canned food",
       "texturePath": "orange.png",
-      "value": 8.00,
-      "nourishment": 6.00
-    },
-    {
-      "name": "Pear",
-      "texturePath": "orange.png",
-      "value": 6.00,
-      "nourishment": 4.00
+      "value": 20.00,
+      "nourishment": 15.00
     }
   ]
 }
