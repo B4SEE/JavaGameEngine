@@ -1,6 +1,5 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.animation.AnimationTimer;
@@ -18,7 +17,10 @@ import org.apache.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Class with the main game logic, handles the game state, player input and game events.
@@ -96,7 +98,7 @@ public class GameLogic {
                             try {
                                 Thread.sleep(3000);//30 seconds before the conductor spawns
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                logger.error("Conductor spawn interrupted", e);
                             }
                             Platform.runLater(() -> {//to avoid modifying the entities list from a different thread
                                 spawnConductor();
@@ -267,7 +269,7 @@ public class GameLogic {
             try {
                 enemy = (Entity) enemyCreator.invoke(EntitiesCreator.class);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+                logger.error("Enemy creation error", e);
             }
             if (enemy == null) return;
             enemy.setCurrentWagon(wagon);
@@ -548,7 +550,7 @@ public class GameLogic {
         Scene isoScene = stage.getScene();
         Atmospheric.fadeOutMusic(0.00);
         GUI.initDeathScreen(deathMessage);
-        logger.info("Player died, death message: " + deathMessage);
+        logger.info("Game over with message: " + deathMessage);
         GUI.confirmButton.setOnAction(actionEvent1 -> {
             stage.setScene(isoScene);
             restartGame();
@@ -925,8 +927,9 @@ public class GameLogic {
         // Handle checking ticket response
         if (Objects.equals(action, "check ticket")) {
             if (Checker.checkIfPlayerHasTicket(player.getPlayerInventory().getItemsArray())) {
-                //TODO end the game
                 dialogueEntity.setBehaviour(Constants.Behaviour.NEUTRAL);
+                deathMessage = "You escaped the train";
+                stopGame();
             } else {
                 dialogueEntity.setNegativeCount(dialogueEntity.getNegativeCount() + 1);
                 if (dialogueEntity.getNegativeCount() >= dialogueEntity.getNegativeThreshold()) {
@@ -1859,7 +1862,7 @@ public class GameLogic {
                 logger.info(boss.getName() + " trying to attack, player has " + seconds + " seconds to react...");
                 Thread.sleep(seconds * 1000L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Error while boss attacking: " + e.getMessage());
             }
             if (Checker.checkCollision(attackCircle, player.getHitbox())) {
                 logger.info(boss.getName() + " attacked the player");

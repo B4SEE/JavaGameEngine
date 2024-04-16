@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.*;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
-import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Shape;
@@ -40,8 +39,6 @@ public class Entity {
     private Constants.EntityType type;
     @JsonProperty("behaviour")
     private Constants.Behaviour behaviour;
-    @JsonProperty("initialBehaviour")
-    private Constants.Behaviour initialBehaviour;
     @JsonProperty("intelligence")
     private int intelligence = 0;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
     @JsonProperty("negativeThreshold")
@@ -55,7 +52,7 @@ public class Entity {
     @JsonIgnore
     private int[] startIndex;
     @JsonIgnore
-    private List<Point2D> previousPositions = new ArrayList<>();
+    private final List<Point2D> previousPositions = new ArrayList<>();//remove final if not working
     @JsonIgnore
     private int counter = 0;
     @JsonIgnore
@@ -100,8 +97,8 @@ public class Entity {
     private Wagon currentWagon;
     @JsonIgnore
     private Thread soundThread;
-    @JsonIgnore
-    private Thread animationThread;
+//    @JsonIgnore
+//    private Thread animationThread;
 
     @JsonCreator
     public Entity(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("type") Constants.EntityType type, @JsonProperty("positionX") double positionX, @JsonProperty("positionY") double positionY) {
@@ -175,14 +172,6 @@ public class Entity {
     @JsonIgnore
     public Constants.EntityType getType() {
         return type;
-    }
-    @JsonIgnore
-    public void setInitialBehaviour(Constants.Behaviour initialBehaviour) {
-        this.initialBehaviour = initialBehaviour;
-    }
-    @JsonIgnore
-    public Constants.Behaviour getInitialBehaviour() {
-        return initialBehaviour;
     }
     @JsonIgnore
     public void setBehaviour(Constants.Behaviour behaviour) {
@@ -384,14 +373,14 @@ public class Entity {
     public Thread getSoundThread() {
         return soundThread;
     }
-    @JsonIgnore
-    public void setAnimationThread(Thread animationThread) {
-        this.animationThread = animationThread;
-    }
-    @JsonIgnore
-    public Thread getAnimationThread() {
-        return animationThread;
-    }
+//    @JsonIgnore
+//    public void setAnimationThread(Thread animationThread) {
+//        this.animationThread = animationThread;
+//    }
+//    @JsonIgnore
+//    public Thread getAnimationThread() {
+//        return animationThread;
+//    }
 
 
     /**
@@ -425,13 +414,11 @@ public class Entity {
     @JsonIgnore
     public List<Entity> inAttackRange(List<Entity> entities) {
         List<Entity> inRange = new ArrayList<>();
-        int i = 0;
         for (Entity entity : entities) {
             if (entity != null) {
                 if (entity != this) {
                     if (entity.isAlive() && Checker.checkCollision(attackRange, entity.getHitbox())) {
                         inRange.add(entity);
-                        i++;
                     }
                 }
             }

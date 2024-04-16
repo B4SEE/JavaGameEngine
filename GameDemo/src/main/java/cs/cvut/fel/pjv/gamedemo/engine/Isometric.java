@@ -1,6 +1,5 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.application.Platform;
@@ -353,22 +352,22 @@ public class Isometric {
         logger.info("All objects updated");
     }
 
-    /**
-     * Move the grid by the specified delta x and delta y.
-     * If there is a collision with the player hitbox and the walls, the delta x and delta y are adjusted.
-     * @param deltaX the delta x
-     * @param deltaY the delta y
-     */
-    public void moveGrid(int deltaX, int deltaY) {
-        if (Checker.checkCollision(player.getHitbox(), walls)) {
-            this.deltaX -= deltaX;
-            this.deltaY -= deltaY;
-            return;
-        }
-        this.deltaX += deltaX;
-        this.deltaY += deltaY;
-        updateAll();
-    }
+//    /**
+//     * Move the grid by the specified delta x and delta y.
+//     * If there is a collision with the player hitbox and the walls, the delta x and delta y are adjusted.
+//     * @param deltaX the delta x
+//     * @param deltaY the delta y
+//     */
+//    public void moveGrid(int deltaX, int deltaY) {
+//        if (Checker.checkCollision(player.getHitbox(), walls)) {
+//            this.deltaX -= deltaX;
+//            this.deltaY -= deltaY;
+//            return;
+//        }
+//        this.deltaX += deltaX;
+//        this.deltaY += deltaY;
+//        updateAll();
+//    }
 
     /**
      * Update the walls.
@@ -760,6 +759,7 @@ public class Isometric {
         //if collision with walls, set end of line to the point of collision
         if (Checker.checkCollision(bulletHitbox, twoAndTallerWalls)) {
             int[] collisionPoint = Checker.getCollisionPoint(bulletHitbox, twoAndTallerWalls);
+            if (collisionPoint == null) return;
             bulletHitbox = new Line(player.getPositionX() + 32, player.getPositionY() + 64, collisionPoint[0], collisionPoint[1]);
             bulletHitbox.setStyle("-fx-stroke: #0095ff; -fx-stroke-width: 1; -fx-opacity: 0.5;");
         }
@@ -799,7 +799,7 @@ public class Isometric {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        logger.error("Boss attack circle animation interrupted");
                     }
                     Platform.runLater(() -> {//runlater to avoid concurrent modification exception
                         circleFill.setRadius(circleFill.getRadius() + (double) (radius * Constants.TILE_WIDTH) / (seconds * 10));

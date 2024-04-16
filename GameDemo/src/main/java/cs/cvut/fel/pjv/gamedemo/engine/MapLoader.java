@@ -1,11 +1,13 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MapLoader {
+    private static final Logger logger = Logger.getLogger(MapLoader.class);
     public MapLoader() {
     }
 
@@ -25,7 +27,7 @@ public class MapLoader {
             }
             scanner.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error while loading the map: " + e);
         }
         return map.toString();
     }
@@ -78,7 +80,7 @@ public class MapLoader {
             }
             result = String.join(Constants.MAP_ROW_SEPARATOR, rows);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while parsing the map: " + e);
         }
         return result;
     }

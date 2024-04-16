@@ -1,7 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -9,17 +8,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 
 public class GUI {
+    private static final Logger logger = LogManager.getLogger(GUI.class);
     public static Scene pauseScreen;
     public static Button resumeButton;
     public static Button exitButton;
@@ -67,7 +65,7 @@ public class GUI {
             URL fxmlUrl = fxmlFile.toURI().toURL();
             grid = FXMLLoader.load(fxmlUrl);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error loading FXML file: " + e.getMessage());
         }
         return grid;
     }

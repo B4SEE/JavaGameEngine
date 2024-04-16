@@ -16,7 +16,6 @@ public class EntitiesCreator {
         logger.info("Setting entity " + entity.getName() + " as default enemy...");
         entity.setType(Constants.EntityType.ENEMY);
         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
-        entity.setInitialBehaviour(entity.getBehaviour());
         entity.setHeight(Constants.ENEMY_BASIC_HEIGHT);
         entity.setSpeedX((int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN));
         entity.setSpeedY((int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN));
@@ -64,7 +63,6 @@ public class EntitiesCreator {
         setAsDefaultEnemy(npc);
         npc.setType(Constants.EntityType.NPC);
         npc.setBehaviour(Constants.Behaviour.NEUTRAL);
-        npc.setInitialBehaviour(npc.getBehaviour());
         npc.setIntelligence((int) (Math.random() * 2));
         if (npc.getDialoguePath() == null) {
             npc.setDialoguePath(RandomHandler.getRandomDialogueThatStartsWith(npc.getName()));
@@ -86,7 +84,6 @@ public class EntitiesCreator {
         logger.info("Setting entity " + player.getName() + " as default player...");
         player.setType(Constants.EntityType.PLAYER);
         player.setBehaviour(Constants.Behaviour.NEUTRAL);
-        player.setInitialBehaviour(player.getBehaviour());
         player.setHealth(Constants.PLAYER_MAX_HEALTH);
         player.setDamage(Constants.PLAYER_BASIC_DAMAGE);
         player.setHitBoxSize(Constants.PLAYER_HITBOX);
@@ -104,7 +101,6 @@ public class EntitiesCreator {
         bully.setCooldown(4);//kidnapping cooldown
         bully.setSpeedX(Constants.PLAYER_BASIC_SPEED_X - 1);
         bully.setSpeedY(Constants.PLAYER_BASIC_SPEED_Y - 1);
-        bully.setInitialBehaviour(bully.getBehaviour());
         logger.info("Bully created");
         return bully;
     }
@@ -118,7 +114,6 @@ public class EntitiesCreator {
         int cooldown = bossStats[4];
         entity.setType(Constants.EntityType.BOSS);
         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
-        entity.setInitialBehaviour(entity.getBehaviour());
         entity.setHeight(Constants.BOSS_BASIC_HEIGHT);
         entity.setSpeedX(Constants.BOSS_BASIC_SPEED_X);
         entity.setSpeedY(Constants.BOSS_BASIC_SPEED_Y);

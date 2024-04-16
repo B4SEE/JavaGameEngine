@@ -1,9 +1,5 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import cs.cvut.fel.pjv.gamedemo.common_classes.QuestNPC;
 
@@ -34,9 +30,6 @@ public class Events {
     }
     public static void addQuestNPC(QuestNPC questNPC) {
         availableQuestNPCs.add(questNPC);
-    }
-    public static void removeQuestNPC(QuestNPC questNPC) {
-        availableQuestNPCs.remove(questNPC);
     }
     public static Constants.Event getCurrentEvent() {
         return currentEvent;

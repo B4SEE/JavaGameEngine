@@ -100,8 +100,6 @@ public class RandomHandler {
         return firearm;
     }
     public static Item getQuestItem(String name) {
-        //list all files from items directory
-        File file = new File("items/" + name + ".json");
         ObjectMapper objectMapper = new ObjectMapper();
         Item questItem = null;
         try {
@@ -181,7 +179,11 @@ public class RandomHandler {
                 JsonNode rootNode = objectMapper.readTree(jsonData);
                 Item item = new Item(rootNode.get("name").asText(), rootNode.get("texturePath").asText(), rootNode.get("value").asInt());
                 //delete the file
-                file.delete();
+                if (file.delete()) {
+                    logger.info("Duplicate necessary to spawn item deleted");
+                } else {
+                    logger.error("Failed to delete the file");
+                }
                 logger.info("Necessary to spawn item generated");
                 return item;
             } catch (Exception e) {

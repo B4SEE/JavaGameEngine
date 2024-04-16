@@ -1,11 +1,9 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.stage.Stage;
 import org.apache.log4j.LogManager;
@@ -17,7 +15,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class GameSaver {
     @JsonIgnore
@@ -71,8 +68,7 @@ public class GameSaver {
     }
     @JsonIgnore
     public void saveGame() {
-        logger.info("Saving game");
-        //TODO: save Train class, Player class, Player inventory, currentWagon//save all to folder "save_date" (inside will be saved game.json, player.json and player_inventory.json)
+        logger.info("Saving game...");
         Date currentDate = new Date();
         String date = currentDate.toString().replaceAll("\\s", "_");
         //remove unnecessary characters
@@ -81,7 +77,11 @@ public class GameSaver {
         //create folder
         File folder = new File(path);
         if (!folder.exists()) {
-            folder.mkdir();
+            if (folder.mkdir()) {
+                logger.info("Folder " + path + " created");
+            } else {
+                logger.error("Failed to create folder " + path);
+            }
         }
         //save game
         try {
@@ -115,22 +115,28 @@ public class GameSaver {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/events.json");
-            EventsData eventsData = new EventsData();
-            eventsData.setAvailableQuestNPCs(Events.getAvailableQuestNPCs());
-            eventsData.setCurrentEvent(Events.getCurrentEvent());
-            eventsData.setCanSpawnLockedDoor(Events.canSpawnLockedDoor());
-            eventsData.setTimeLoopCounter(Events.getTimeLoopCounter());
-            eventsData.setNextEvent(Events.getNextEvent());
-            eventsData.setPlayerKidnapped(Events.isPlayerKidnapped());
-            eventsData.setPlayerKilledGuard(Events.isPlayerKilledGuard());
-            eventsData.setCanSpawnKey(Events.canSpawnKey());
-            eventsData.setShouldCallGuard(Events.shouldCallGuard());
+            EventsData eventsData = getEventsData();
             objectMapper.writeValue(file, eventsData);
             logger.info("Events saved");
         } catch (IOException e) {
             logger.error("Failed to save events");
         }
     }
+
+    private static EventsData getEventsData() {
+        EventsData eventsData = new EventsData();
+        eventsData.setAvailableQuestNPCs(Events.getAvailableQuestNPCs());
+        eventsData.setCurrentEvent(Events.getCurrentEvent());
+        eventsData.setCanSpawnLockedDoor(Events.canSpawnLockedDoor());
+        eventsData.setTimeLoopCounter(Events.getTimeLoopCounter());
+        eventsData.setNextEvent(Events.getNextEvent());
+        eventsData.setPlayerKidnapped(Events.isPlayerKidnapped());
+        eventsData.setPlayerKilledGuard(Events.isPlayerKilledGuard());
+        eventsData.setCanSpawnKey(Events.canSpawnKey());
+        eventsData.setShouldCallGuard(Events.shouldCallGuard());
+        return eventsData;
+    }
+
     @JsonIgnore
     public void loadGame() {
         logger.info("Loading game...");
@@ -207,7 +213,6 @@ public class GameSaver {
             createPlayer();
             createWagon();
             createTrain();
-            //TODO place player in the middle of the train
         }
         GameLogic gameLogic = new GameLogic(stage, train);
         gameLogic.loadGame(player, currentWagon);
@@ -231,6 +236,7 @@ public class GameSaver {
         this.player = new Player(Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y);
         player.getPlayerInventory().setAmmo(50);
         player.getPlayerInventory().setMoney(100);
+        player.getPlayerInventory().addItem(new Item("ticket", "orange.png", Constants.ItemType.VALID_TICKET));
         logger.info("New player created");
     }
     @JsonIgnore

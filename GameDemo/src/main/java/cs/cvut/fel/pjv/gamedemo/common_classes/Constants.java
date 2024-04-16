@@ -3,7 +3,6 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -120,7 +119,7 @@ public class Constants {
     public static final String[] QUEST_NPC_NAMES = {"lost_toy_lady"};
     public static final String CONDUCTOR = "conductor";
     public static final String GRANDMOTHER = "grandmother";
-    public static final String GUARD = "guard";
+//    public static final String GUARD = "guard";
     public static final String ZOMBIE = "zombie";
     public static final String BULLY = "bully";
     public static final String ROBOT = "robot";

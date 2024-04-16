@@ -1,12 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.CustomMapLoader;
-import cs.cvut.fel.pjv.gamedemo.Main;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -54,9 +49,7 @@ public class Game {
             }
         });
 
-        GUI.exitButton.setOnAction(actionEvent -> {
-            System.exit(0);
-        });
+        GUI.exitButton.setOnAction(actionEvent -> System.exit(0));
 
         return GUI.mainMenuScene;
     }
