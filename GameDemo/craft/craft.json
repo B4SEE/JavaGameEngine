@@ -1,0 +1,29 @@
+{
+  "craft_recipes": [
+    {
+      "item1": "wooden_baseball_bat",
+      "item2": "toolbox",
+      "result": "improved_wooden_baseball_bat"
+    },
+    {
+      "item1": "metal_baseball_bat",
+      "item2": "toolbox",
+      "result": "improved_metal_baseball_bat"
+    },
+    {
+      "item1": "old_gun",
+      "item2": "toolbox",
+      "result": "repaired_old_gun"
+    },
+    {
+      "item1": "canned_food",
+      "item2": "lighter",
+      "result": "cooked_canned_food"
+    },
+    {
+      "item1": "razor_blade",
+      "item2": "some_garbage",
+      "result": "improvised_knife"
+    }
+  ]
+}
