@@ -5,6 +5,8 @@ import cs.cvut.fel.pjv.gamedemo.engine.Atmospheric;
 import cs.cvut.fel.pjv.gamedemo.engine.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 import javafx.scene.shape.Shape;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +15,8 @@ import java.util.Objects;
  * Represents a player in the game.
  */
 public class Player extends Entity {
+    @JsonIgnore
+    private static final Logger logger = LogManager.getLogger(Player.class);
     @JsonProperty("hunger")
     private int hunger;
     @JsonIgnore//inventory will be saved in separate file
@@ -67,9 +71,10 @@ public class Player extends Entity {
     public void heal(long time) {
         int healCooldown = 2;
         if (canHeal) {
-            if (hunger >= super.getHealth()) {
+            if (hunger > super.getHealth()) {
                 setHealth(super.getHealth() + 1);
                 setHunger(hunger - 1);
+                logger.info("Player healed, current health: " + super.getHealth());
             }
             whenHealed = time;
             canHeal = false;
@@ -87,11 +92,12 @@ public class Player extends Entity {
      */
     @JsonIgnore
     public void eat(Food food) {
-        if ((hunger + food.nourishment) > Constants.PLAYER_MAX_HUNGER) {
+        if ((hunger + food.getNourishment()) > Constants.PLAYER_MAX_HUNGER) {
             hunger = Constants.PLAYER_MAX_HUNGER;
         } else {
-            hunger += food.nourishment;
+            hunger += food.getNourishment();
         }
+        logger.info("Player ate " + food.getName() + ", current hunger: " + hunger);
     }
 
     /**
@@ -104,9 +110,9 @@ public class Player extends Entity {
         if (shouldStarve) {
             if (hunger <= 0) {
                 setHealth(super.getHealth() - 1);
+                logger.info("Player starved, current health: " + super.getHealth());
             } else  {
                 setHunger(hunger - 1);
-                System.out.println("Hunger: " + hunger);
             }
             whenStarved = time;
             shouldStarve = false;
@@ -137,6 +143,7 @@ public class Player extends Entity {
             eat(food);
             playerInventory.setMainHandItem(null);
         } else if (playerInventory.getMainHandItem() instanceof MeleeWeapon meleeWeapon) {
+            logger.info("Player attacked with melee weapon");
             super.setDamage(super.getDamage() + (meleeWeapon.getDamage()));
             super.setCooldown(meleeWeapon.getAttackSpeed());
             List<Entity> targets = super.getCurrentWagon().getEntities();
@@ -144,6 +151,7 @@ public class Player extends Entity {
             super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
             super.setCooldown(2);//entities will not judge player's attack with knife, because they "can't see" the knife.
         } else if (playerInventory.getMainHandItem() instanceof Firearm) {//hit (!shoot) with firearm
+            logger.info("Player attacked with firearm");
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
         }
@@ -159,25 +167,27 @@ public class Player extends Entity {
      */
     @JsonIgnore
     public void shoot(Firearm firearm, List<Entity> targets, int aimX, int aimY, long time, Shape obstacles) {
-        System.out.println(playerInventory.getAmmo());
+        logger.info("Player is trying to shoot");
         if (playerInventory.getAmmo() <= 0) {
-            //sound of no ammo
+            logger.info("No ammo");
             return;
         }
-        System.out.println("Shooting");
-        playerInventory.setAmmo(playerInventory.getAmmo() - 1);
+        logger.info("Player has ammo");
         Atmospheric.playSound("game_resources/sounds/gun/gunshot.wav");
+        playerInventory.setAmmo(playerInventory.getAmmo() - 1);
         for (Entity target : targets) {
             if (target != null && target.isAlive() && Checker.checkIfPlayerCanShoot(this, aimX, aimY, target, obstacles, time)) {
+                logger.info("Player hit " + target.getName() + ", ammo left: " + playerInventory.getAmmo());
                 target.takeDamage(firearm.getDamage());
-                System.out.println("Target health: " + target.getHealth());
                 for (Entity entity : targets) {
                     if (Checker.checkIfEntityRemember(entity, this, obstacles, time) && Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && Objects.equals(target.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
+                        logger.info("Entity " + entity.getName() + " saw player shooting at " + target.getName() + ", changing behaviour to AGGRESSIVE");
                         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
                     }
                 }
                 return;
             }
         }
+        logger.info("Player missed");
     }
 }

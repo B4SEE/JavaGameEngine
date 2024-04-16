@@ -3,7 +3,10 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  * Represents a train with wagons.
@@ -12,6 +15,8 @@ import cs.cvut.fel.pjv.gamedemo.engine.Events;
  * Needed for the game to store wagons, their connections and contents.
  */
 public class Train {
+    @JsonIgnore
+    private static final Logger logger = LogManager.getLogger(Train.class);
     @JsonProperty
     private final Wagon[] wagonsArray;
 
@@ -24,14 +29,15 @@ public class Train {
     }
     @JsonIgnore
     public void addWagon(Wagon wagon) {
+        logger.info("Adding wagon " + wagon.getId() + " to the train...");
         for (int i = 0; i < wagonsArray.length; i++) {
             if (wagonsArray[i] == null) {
-                System.out.println("Wagon " + wagon.getId() + " added to the train.");
                 wagonsArray[i] = wagon;
+                logger.info("Wagon " + wagon.getId() + " added to the train");
                 return;
             }
         }
-        //if no empty space is found, remove the oldest wagon (with the lowest id)
+        logger.info("No empty space found, removing the oldest wagon...");
         removeWagon(wagonsArray[findMinWagonId()]);
         addWagon(wagon);
     }
@@ -40,20 +46,22 @@ public class Train {
         return wagonsArray;
     }
     @JsonIgnore
-    public void removeWagon(Wagon wagon) {//when wagon deleted, other wagon door that leads to it will have empty targetId (will behave as locked, new wagon will not generate)
-                                            //it could be solved, but it is not necessary for the game (player will not be able to enter the wagon behind the conductor (removed wagon))
+    public void removeWagon(Wagon wagon) {
+        logger.info("Removing wagon " + wagon.getId() + " from the train...");
         for (int i = 0; i < wagonsArray.length; i++) {
             Entity conductor = null;
             if (wagonsArray[i] == wagon) {
                 if (Events.isConductorSpawned()) {
                     if (wagon.getConductor() != null) {
-                        System.out.println("Conductor moved to the nearest wagon.");
+                        logger.info("Conductor found in wagon " + wagon.getId() + ", moving to the next wagon...");
                         conductor = wagon.getConductor();
                         getWagonById(findMinWagonId()).getEntities().add(conductor);
                         conductor.setCurrentWagon(getWagonById(findMinWagonId()));
+                        logger.info("Conductor moved to wagon " + findMinWagonId());
                     }
                 }
                 wagonsArray[i] = null;
+                logger.info("Wagon " + wagon.getId() + " removed from the train");
             }
         }
     }

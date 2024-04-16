@@ -8,6 +8,8 @@ import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Shape;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,8 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = QuestNPC.class, name = "QuestNPC")
 })
 public class Entity {
+    @JsonIgnore
+    private static final Logger logger = LogManager.getLogger(Entity.class);
     @JsonProperty("name")
     private String name;
     @JsonProperty("texturePath")
@@ -137,6 +141,7 @@ public class Entity {
     }
     @JsonIgnore
     public void setNegativeCount(int negativeCount) {
+        logger.info("Entity " + this.getName() + " negative count: " + negativeCount + "/" + negativeThreshold);
         this.negativeCount = negativeCount;
     }
     @JsonIgnore
@@ -395,9 +400,10 @@ public class Entity {
      */
     @JsonIgnore
     public void takeDamage(int damage) {
-        System.out.println(name + " took " + damage + " damage.");
         health -= damage;
+        logger.info("Entity " + this.getName() + " took " + damage + " damage, entity health: " + this.getHealth());
         if (Objects.equals(this.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
+            logger.info("Entity " + this.getName() + " is attacked, changing behaviour to AGGRESSIVE and calling guard...");
             this.setBehaviour(Constants.Behaviour.AGGRESSIVE);
             Events.setShouldCallGuard(true);
         }
@@ -448,6 +454,7 @@ public class Entity {
         if (entity.getCanAttack()) {
             for (Entity target : inAttackRange) {
                 if (target != null) {
+                    logger.info("Entity " + entity.getName() + " attacks " + target.getName() + "...");
                     target.takeDamage(entity.getDamage());
                 }
             }

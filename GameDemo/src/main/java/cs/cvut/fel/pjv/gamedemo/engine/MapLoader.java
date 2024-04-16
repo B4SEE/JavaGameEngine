@@ -51,7 +51,6 @@ public class MapLoader {
                                 //generate random number from 1 to 9
                                 int random = (int) (Math.random() * 9 + 1);
                                 String chest = "2" + random + "CO";
-                                System.out.println(chest);
                                 subRows[j] = chest;
                             } else if (subRows[j].charAt(1) == '2') {
                                 // Generate the trap

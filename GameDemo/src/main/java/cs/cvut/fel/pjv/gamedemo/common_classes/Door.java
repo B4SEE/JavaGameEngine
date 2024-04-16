@@ -1,11 +1,15 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.*;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  * Object child class representing a door, which functions as a teleport to another wagon.
  */
 public class Door extends Object {
+    @JsonIgnore
+    private static final Logger logger = LogManager.getLogger(Door.class);
     @JsonProperty("targetId")
     private int targetId;
     @JsonProperty("teleport")
@@ -45,12 +49,13 @@ public class Door extends Object {
      */
     @JsonIgnore
     public void teleport(Entity entity) {
+        logger.info("Teleporting entity " + entity.getName() + " to wagon with ID " + targetId);
         double objectIsoX = teleport.getIsoX();
         double objectIsoY = teleport.getIsoY();
         int height = entity.getHeight();
         entity.setPositionX((int) objectIsoX);
         entity.setPositionY((int) objectIsoY - height * 32);
-        System.out.println("Teleporting to " + objectIsoX + " " + objectIsoY);
+        logger.info("Entity " + entity.getName() + " teleported to wagon ID " + targetId + " to " + objectIsoX + ", " + objectIsoY);
     }
     /**
      * Locks the door.
@@ -58,6 +63,7 @@ public class Door extends Object {
     @JsonIgnore
     public void lock() {
         isLocked = true;
+        logger.info("Door at " + getIsoX() + ", " + getIsoY() + " locked");
     }
     /**
      * Unlocks the door.
@@ -65,6 +71,7 @@ public class Door extends Object {
     @JsonIgnore
     public void unlock() {
         isLocked = false;
+        logger.info("Door at " + getIsoX() + ", " + getIsoY() + " unlocked");
     }
     @JsonIgnore
     public boolean isLocked() {

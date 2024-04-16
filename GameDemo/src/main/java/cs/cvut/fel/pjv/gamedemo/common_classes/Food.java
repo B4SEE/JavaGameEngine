@@ -8,11 +8,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Food extends Item {
     @JsonProperty("nourishment")
-    public final int nourishment;
+    private final int nourishment;
 
     @JsonCreator
     public Food(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("nourishment") int nourishment) {
         super(name, texturePath, Constants.ItemType.FOOD);
         this.nourishment = nourishment;
+    }
+
+    public int getNourishment() {
+        return nourishment;
     }
 }

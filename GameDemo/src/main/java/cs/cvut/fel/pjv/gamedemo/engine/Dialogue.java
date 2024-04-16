@@ -3,16 +3,20 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Entity;
+import cs.cvut.fel.pjv.gamedemo.common_classes.Wagon;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - check
+public class Dialogue {
+    private static final Logger logger = LogManager.getLogger(Dialogue.class);
     private String action;
     private String dialoguePath;
     private JsonNode dialoguesNode;
@@ -96,7 +100,6 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
             //player will see his answer and npc's response
             text.setY(100 + text2.getLayoutBounds().getHeight() + 50);
             grid.getChildren().add(text2);
-            System.out.println("option text: " + currentOptionNode.get("text").asText());
         }
         grid.getChildren().add(text);
     }
@@ -155,13 +158,13 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
                     break;
             }
             if (nextDialogueNode != null) {
-                System.out.println("next dialogue");
                 previousDialogueNode = currentDialogueNode;
                 currentDialogueNode = nextDialogueNode;
                 optionsNode = currentDialogueNode.get("options");
                 updateDialogue();
+            } else if (currentOptionNode != null) {
+                logger.info("End of dialogue (no next dialogue)");
             }
-            System.out.println("no next dialogue");
         });
     }
 
@@ -189,7 +192,7 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
         if (optionIndex < 0 || optionIndex >= optionsNode.size()) {
             return;
         }
-        System.out.println("selected option " + optionIndex);
+        logger.info("Selected option: " + optionIndex + 1);
         currentOptionNode = optionsNode.get(optionIndex);
         nextDialogueNode = currentOptionNode.get("nextDialogue");//null if no next dialogue
         if (nextDialogueNode != null) {
@@ -203,6 +206,7 @@ public class Dialogue {//answer types: 1 - negative, 2 - fight, 3 - trade, 4 - c
         }
         if (currentOptionNode.has("action")) {
             action = currentOptionNode.get("action").asText();
+            logger.info("Selected option action: " + action);
         }
     }
 }

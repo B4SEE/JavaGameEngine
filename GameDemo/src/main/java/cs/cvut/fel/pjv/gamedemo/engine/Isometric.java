@@ -1,5 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
+import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
 import javafx.application.Platform;
@@ -10,6 +11,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.*;
 import javafx.stage.Stage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.List;
  * Class for isometric graphics logic.
  */
 public class Isometric {
+    private static final Logger logger = LogManager.getLogger(Isometric.class);
     private int deltaX = 10;
     private int deltaY = 0;
     private String map = "";
@@ -35,28 +39,9 @@ public class Isometric {
     private Label hint = new Label();
     private Line aimLine = new Line();
     private Scene isoScene;
+    private ImageView mainHandSlotImage = new ImageView();
+    private Rectangle mainHandSlot = new Rectangle();
     public Isometric() {
-    }
-
-    /**
-     * Remove dead entities from the grid.
-     */
-    public void removeDeadEntities() {
-        if (!player.isAlive()) {
-            grid.getChildren().remove(hint);
-        }
-        if (entities != null) {
-            for (Entity entity : entities) {
-                if (entity != null) {
-                    if (!entity.isAlive()) {
-                        grid.getChildren().remove(entity.getEntityView());
-                        grid.getChildren().remove(entity.getHitbox());
-                        grid.getChildren().remove(entity.getTrackPoint());
-                        grid.getChildren().remove(entity.getAttackRange());
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -74,19 +59,20 @@ public class Isometric {
      * Note: Player movement may experience lag, requires further investigation.
      */
     public void start() {
+        logger.info("Starting isometric graphics...");
         if (mainStage == null) {
-//            System.out.println("Stage is not initialised");
-//            System.out.println("Exiting the program");
+            logger.error("Main stage is not initialised");
+            logger.error("Exiting...");
             System.exit(1);
         }
         if (player == null) {
-//            System.out.println("Player is not initialised");
-//            System.out.println("Exiting the program");
+            logger.error("Player is not initialised");
+            logger.error("Exiting...");
             System.exit(1);
         }
         if (!Checker.checkMap(map)) {
-//            System.out.println("Map string is not valid");
-//            System.out.println("Exiting the program");
+            logger.error("Map is not valid");
+            logger.error("Exiting...");
             System.exit(1);
         }
         grid.setPrefSize(1000, 1000);
@@ -95,6 +81,7 @@ public class Isometric {
         isoScene = mainStage.getScene();
         mainStage.setResizable(false);
         mainStage.show();
+        logger.info("Isometric graphics started");
     }
 
     /**
@@ -117,6 +104,7 @@ public class Isometric {
      * Clear the grid and all the game data.
      */
     public void clearAll() {
+        logger.info("Clearing all isometric graphics data...");
         grid.getChildren().clear();
         objectsToDraw = null;
         map = "";
@@ -128,6 +116,7 @@ public class Isometric {
         playerDeltaX = 0;
         playerDeltaY = 0;
         hint = new Label();
+        logger.info("Isometric graphics data cleared");
     }
 
     /**
@@ -135,10 +124,12 @@ public class Isometric {
      * @param stage the main stage
      */
     public void initialiseStage(Stage stage) {
+        logger.info("Initialising main stage...");
         grid = new Pane();
         mainStage = stage;
         Scene scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         mainStage.setScene(scene);
+        logger.info("Main stage initialised");
     }
 
     /**
@@ -146,12 +137,15 @@ public class Isometric {
      * @param wagon the wagon
      */
     public void initialiseWagon(Wagon wagon) {
+        logger.info("Initialising wagon...");
         if (wagon == null) {
+            logger.error("Wagon is not initialised");
             return;
         }
         setMap(wagon.getSeed());
         setObjectsToDraw(wagon.getObjectsArray());
         setEntities(wagon.getEntities());
+        logger.info("Wagon initialised");
     }
 
     /**
@@ -175,12 +169,14 @@ public class Isometric {
      * @param player the player
      */
     public void setPlayer(Player player) {
+        logger.info("Setting player...");
         this.player = player;
         setEntityBoxes(this.player);
         this.player.setStartPositionX(player.getPositionX());
         this.player.setStartPositionY(player.getPositionY());
         updatePlayerDeltaX(0);
         updatePlayerDeltaY(0);
+        logger.info("Player set");
     }
 
     /**
@@ -196,6 +192,7 @@ public class Isometric {
      * @param entities the entities
      */
     public void setEntities(List<Entity> entities) {
+        logger.info("Setting entities...");
         this.entities = entities;
         drawnEntities = new ArrayList<>();
         for (Entity entity : this.entities) {
@@ -203,6 +200,7 @@ public class Isometric {
             entity.setStartPositionX(entity.getPositionX());
             entity.setStartPositionY(entity.getPositionY());
         }
+        logger.info("Entities set");
     }
 
     /**
@@ -264,6 +262,7 @@ public class Isometric {
      * if the entity's hitbox collides with the walls, the entity's position is not updated
      */
     public void updateEntityPosition(Entity entity, double deltaX, double deltaY, int speedX, int speedY) {
+
         int slipX = Constants.SLIP_X;
         int slipY = Constants.SLIP_Y;
 
@@ -345,11 +344,13 @@ public class Isometric {
      * Update all the objects in the game.
      */
     public void updateAll() {
+        logger.info("Updating all objects...");
         grid.getChildren().clear();
         placeFloor();
         placePolygons();
         mergeObjectHitboxes();
         placeWalls();
+        logger.info("All objects updated");
     }
 
     /**
@@ -395,9 +396,8 @@ public class Isometric {
             for (Object object : objects) {
                 if (object.getHeight() > 0) {
                     Image objectTexture = new Image(object.getTexturePath());
-                    double[] objectIsoXY = cartesianToIsometric(object.getCartX(), object.getCartY());
                     grid.getChildren().remove(object.getTexture());
-                    playerDrawn = isEntitiesDrawn(playerDrawn, objectTexture, objectIsoXY);
+                    playerDrawn = isEntitiesDrawn(playerDrawn, objectTexture, new double[]{object.getIsoX(), object.getIsoY()});
                     placeIsometricTileWithTexture(object.getTexture(), object.getCartX(), object.getCartY());
                 }
             }
@@ -409,16 +409,19 @@ public class Isometric {
      * Draw the map and the player.
      */
     private void placeMap() {
+        logger.info("Drawing map...");
         placePolygons();
         placeFloor();
         mergeObjectHitboxes();
         placeWalls();
+        logger.info("Map drawn");
     }
 
     /**
      * Place/draw the floor.
      */
     private void placeFloor() {
+        logger.info("Drawing floor...");
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
 
@@ -432,6 +435,7 @@ public class Isometric {
                 }
             }
         }
+        logger.info("Floor drawn");
     }
 
     /**
@@ -457,6 +461,7 @@ public class Isometric {
      * Place/draw the walls.
      */
     private void placeWalls() {
+        logger.info("Drawing walls...");
         boolean playerDrawn = false;
 
         for (int i = 0; i < objectsToDraw.length; i++) {
@@ -476,6 +481,7 @@ public class Isometric {
             }
         }
         drawEntitiesAbove(playerDrawn);
+        logger.info("Walls drawn");
     }
 
     /**
@@ -578,6 +584,7 @@ public class Isometric {
      * Place the polygons for object hitboxes.
      */
     private void placePolygons() {
+        logger.info("Setting object hitboxes...");
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
                 int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + deltaX * Constants.TILE_WIDTH;
@@ -586,12 +593,14 @@ public class Isometric {
                 objectsToDraw[i][j].setObjectHitbox(parallelogram);
             }
         }
+        logger.info("Object hitboxes set");
     }
 
     /**
      * Merge the object hitboxes to create one solid shape.
      */
     private void mergeObjectHitboxes() {
+        logger.info("Merging object hitboxes...");
         walls = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
         grid.getChildren().remove(objectsToDraw[0][0].getObjectHitbox());
         grid.getChildren().remove(objectsToDraw[0][1].getObjectHitbox());
@@ -620,6 +629,7 @@ public class Isometric {
         twoAndTallerWalls.setStyle("-fx-opacity: 0;");
         grid.getChildren().add(walls);
         grid.getChildren().add(twoAndTallerWalls);
+        logger.info("Object hitboxes merged");
     }
 
     /**
@@ -687,17 +697,18 @@ public class Isometric {
      */
     private Polygon getObjectHitBox(int cartX, int cartY) {
         Polygon parallelogram = new Polygon();
-        double[] isoXY1 = cartesianToIsometric(cartX, cartY);
-        double[] isoXY2 = cartesianToIsometric(cartX + Constants.TILE_WIDTH, cartY);
-        double[] isoXY3 = cartesianToIsometric(cartX + Constants.TILE_WIDTH, cartY + Constants.TILE_HEIGHT);
-        double[] isoXY4 = cartesianToIsometric(cartX, cartY + Constants.TILE_WIDTH);
+        double[][] isoXY = {
+                cartesianToIsometric(cartX, cartY),
+                cartesianToIsometric(cartX + Constants.TILE_WIDTH, cartY),
+                cartesianToIsometric(cartX + Constants.TILE_WIDTH, cartY + Constants.TILE_HEIGHT),
+                cartesianToIsometric(cartX, cartY + Constants.TILE_WIDTH)
+        };
 
-        parallelogram.getPoints().addAll(isoXY1[0] + Constants.TILE_WIDTH, isoXY1[1],
-                isoXY2[0] + Constants.TILE_WIDTH, isoXY2[1],
-                isoXY3[0] + Constants.TILE_WIDTH, isoXY3[1],
-                isoXY4[0] + Constants.TILE_WIDTH, isoXY4[1]);
+        for (double[] doubles : isoXY) {
+            parallelogram.getPoints().addAll(doubles[0] + Constants.TILE_WIDTH, doubles[1]);
+        }
+
         parallelogram.setStyle("-fx-opacity: 0;");
-
         parallelogram.setScaleX(0.8);
         parallelogram.setScaleY(0.8);
 
@@ -809,18 +820,18 @@ public class Isometric {
      * @param currentStage the current stage
      */
     public void showKidnappingProgress(int stages, int currentStage) {
-        Rectangle progressBarBackground = new Rectangle(100, 100, 200, 20);
+        Rectangle progressBarBackground = new Rectangle(200, 20);
         progressBarBackground.setStyle("-fx-fill: #313131;");
-        Rectangle progressBar = new Rectangle(100, 100, 200, 20);
-        progressBar.setStyle("-fx-fill: #04adad;");
         progressBarBackground.setWidth(200);
-        progressBar.setWidth((double) (200 * currentStage) / stages);
         progressBarBackground.setLayoutX(isoScene.getWidth() / 2 - 100);
-        progressBar.setLayoutX(isoScene.getWidth() / 2 - 100);
         progressBarBackground.setLayoutY(50);
+
+        Rectangle progressBar = new Rectangle((double) (200 * currentStage) / stages, 20);
+        progressBar.setStyle("-fx-fill: #04adad;");
+        progressBar.setLayoutX(isoScene.getWidth() / 2 - 100);
         progressBar.setLayoutY(50);
-        grid.getChildren().add(progressBarBackground);
-        grid.getChildren().add(progressBar);
+
+        grid.getChildren().addAll(progressBarBackground, progressBar);
     }
 
     /**
@@ -862,5 +873,32 @@ public class Isometric {
      */
     public int getPlayerDeltaY() {
         return playerDeltaY;
+    }
+
+    public void drawPlayerMainHandSlot(Item mainHandItem) {
+        //clear the grid
+        grid.getChildren().remove(mainHandSlot);
+        grid.getChildren().remove(mainHandSlotImage);
+
+        //draw the slot
+        mainHandSlot = new Rectangle(Constants.SLOT_SIZE, Constants.SLOT_SIZE);
+        mainHandSlot.setArcHeight(10);
+        mainHandSlot.setArcWidth(10);
+        mainHandSlot.setStyle("-fx-fill: #a20808; -fx-stroke: #ffffff; -fx-stroke-width: 10");
+        //place the slot in the bottom left corner
+        int x = Constants.SLOT_SIZE;
+        int y = Constants.WINDOW_HEIGHT - 2 * Constants.SLOT_SIZE;
+        mainHandSlot.setX(x);
+        mainHandSlot.setY(y);
+        grid.getChildren().add(mainHandSlot);
+        //draw item in the slot
+        if (mainHandItem != null) {
+            mainHandSlotImage = new ImageView(new Image(mainHandItem.getTexturePath()));
+            mainHandSlotImage.setFitWidth(Constants.SLOT_SIZE);
+            mainHandSlotImage.setFitHeight(Constants.SLOT_SIZE);
+            mainHandSlotImage.setX(x);
+            mainHandSlotImage.setY(y);
+            grid.getChildren().add(mainHandSlotImage);
+        }
     }
 }

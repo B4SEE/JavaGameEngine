@@ -8,6 +8,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +18,7 @@ import java.util.Objects;
  * Class with all checking methods.
  */
 public class Checker {
+    private static final Logger logger = LogManager.getLogger(Checker.class);
 
      /**
      * Check if map is valid.
@@ -55,7 +58,6 @@ public class Checker {
                 return false;
             }
         }
-        System.out.println("lines checked");
         return true;
     }
 
@@ -70,8 +72,6 @@ public class Checker {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
             for (String code : subRows) {
                 if (code.length() != 4) {
-                    System.out.println(code);
-                    System.out.println("first");
                     return false;
                 }
             }
@@ -90,27 +90,20 @@ public class Checker {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
             for (String subRow : subRows) {
                 if (!List.of(Constants.ALLOWED_CODES).contains(subRow.charAt(0))) {
-                    System.out.println(subRow.charAt(0));
-                    System.out.println("second");
                     return false;
                 }
                 if (!List.of(Constants.ALLOWED_HEIGHTS).contains(subRow.charAt(1))) {
                     if (subRow.charAt(0) != Constants.INTERACTIVE_OBJECT) {
-                        System.out.println(subRow.charAt(1) + " " + subRow);
-                        System.out.println("third");
                         return false;
                     }
                 }
                 if (!Character.isLetter(subRow.charAt(2))) {
-                    System.out.println("fourth");
                     return false;
                 }
                 if (!Character.isLetter(subRow.charAt(3))) {
-                    System.out.println("fifth");
                     return false;
                 }
                 if (!Constants.OBJECT_IDS.containsKey(subRow.substring(2, 4)) && !Constants.INTERACTIVE_OBJECTS.containsKey(subRow.substring(2, 4))) {
-                    System.out.println("sixth");
                     return false;
                 }
             }
@@ -135,8 +128,6 @@ public class Checker {
                 }
             }
         }
-        System.out.println("doors: " + doors);
-        System.out.println(lines.length);
         return doors == 2;
     }
 
@@ -230,7 +221,11 @@ public class Checker {
         if (entity.getPreviousPositions().size() > Constants.MAX_PREV_POS_LIST_SIZE) {
             entity.getPreviousPositions().removeFirst();
         }
-        return entity.getCounter() > Constants.MAX_COUNTER;
+        if (entity.getCounter() > Constants.MAX_COUNTER) {
+            logger.info("Entity " + entity.getName() + " is stuck at " + entity.getPositionX() +32 + ", " + entity.getPositionY() + 80);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -314,10 +309,12 @@ public class Checker {
         for (Item item : itemsArray) {
             if (item != null) {
                 if (item.getType() == Constants.ItemType.VALID_TICKET) {
+                    logger.info("Player has a valid ticket");
                     return true;
                 }
             }
         }
+        logger.info("Player does not have a valid ticket or the ticket is not valid");
         return false;
     }
 

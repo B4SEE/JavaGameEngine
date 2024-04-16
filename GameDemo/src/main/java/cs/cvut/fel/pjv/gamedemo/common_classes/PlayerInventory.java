@@ -9,12 +9,16 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  * Represents player's inventory, extends Inventory class.
  * It has additional slots for main hand, crafting table and result slot and shows player's money and ammo.
  */
 public class PlayerInventory extends Inventory {
+    @JsonIgnore
+    private static final Logger logger = LogManager.getLogger(PlayerInventory.class);
     @JsonProperty("mainHandItem")
     private Item mainHandItem;
     @JsonProperty("firstCraftingItem")
@@ -78,6 +82,7 @@ public class PlayerInventory extends Inventory {
         deleteButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + 75 + ((double) index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         deleteButton.setStyle("-fx-background-color: #a20808; -fx-text-fill: #ffffff; -fx-font-size: 20;");
         EventHandler deleteButtonHandler = e -> {
+            logger.info("Deleted item: " + getSelectedItem().getName());
             removeItem(getSelectedItem());
             clearButton();
         };
@@ -101,23 +106,27 @@ public class PlayerInventory extends Inventory {
         EventHandler putBackButtonHandler = e -> {
             if (mainHandItem == getSelectedItem()) {
                 if (addItem(mainHandItem)) {
+                    logger.info("Put back item: " + getSelectedItem().getName());
                     mainHandItem = null;
                     clearButton();
                 }
             } else if (firstCraftingItem == getSelectedItem()) {
                 if (addItem(firstCraftingItem)) {
+                    logger.info("Put back item: " + getSelectedItem().getName());
                     firstCraftingItem = null;
                     resultItem = null;
                     clearButton();
                 }
             } else if (secondCraftingItem == getSelectedItem()) {
                 if (addItem(secondCraftingItem)) {
+                    logger.info("Put back item: " + getSelectedItem().getName());
                     secondCraftingItem = null;
                     resultItem = null;
                     clearButton();
                 }
             } else if (resultItem == getSelectedItem()) {
                 if (addItem(resultItem)) {
+                    logger.info("Put back item: " + getSelectedItem().getName());
                     firstCraftingItem = null;
                     secondCraftingItem = null;
                     resultItem = null;
@@ -143,9 +152,11 @@ public class PlayerInventory extends Inventory {
         putToCraftTableButton.setStyle("-fx-background-color: #563102; -fx-text-fill: #ffffff; -fx-font-size: 20;");
         EventHandler putToCraftTableButtonHandler = e -> {
             if (firstCraftingItem == null) {
+                logger.info("Put item to craft table: " + getSelectedItem().getName());
                 firstCraftingItem = takeItem(getSelectedItemIndex());
                 clearButton();
             } else if (secondCraftingItem == null) {
+                logger.info("Put item to craft table: " + getSelectedItem().getName());
                 secondCraftingItem = takeItem(getSelectedItemIndex());
                 clearButton();
             }
@@ -173,6 +184,7 @@ public class PlayerInventory extends Inventory {
         mainHandSlotButton.setStyle("-fx-background-color: #fada14; -fx-text-fill: #ffffff; -fx-font-size: 20;");
         EventHandler equipButtonHandler = e -> {
             if (mainHandItem == null) {
+                logger.info("Equipped item: " + getSelectedItem().getName());
                 mainHandItem = takeItem(getSelectedItemIndex());
                 clearButton();
             }
@@ -320,26 +332,23 @@ public class PlayerInventory extends Inventory {
     @JsonIgnore
     private void setSceneBasicHandler() {
         scene.setOnMouseMoved(e -> {
-
             grid.getChildren().remove(itemNameLabel);
-
             int x = getMouseGridXY(e.getX(), e.getY())[0];
             int y = getMouseGridXY(e.getX(), e.getY())[1];
-
             int index = y * Constants.INVENTORY_MAX_WIDTH + x;
 
-            if (index >= 0) {
-                if (index < inventorySize && itemsArray[index] != null) {
-                    itemNameLabel.setText(itemsArray[index].getName() + " | " + itemsArray[index].getValue());
-                    //if clicked on item, select it (border)
-                } else {
-                    itemNameLabel.setText(x + " " + y + " | " + e.getX() + " " + e.getY());
-                }
-                itemNameLabel.setLayoutX(Constants.INVENTORY_MAX_WIDTH);
-                itemNameLabel.setLayoutY(25);
-                itemNameLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
-                grid.getChildren().add(itemNameLabel);
+            if (index >= 0 && index < inventorySize && itemsArray[index] != null) {
+                String name = itemsArray[index].getName();
+                String info = getInfoString(itemsArray[index]);
+                itemNameLabel.setText(" | " + name + info);
+            } else {
+                itemNameLabel.setText("Empty");
             }
+
+            itemNameLabel.setLayoutX(Constants.INVENTORY_MAX_WIDTH);
+            itemNameLabel.setLayoutY(25);
+            itemNameLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
+            grid.getChildren().add(itemNameLabel);
             this.setSceneSelectHandler();
         });
     }
@@ -385,6 +394,7 @@ public class PlayerInventory extends Inventory {
                 Rectangle slot = (Rectangle) getSlot(x, y);
                 slot.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 10;");
                 setSelectedItem(itemsArray[index]);
+                logger.info("Selected item: " + itemsArray[index].getName());
 
                 Button deleteButton = deleteButton(index);
                 grid.getChildren().add(deleteButton);
@@ -399,18 +409,22 @@ public class PlayerInventory extends Inventory {
             } else if (x == mainHandSlotXY[0] && y == mainHandSlotXY[1]) {
                 if (mainHandItem != null) {
                     setNonInventorySelectionHandler(x, y, mainHandItem, "Unequip");
+                    logger.info("Selected item: " + mainHandItem.getName());
                 }
             } else if (x == resultSlotXY[0] && y == resultSlotXY[1]) {
                     if (resultItem != null) {
                         setNonInventorySelectionHandler(x, y, resultItem, "Take");
+                        logger.info("Selected item: " + resultItem.getName());
                     }
             } else if (x == firstCraftingSlotXY[0] && y == firstCraftingSlotXY[1]) {
                 if (firstCraftingItem != null) {
                     setNonInventorySelectionHandler(x, y, firstCraftingItem, "Put back");
+                    logger.info("Selected item: " + firstCraftingItem.getName());
                 }
             } else if (x == secondCraftingSlotXY[0] && y == secondCraftingSlotXY[1]) {
                 if (secondCraftingItem != null) {
                     setNonInventorySelectionHandler(x, y, secondCraftingItem, "Put back");
+                    logger.info("Selected item: " + secondCraftingItem.getName());
                 }
             }
         });
@@ -446,6 +460,7 @@ public class PlayerInventory extends Inventory {
     @JsonIgnore
     private void setSceneDeselectHandler() {
         scene.setOnMouseClicked(e1 -> {
+            logger.info("Deselected item: " + getSelectedItem().getName());
             updateInventory();
             grid.getChildren().removeIf(node -> node instanceof Button);
             setSelectedItem(null);
@@ -479,6 +494,7 @@ public class PlayerInventory extends Inventory {
     }
     @JsonIgnore
     public void setMoney(int money) {
+        logger.info("Player's money set to: " + money);
         this.money = money;
     }
     @JsonIgnore
@@ -487,6 +503,7 @@ public class PlayerInventory extends Inventory {
     }
     @JsonIgnore
     public void setAmmo(int ammo) {
+        logger.info("Player's ammo set to: " + ammo);
         this.ammo = ammo;
     }
     @JsonIgnore

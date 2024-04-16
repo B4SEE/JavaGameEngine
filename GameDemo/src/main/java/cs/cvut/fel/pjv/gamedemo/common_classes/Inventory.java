@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import cs.cvut.fel.pjv.gamedemo.engine.Isometric;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,9 +14,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class for inventory, responsible for adding, removing, taking items, and showing inventory.
@@ -23,6 +28,8 @@ import java.util.List;
  * @see PlayerInventory
  */
 public class Inventory {
+    @JsonIgnore
+    private static final Logger logger = LogManager.getLogger(Inventory.class);
     @JsonProperty("inventorySize")
     public final int inventorySize;
     @JsonProperty("itemsArray")
@@ -53,27 +60,6 @@ public class Inventory {
     @JsonSetter("vendor")
     public void setVendor(boolean vendor) {
         this.vendor = vendor;
-    }
-
-    /**
-     * Fill inventory with random items from dictionary
-     * @param lootTable loot table
-     * @param chance chance to get random item
-     * <br>
-     * Note: chance defines the probability of getting a random item from the dictionary;
-     * there is no way to get a specific item from the dictionary
-     */
-    @JsonIgnore
-    public void fillWithRandomItems(Item[] lootTable, int chance) {
-        itemsArray = new Item[inventorySize];
-        for (int i = 0; i < inventorySize; i++) {
-            if (Math.random() * 100 < chance) {
-                int randomIndex = (int) (Math.random() * lootTable.length);
-                itemsArray[i] = lootTable[randomIndex];
-            } else {
-                itemsArray[i] = null;
-            }
-        }
     }
 
     /**
@@ -120,9 +106,7 @@ public class Inventory {
      */
     @JsonIgnore
     public boolean addItem(Item item) {
-        if (item == null) {
-            return false;
-        }
+        if (item == null) return false;
         for (int i = 0; i < inventorySize; i++) {
             if (itemsArray[i] == null) {
                 itemsArray[i] = item;
@@ -139,9 +123,7 @@ public class Inventory {
      */
     @JsonIgnore
     public Item takeItem(int index) {
-        if (index < 0 || index >= inventorySize) {
-            return null;
-        }
+        if (index < 0 || index >= inventorySize) return null;
         Item item = itemsArray[index];
         itemsArray[index] = null;
         return item;
@@ -149,14 +131,11 @@ public class Inventory {
 
     /**
      * Remove item from inventory
-     *
      * @param item item to remove
      */
     @JsonIgnore
     public void removeItem(Item item) {
-        if (item == null) {
-            return;
-        }
+        if (item == null) return;
         for (int i = 0; i < inventorySize; i++) {
             if (itemsArray[i] == item) {
                 itemsArray[i] = null;
@@ -164,6 +143,12 @@ public class Inventory {
             }
         }
     }
+
+    /**
+     * Get item with the same name from inventory
+     * @param item item to compare
+     * @return item with the same name
+     */
     @JsonIgnore
     public Item getWithSameName(Item item) {
         for (int i = 0; i < inventorySize; i++) {
@@ -198,7 +183,9 @@ public class Inventory {
 
             if (index >= 0) {
                 if (index < inventorySize && itemsArray[index] != null) {
-                    itemNameLabel.setText(" | " + itemsArray[index].getName() + " | value: " + itemsArray[index].getValue() + " | ");
+                    String name = itemsArray[index].getName();
+                    String info = getInfoString(itemsArray[index]);
+                    itemNameLabel.setText(" | " + name + info);
                 } else {
                     itemNameLabel.setText("Empty");
                 }
@@ -209,6 +196,19 @@ public class Inventory {
             }
             setSceneSelectHandler();
         });
+    }
+    protected String getInfoString(Item item) {
+        String separator = " | ";
+        String value = ((item.getValue() != 0 && vendor) ? item.getValue() + " coins" : (vendor) ? "Free" : "");
+        String melee_damage = item instanceof MeleeWeapon ? "Damage: " + ((MeleeWeapon) item).getDamage() : "";
+        String attack_speed = item instanceof MeleeWeapon ? "Attack speed: " + ((MeleeWeapon) item).getAttackSpeed() : "";
+        String firearm_damage = item instanceof Firearm ? "Damage: " + ((Firearm) item).getDamage() : "";
+        String shooting_speed = item instanceof Firearm ? "Shooting speed: " + ((Firearm) item).getShootingSpeed() : "";
+        String nourishment = item instanceof Food ? "Nourishment: " + ((Food) item).getNourishment() : "";
+        // return all non-empty strings separated by separator
+        return separator + Stream.of(value, melee_damage, attack_speed, firearm_damage, shooting_speed, nourishment)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(separator));
     }
 
     /**
@@ -235,6 +235,7 @@ public class Inventory {
                 Rectangle slot = (Rectangle) getSlot(x, y);
                 slot.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 10;");
                 selectedItem = itemsArray[index];
+                logger.info("Selected item: " + selectedItem.getName());
                 if (vendor) {
                     Button buyButton = getBuyButton(index);
                     grid.getChildren().add(buyButton);
@@ -258,6 +259,7 @@ public class Inventory {
             if (index2 >= 0 && index2 < inventorySize && itemsArray[index2] != null) {
                 updateInventory();
                 grid.getChildren().removeIf(node -> node instanceof Button);
+                logger.info("Deselected item: " + selectedItem.getName());
                 selectedItem = null;
                 clearSceneHandlers();
                 setSceneBasicHandler();
@@ -326,7 +328,6 @@ public class Inventory {
             grid.getChildren().add(rectangle);
 
             if (itemsArray[i] != null) {
-                System.out.println(itemsArray[i].getTexturePath());
                 ImageView imageView = new ImageView(itemsArray[i].getTexturePath());
                 imageView.setFitHeight(Constants.SLOT_SIZE);
                 imageView.setFitWidth(Constants.SLOT_SIZE);

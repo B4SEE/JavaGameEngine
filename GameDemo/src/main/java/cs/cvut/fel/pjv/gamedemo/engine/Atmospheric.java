@@ -1,36 +1,47 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
+import cs.cvut.fel.pjv.gamedemo.Main;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.util.List;
 
 public class Atmospheric {
+    private static final Logger logger = LogManager.getLogger(Atmospheric.class);
     private static MediaPlayer backgroundMusic;
     private static boolean bossMusicPlaying = false;
     private static boolean pauseScreenMusicPlaying = false;
     private static MediaView viewer = new MediaView();
     private static final double normalVolume = 0.5;
     public static void updateBackgroundMusic() {
+        logger.info("Updating background music...");
         int chance = (int) (Math.random() * 100);
         //check if music is playing
         if (backgroundMusic != null) {
+            logger.info("Music is already playing");
             return;//do not play music if it is already playing
         }
         if (chance < 100) {
-            System.out.println("Atmospheric music is playing.");
             //get random atmospheric music
-            File musicFile = RandomHandler.getRandomMusicFile("background/");
-            File musicFile2 = RandomHandler.getRandomMusicFile("pauseScreen/");//take music files from pause screen music too
-            File randomMusicFile = Math.random() < 0.5 ? musicFile : musicFile2;
-            //play music
-            playMusic(randomMusicFile, 0);
+            List<File> musicFiles = RandomHandler.getAllFilesFromDirectory("background/");
+            musicFiles.addAll(RandomHandler.getAllFilesFromDirectory("pauseScreen/"));//take music files from pause screen music too
+            if (!musicFiles.isEmpty()) {
+                File randomMusicFile = musicFiles.get((int) (Math.random() * musicFiles.size()));
+                playMusic(randomMusicFile, 0);
+                logger.info("Atmospheric music is playing");
+                return;
+            }
+            logger.error("No music files found.");
         }
     }
     public static void playMusic(File musicFile, int loops) {
+        logger.info("Now playing music: " + musicFile.getName());
         Media sound = new Media(musicFile.toURI().toString());
         backgroundMusic = new MediaPlayer(sound);
         backgroundMusic.setVolume(0.00);
@@ -59,7 +70,7 @@ public class Atmospheric {
                 backgroundMusic.stop();
                 backgroundMusic = null;
             }
-            System.out.println("Music faded out.");
+            logger.info("Music faded out.");
         }).start();
     }
     private static double getVolume() {
@@ -85,12 +96,12 @@ public class Atmospheric {
                         try {
                             Thread.sleep(20);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            logger.error("Error while fading in music.");
                         }
                         volume[0] -= 0.007;
                         setVolume(volume[0]);
                     }
-                    System.out.println("Music faded out.");
+                    logger.info("Music faded in.");
                 }).start();
             } else {
                 new Thread(() -> {
@@ -98,12 +109,12 @@ public class Atmospheric {
                         try {
                             Thread.sleep(20);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            logger.error("Error while fading in music.");
                         }
                         volume[0] += 0.007;
                         setVolume(volume[0]);
                     }
-                    System.out.println("Music faded in.");
+                    logger.info("Music faded in.");
                 }).start();
             }
         }
@@ -143,11 +154,11 @@ public class Atmospheric {
     public static void playSound(String pathFile) {
         //create new Thread to play sound (to avoid pausing the game)
         new Thread(() -> {
+            logger.info("Playing sound: " + pathFile);
             File soundFile = new File(pathFile);
             Media sound = new Media(soundFile.toURI().toString());
             MediaPlayer mediaPlayer = new MediaPlayer(sound);
             mediaPlayer.setVolume(normalVolume);
-            System.out.println("Playing sound: " + pathFile);
             viewer.setMediaPlayer(mediaPlayer);//to avoid garbage collection
             mediaPlayer.play();
         }).start();
@@ -186,9 +197,10 @@ public class Atmospheric {
             try {
                 Thread.sleep(7000);//delay
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Error while playing pause screen music.");
             }
             if (pauseScreenMusicPlaying) {
+                logger.info("Playing pause screen music...");
                 File musicFile = RandomHandler.getRandomMusicFile("pauseScreen/");
                 playMusic(musicFile, 30);
             }

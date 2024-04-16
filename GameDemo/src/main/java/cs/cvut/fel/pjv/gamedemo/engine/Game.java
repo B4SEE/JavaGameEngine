@@ -1,25 +1,32 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.CustomMapLoader;
+import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class Game {
+    private static final Logger logger = LogManager.getLogger(Game.class);
     private static Stage stage;
     private static final GameSaver game = new GameSaver();
     public static void setStage(Stage stage) {
         Game.stage = stage;
     }
     public static void start() {
+        logger.info("Starting game...");
         game.setStage(stage);
         stage.setScene(showMainMenuScene());
         stage.show();
     }
     public static Scene showMainMenuScene() {
+        logger.info("Showing main menu scene...");
+
         Atmospheric.playPauseScreenMusic();
 
         GUI.initMainMenu();
