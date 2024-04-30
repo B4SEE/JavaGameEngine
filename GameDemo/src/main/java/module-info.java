@@ -15,4 +15,8 @@ module cs.cvut.fel.pjv.gamedemo {
     opens cs.cvut.fel.pjv.gamedemo to com.fasterxml.jackson.databind, javafx.fxml;
     exports cs.cvut.fel.pjv.logging;
     opens cs.cvut.fel.pjv.logging to com.fasterxml.jackson.databind, javafx.fxml;
+    exports cs.cvut.fel.pjv.gamedemo.engine.gamelogic;
+    opens cs.cvut.fel.pjv.gamedemo.engine.gamelogic to com.fasterxml.jackson.databind;
+    exports cs.cvut.fel.pjv.gamedemo.engine.utils;
+    opens cs.cvut.fel.pjv.gamedemo.engine.utils to com.fasterxml.jackson.databind;
 }
