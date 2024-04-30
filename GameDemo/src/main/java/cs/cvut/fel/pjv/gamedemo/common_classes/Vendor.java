@@ -3,12 +3,18 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
-import cs.cvut.fel.pjv.gamedemo.engine.RandomHandler;
-public class Vendor extends Entity {//fix json
+import cs.cvut.fel.pjv.gamedemo.engine.Events;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.RandomHandler;
+public class Vendor extends Entity {
+
+    //region Attributes
     @JsonProperty("vendorInventory")
     private Inventory vendorInventory;
+    //endregion
+
+    //region Constructors
     public Vendor(String name, String texturePath) {
         super(name, texturePath);
         setAsDefaultVendor();
@@ -21,24 +27,53 @@ public class Vendor extends Entity {//fix json
         vendorInventory.setVendor(true);
         vendorInventory.setInventoryLabel(this.getName());
     }
-    @JsonIgnore
-    public Inventory getVendorInventory() {
-        return vendorInventory;
-    }
-    @JsonIgnore
-    public void setVendorInventory(Inventory vendorInventory) {
-        this.vendorInventory = vendorInventory;
-    }
+    //endregion
+
+    //region Methods
     @JsonIgnore
     public void setAsDefaultVendor() {
+        initVendor();
+        initInventory();
+        fillInventory();
+    }
+    @JsonIgnore
+    private void initVendor() {
         EntitiesCreator.setAsDefaultNPC(this);
         super.setType(Constants.EntityType.VENDOR);
+    }
+    @JsonIgnore
+    private void initInventory() {
         if (vendorInventory == null) {
             int randomInventorySize = (int) (Math.random() * 20 + 1);
             this.vendorInventory = new Inventory(randomInventorySize);
             vendorInventory.setVendor(true);
             vendorInventory.setInventoryLabel(this.getName());
         }
-        RandomHandler.fillInventoryWithRandomItems(vendorInventory);
     }
+    @JsonIgnore
+    private void fillInventory() {
+        boolean original = Events.canSpawnTicket();
+        Events.setCanSpawnTicket(true);
+        RandomHandler.fillInventoryWithRandomItems(vendorInventory);
+        Events.setCanSpawnTicket(original);
+    }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
+    @JsonIgnore
+    public Inventory getVendorInventory() {
+        return vendorInventory;
+    }
+    //endregion
+
+    //region Setters
+    @JsonSetter("vendorInventory")
+    public void setVendorInventory(Inventory vendorInventory) {
+        this.vendorInventory = vendorInventory;
+    }
+    //endregion
+
+    //endregion
 }

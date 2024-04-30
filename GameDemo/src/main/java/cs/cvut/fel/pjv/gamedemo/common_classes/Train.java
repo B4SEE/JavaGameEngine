@@ -3,7 +3,6 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import cs.cvut.fel.pjv.gamedemo.Main;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -15,11 +14,15 @@ import org.apache.log4j.Logger;
  * Needed for the game to store wagons, their connections and contents.
  */
 public class Train {
+
+    //region Attributes
     @JsonIgnore
     private static final Logger logger = LogManager.getLogger(Train.class);
     @JsonProperty
     private final Wagon[] wagonsArray;
+    //endregion
 
+    //region Constructors
     public Train() {
         wagonsArray = new Wagon[Constants.TRAIN_WAGONS];
     }
@@ -27,6 +30,9 @@ public class Train {
     public Train(@JsonProperty("wagonsArray") Wagon[] wagonsArray) {
         this.wagonsArray = wagonsArray;
     }
+    //endregion
+
+    //region Methods
     @JsonIgnore
     public void addWagon(Wagon wagon) {
         logger.info("Adding wagon " + wagon.getId() + " to the train...");
@@ -40,10 +46,6 @@ public class Train {
         logger.info("No empty space found, removing the oldest wagon...");
         removeWagon(wagonsArray[findMinWagonId()]);
         addWagon(wagon);
-    }
-    @JsonIgnore
-    public Wagon[] getWagonsArray() {
-        return wagonsArray;
     }
     @JsonIgnore
     public void removeWagon(Wagon wagon) {
@@ -85,6 +87,7 @@ public class Train {
         }
         return maxId;
     }
+    @JsonIgnore
     public Wagon getWagonById(int id) {
         for (Wagon wagon : wagonsArray) {
             if (wagon != null && wagon.getId() == id) {
@@ -93,6 +96,7 @@ public class Train {
         }
         return null;
     }
+    @JsonIgnore
     public int indexOf(Wagon wagon) {
         for (int i = 0; i < wagonsArray.length; i++) {
             if (wagonsArray[i] == wagon) {
@@ -101,4 +105,16 @@ public class Train {
         }
         return -1;
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
+    @JsonIgnore
+    public Wagon[] getWagonsArray() {
+        return wagonsArray;
+    }
+    //endregion
+
+    //endregion
 }
