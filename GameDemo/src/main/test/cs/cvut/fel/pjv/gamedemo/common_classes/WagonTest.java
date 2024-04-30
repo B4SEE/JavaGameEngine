@@ -1,6 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
-import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
