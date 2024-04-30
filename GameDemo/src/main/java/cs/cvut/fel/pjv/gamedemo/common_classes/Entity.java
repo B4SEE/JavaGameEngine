@@ -391,6 +391,10 @@ public class Entity {
     public void takeDamage(int damage) {
         health -= damage;
         logger.info("Entity " + this.getName() + " took " + damage + " damage, entity health: " + this.getHealth());
+        if (health <= 0) {
+            logger.info("Entity " + this.getName() + " died...");
+            return;
+        }
         if (Objects.equals(this.getBehaviour(), Constants.Behaviour.NEUTRAL)) {
             logger.info("Entity " + this.getName() + " is attacked, changing behaviour to AGGRESSIVE and calling guard...");
             this.setBehaviour(Constants.Behaviour.AGGRESSIVE);

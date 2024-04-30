@@ -78,7 +78,7 @@ public class GameSaver {
         File folder = new File(path);
         if (!folder.exists()) {
             if (folder.mkdir()) {
-                logger.info("Folder " + path + " created");
+                logger.debug("Folder " + path + " created");
             } else {
                 logger.error("Failed to create folder " + path);
             }
@@ -88,7 +88,7 @@ public class GameSaver {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/game.json");
             objectMapper.writeValue(file, this);
-            logger.info("Game saved");
+            logger.debug("Game saved");
         } catch (IOException e) {
             logger.error("Failed to save game");
         }
@@ -98,7 +98,7 @@ public class GameSaver {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/player.json");
             objectMapper.writeValue(file, player);
-            logger.info("Player saved");
+            logger.debug("Player saved");
         } catch (IOException e) {
             logger.error("Failed to save player");
         }
@@ -107,7 +107,7 @@ public class GameSaver {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/player_inventory.json");
             objectMapper.writeValue(file, player.getPlayerInventory());
-            logger.info("Player inventory saved");
+            logger.debug("Player inventory saved");
         } catch (IOException e) {
             logger.error("Failed to save player inventory");
         }
@@ -117,10 +117,11 @@ public class GameSaver {
             FileWriter file = new FileWriter(path + "/events.json");
             EventsData eventsData = getEventsData();
             objectMapper.writeValue(file, eventsData);
-            logger.info("Events saved");
+            logger.debug("Events saved");
         } catch (IOException e) {
             logger.error("Failed to save events");
         }
+        logger.info("Game saved");
     }
 
     private static EventsData getEventsData() {
@@ -167,22 +168,22 @@ public class GameSaver {
             );
 
             GameSaver game = objectMapper.readValue(new File(lastSave.getPath() + "/game.json"), GameSaver.class);
-            logger.info("Game loaded");
+            logger.debug("Game loaded");
             train = game.train;
-            logger.info("Train loaded");
+            logger.debug("Train loaded");
             //set current wagon for all entities (it is not saved in json)
             for (Wagon wagon : train.getWagonsArray()) {
                 if (wagon != null) wagon.updateEntities();
             }
-            logger.info("Wagons updated");
+            logger.debug("Wagons updated");
 
             currentWagon = train.getWagonsArray()[game.currentWagonIndex];
-            logger.info("Current wagon loaded");
+            logger.debug("Current wagon loaded");
 
             player = objectMapper.readValue(new File(lastSave.getPath() + "/player.json"), Player.class);
-            logger.info("Player loaded");
+            logger.debug("Player loaded");
             player.setPlayerInventory(objectMapper.readValue(new File(lastSave.getPath() + "/player_inventory.json"), PlayerInventory.class));
-            logger.info("Player inventory loaded");
+            logger.debug("Player inventory loaded");
             player.setCurrentWagon(currentWagon);
 
             //load events
@@ -196,7 +197,8 @@ public class GameSaver {
             Events.setPlayerKilledGuard(eventsData.isPlayerKilledGuard());
             Events.setCanSpawnKey(eventsData.isCanSpawnKey());
             Events.setShouldCallGuard(eventsData.isShouldCallGuard());
-            logger.info("Events loaded");
+            logger.debug("Events loaded");
+            logger.info("Game loaded");
         } catch (IOException e) {
             logger.error("Failed to load game");
         }
@@ -220,11 +222,13 @@ public class GameSaver {
     }
     @JsonIgnore
     public void prepareEvents() {//only for new game
-        logger.info("Preparing events");
+        logger.debug("Preparing events...");
+        Events.resetAll();
+        logger.debug("Resetting all events...");
         for (String name : Constants.QUEST_NPC_NAMES) {
-            logger.info("Adding quest NPC " + name + " to availableQuestNPCs...");
+            logger.debug("Adding quest NPC " + name + " to availableQuestNPCs...");
             Events.addQuestNPC(new QuestNPC(name, "textures/default/entities/npcs/quest/" + name + "_front.png"));
-            logger.info("Quest NPC " + name + " added to availableQuestNPCs");
+            logger.debug("Quest NPC " + name + " added to availableQuestNPCs");
         }
         Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
         Events.setCanSpawnKey(false);
@@ -232,7 +236,7 @@ public class GameSaver {
     }
     @JsonIgnore
     public void createPlayer() {
-        logger.info("Creating new player");
+        logger.debug("Creating new player...");
         this.player = new Player(Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y);
         player.getPlayerInventory().setAmmo(50);
         player.getPlayerInventory().setMoney(100);
@@ -241,7 +245,7 @@ public class GameSaver {
     }
     @JsonIgnore
     public void createWagon() {
-        logger.info("Creating new wagon");
+        logger.debug("Creating new wagon...");
         String randomWagonType = RandomHandler.getRandomWagonType();
         Wagon wagon = new Wagon(0, randomWagonType);
         wagon.generateWagon();
@@ -251,18 +255,18 @@ public class GameSaver {
     }
     @JsonIgnore
     public void createTrain() {
-        logger.info("Creating new train");
+        logger.debug("Creating new train...");
         Train train = new Train();
         train.addWagon(currentWagon);
         this.train = train;
         logger.info("New train created");
     }
     @JsonIgnore
-    private void removeUnnecessaryFiles() {
+    public void removeUnnecessaryFiles() {
         List<File> files = RandomHandler.getListOfFilesThatStartWith("necessary_to_spawn_item", "items/");
         for (File file : files) {
             if (file.delete()) {
-                logger.info("File " + file.getName() + " deleted");
+                logger.debug("File " + file.getName() + " deleted");
             } else {
                 logger.error("Failed to delete file " + file.getName());
             }
@@ -273,6 +277,6 @@ public class GameSaver {
         this.player = null;
         this.currentWagon = null;
         this.train = null;
-        logger.info("Game reset");
+        logger.info("Saved game reset");
     }
 }

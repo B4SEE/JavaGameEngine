@@ -394,7 +394,7 @@ public class PlayerInventory extends Inventory {
                 Rectangle slot = (Rectangle) getSlot(x, y);
                 slot.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 10;");
                 setSelectedItem(itemsArray[index]);
-                logger.info("Selected item: " + itemsArray[index].getName());
+                logger.debug("Selected item: " + itemsArray[index].getName());
 
                 Button deleteButton = deleteButton(index);
                 grid.getChildren().add(deleteButton);
@@ -460,7 +460,7 @@ public class PlayerInventory extends Inventory {
     @JsonIgnore
     private void setSceneDeselectHandler() {
         scene.setOnMouseClicked(e1 -> {
-            logger.info("Deselected item: " + getSelectedItem().getName());
+            logger.debug("Deselected item: " + getSelectedItem().getName());
             updateInventory();
             grid.getChildren().removeIf(node -> node instanceof Button);
             setSelectedItem(null);

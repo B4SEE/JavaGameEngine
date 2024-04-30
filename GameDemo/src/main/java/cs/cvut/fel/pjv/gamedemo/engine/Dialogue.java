@@ -163,7 +163,7 @@ public class Dialogue {
                 optionsNode = currentDialogueNode.get("options");
                 updateDialogue();
             } else if (currentOptionNode != null) {
-                logger.info("End of dialogue (no next dialogue)");
+                logger.debug("End of dialogue (no next dialogue)");
             }
         });
     }
@@ -192,7 +192,7 @@ public class Dialogue {
         if (optionIndex < 0 || optionIndex >= optionsNode.size()) {
             return;
         }
-        logger.info("Selected option: " + optionIndex + 1);
+        logger.debug("Selected option: " + optionIndex + 1);
         currentOptionNode = optionsNode.get(optionIndex);
         nextDialogueNode = currentOptionNode.get("nextDialogue");//null if no next dialogue
         if (nextDialogueNode != null) {
@@ -206,7 +206,7 @@ public class Dialogue {
         }
         if (currentOptionNode.has("action")) {
             action = currentOptionNode.get("action").asText();
-            logger.info("Selected option action: " + action);
+            logger.debug("Selected option action: " + action);
         }
     }
 }

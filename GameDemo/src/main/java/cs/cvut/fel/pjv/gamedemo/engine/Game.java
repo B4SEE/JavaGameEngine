@@ -6,6 +6,9 @@ import javafx.stage.Stage;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+
 public class Game {
     private static final Logger logger = LogManager.getLogger(Game.class);
     private static Stage stage;

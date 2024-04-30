@@ -1,7 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
-
 import java.lang.reflect.Method;
 import java.util.Map;
 

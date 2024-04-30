@@ -17,6 +17,10 @@ public class MapLoader {
      * @return - the map
      */
     public static String load(String path) {
+        if (path == null) {
+            logger.error("Path is null");
+            return null;
+        }
         File file = new File(path);
         StringBuilder map = new StringBuilder();
         try {
@@ -80,7 +84,11 @@ public class MapLoader {
             }
             result = String.join(Constants.MAP_ROW_SEPARATOR, rows);
         } catch (Exception e) {
-            logger.error("Error while parsing the map: " + e);
+            if (seed == null) {
+                logger.error("Error while parsing the map: seed is null");
+            } else {
+                logger.error("Error while parsing the map: " + e);
+            }
         }
         return result;
     }

@@ -67,20 +67,18 @@ public class GameLogic {
                 if (everyNSecondsDo(5)) {
                     updateEntitiesPrevPos();
                     //if wagon has trap inside, start the trap event
-                    if (Checker.checkIfWagonHasTrap(wagon.getObjectsArray())) {
-                        generateAndSetTrap();
-                    }
-                    if (Events.getCurrentEvent() != Constants.Event.DEFAULT_EVENT) {
-                        checkIfAllEnemiesAreDead();
-                    }
+                    if (Checker.checkIfWagonHasTrap(wagon.getObjectsArray())) generateAndSetTrap();
+                    //if trap event is active, check if it should be ended
+                    if (Events.getCurrentEvent() != Constants.Event.DEFAULT_EVENT) checkIfAllEnemiesAreDead();
+
                     if (Events.shouldCallGuard() && !Events.isGuardCalled()) {
-                        logger.info("Guard should be called");
+                        logger.debug("Guard should be called");
                         //call with delay
                         Events.setShouldCallGuard(false);
                         Events.setGuardCalled(true);
                         Thread guardCall = new Thread(() -> {
                             try {
-                                logger.info("Trying to call the guard...");
+                                logger.debug("Trying to call the guard...");
                                 Thread.sleep(5000);
                             } catch (InterruptedException e) {
                                 logger.error("Guard call interrupted", e);
@@ -164,7 +162,7 @@ public class GameLogic {
                     Atmospheric.fadeOutMusic(0.05);
                     break;
             }
-            logger.info("Trap event generated: " + Events.getNextEvent());
+            logger.debug("Trap event generated: " + Events.getNextEvent());
         }
         activateTrap();
     }
@@ -221,6 +219,9 @@ public class GameLogic {
      * Check if all entities from trap event are dead and remove the trap if they are.
      */
     private void checkIfAllEnemiesAreDead() {
+        //no reward for default event
+        if (Events.getCurrentEvent() == Constants.Event.DEFAULT_EVENT) return;
+
         int count = 0;
         for (Entity entity : wagon.getEntities()) {
             if (entity != null && entity.isAlive()) {
@@ -229,31 +230,37 @@ public class GameLogic {
                 }
             }
         }
-        if (count == 0) {
-            //random reward for escaping the trap
-            int moneyReward = (int) (Math.random() * Constants.MAX_TRAP_REWARD) + Constants.MIN_TRAP_REWARD;
-            int ammoReward = (int) (Math.random() * Constants.MAX_TRAP_REWARD) + Constants.MIN_TRAP_REWARD;
-            Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
-            Events.setBossFight(false);
-            if (boss != null) {
-                //increase the reward if the player defeats the boss
-                moneyReward += Constants.MAX_TRAP_REWARD;
-                ammoReward += Constants.MAX_TRAP_REWARD;
+        if (count == 0 || Events.getCurrentEvent() == Constants.Event.TIME_LOOP_EVENT || Events.getCurrentEvent() == Constants.Event.SILENCE_EVENT) {
+            //reward the player only if there is trap event
+            if (Events.getCurrentEvent() == Constants.Event.TRAP_EVENT || Events.getCurrentEvent() == Constants.Event.BOSS_EVENT) {
+                //random reward for escaping the trap
+                int moneyReward = (int) (Math.random() * Constants.MAX_TRAP_REWARD) + Constants.MIN_TRAP_REWARD;
+                int ammoReward = (int) (Math.random() * Constants.MAX_TRAP_REWARD) + Constants.MIN_TRAP_REWARD;
+                Events.setCurrentEvent(Constants.Event.DEFAULT_EVENT);
+                Events.setBossFight(false);
+                if (boss != null) {
+                    //increase the reward if the player defeats the boss
+                    moneyReward += Constants.MAX_TRAP_REWARD;
+                    ammoReward += Constants.MAX_TRAP_REWARD;
+                }
+                logger.info("Trap event reward: " + moneyReward + " money, " + ammoReward + " ammo");
+                player.getPlayerInventory().setMoney(player.getPlayerInventory().getMoney() + moneyReward);
+                player.getPlayerInventory().setAmmo(player.getPlayerInventory().getAmmo() + ammoReward);
+                logger.info("Trap event ended");
             }
-            logger.info("Trap event reward: " + moneyReward + " money, " + ammoReward + " ammo");
-            deathMessage = "";
-            player.getPlayerInventory().setMoney(player.getPlayerInventory().getMoney() + moneyReward);
-            player.getPlayerInventory().setAmmo(player.getPlayerInventory().getAmmo() + ammoReward);
-            boss = null;
-            Atmospheric.stopBossMusic();
-            eventStartTime = 0;
-            eventDuration = 0;
-            wagon.removeTrap();
-            wagon.getDoorLeft().unlock();
-            wagon.getDoorRight().unlock();
-            isometric.setObjectsToDraw(wagon.getObjectsArray());
-            isometric.updateAll();
-            logger.info("Trap event ended");
+            if (Checker.checkIfWagonHasTrap(wagon.getObjectsArray())) {
+                deathMessage = "";
+                boss = null;
+                Atmospheric.stopBossMusic();
+                eventStartTime = 0;
+                eventDuration = 0;
+                wagon.removeTrap();
+                wagon.getDoorLeft().unlock();
+                wagon.getDoorRight().unlock();
+                isometric.setObjectsToDraw(wagon.getObjectsArray());
+                isometric.updateAll();
+                logger.debug("Trap event - doors unlocked");
+            }
         }
     }
 
@@ -263,18 +270,17 @@ public class GameLogic {
     private void spawnEnemies() {
         int enemyCount = Math.max(Constants.MIN_TRAP_ENEMIES_COUNT, (int) (Math.random() * Constants.MAX_TRAP_ENEMIES_COUNT));
         for (int i = 0; i < enemyCount; i++) {
-            Method[] enemyCreators = Constants.WAGON_TYPE_ENEMIES.get(wagon.getType());
-            Method enemyCreator = enemyCreators[(int) (Math.random() * enemyCreators.length)];
-            Entity enemy = null;
-            try {
-                enemy = (Entity) enemyCreator.invoke(EntitiesCreator.class);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("Enemy creation error", e);
-            }
-            if (enemy == null) return;
+            Entity enemy = EntitiesCreator.createRandomEnemy(wagon.getType());
+            if (enemy == null) continue;
+
+            logger.debug("Setting enemy position...");
+            Object[] freeSpace = wagon.getAllFloorObjects();
+            Object freeSpaceObject = freeSpace[(int) (Math.random() * freeSpace.length)];
+            enemy.setPositionX(freeSpaceObject.getIsoX() - 32);
+            enemy.setPositionY(freeSpaceObject.getIsoY() - 80);
             enemy.setCurrentWagon(wagon);
             wagon.addEntity(enemy);
-            logger.info("Enemy spawned in " + "wagon" + wagon.getId() + ": " + enemy.getName());
+            logger.info("Enemy spawned in wagon ID " + wagon.getId() + " at " + enemy.getPositionX() + ", " + enemy.getPositionY());
         }
         isometric.setEntities(wagon.getEntities());//otherwise the entities' hitboxes are drawn in the wrong place
         isometric.updateAll();
@@ -321,6 +327,7 @@ public class GameLogic {
         GameSaver game = Game.getGameSaver();
         game.resetGame();
         game.loadGame();
+        game.removeUnnecessaryFiles();
         if (game.getPlayer() == null) {
             game.prepareEvents();
             game.createWagon();
@@ -359,12 +366,12 @@ public class GameLogic {
      * Start the game.
      */
     public void start() {
-        logger.info("Start game");
+        logger.info("Starting game...");
         isometric.start();
         this.wagon.setObstacles(isometric.getWalls());
-        logger.info("Wagon obstacles set");
+        logger.debug("Wagon obstacles set");
         //update all wagons
-        logger.info("Checking wagons...");
+        logger.debug("Checking wagons...");
         for (Wagon wagon : train.getWagonsArray()) {
             if (wagon != null) {
                 isometric.initialiseWagon(wagon);
@@ -374,12 +381,12 @@ public class GameLogic {
                         if (entity.getName().equals(Constants.CONDUCTOR)) {
                             Events.setConductorSpawned(true);
                             conductor = entity;
-                            logger.info("Found conductor in wagon " + wagon.getId());
+                            logger.debug("Found conductor in wagon " + wagon.getId());
                         }
                         if (entity.getName().equals(Constants.GRANDMOTHER)) {
                             Events.setConductorSpawned(true);
                             grandmother = entity;
-                            logger.info("Found grandmother in wagon " + wagon.getId());
+                            logger.debug("Found grandmother in wagon " + wagon.getId());
                         }
                     }
                 }
@@ -388,7 +395,7 @@ public class GameLogic {
         }
         isometric.initialiseWagon(wagon);
 
-        logger.info("Setting entities positions...");
+        logger.debug("Setting entities positions...");
         if (!wagon.getEntities().isEmpty()) {
             if (wagon.getEntities().getFirst().getPositionX() == 0) {
                 int counter = 0;
@@ -400,7 +407,7 @@ public class GameLogic {
                                 if (letterId.equals(Constants.ENEMY_SPAWN) || letterId.equals(Constants.VENDOR_SPAWN) || letterId.equals(Constants.NPC_SPAWN) || letterId.equals(Constants.QUEST_SPAWN)) {
                                     wagon.getEntities().get(counter).setPositionX(object.getIsoX() - 32);
                                     wagon.getEntities().get(counter).setPositionY(object.getIsoY() - 80);
-                                    logger.info("Entity position set: " + wagon.getEntities().get(counter).getName() + " in wagon " + wagon.getId() + " at " + wagon.getEntities().get(counter).getPositionX() + ", " + wagon.getEntities().get(counter).getPositionY());
+                                    logger.debug("Entity position set: " + wagon.getEntities().get(counter).getName() + " in wagon " + wagon.getId() + " at " + wagon.getEntities().get(counter).getPositionX() + ", " + wagon.getEntities().get(counter).getPositionY());
                                     counter++;
                                 }
                             }
@@ -566,7 +573,7 @@ public class GameLogic {
      * Set the handle for the player movement and interaction.
      */
     private void setPlayerHandle() {
-        logger.info("Setting player handle...");
+        logger.debug("Setting player handle...");
         Scene scene = stage.getScene();
 
         //handle movement
@@ -671,7 +678,7 @@ public class GameLogic {
                 isometric.resetAimLine();
             }
         });
-        logger.info("Player handle set");
+        logger.debug("Player handle set");
     }
 
     /**
@@ -758,7 +765,7 @@ public class GameLogic {
      * @param object door to be opened
      */
     private void handleTimeLoop(Door object) {
-        logger.info("Time loop event loops count: " + Events.getTimeLoopCounter());
+        logger.debug("Time loop event loops count: " + Events.getTimeLoopCounter());
         Door door = (object == wagon.getDoorLeft()) ? wagon.getDoorLeft() : wagon.getDoorRight();
         Object actualTeleport = door.getTeleport();
         door.setTeleport((object == wagon.getDoorLeft()) ? wagon.getDoorRightTarget() : wagon.getDoorLeftTarget());
@@ -811,7 +818,7 @@ public class GameLogic {
         Scene scene = stage.getScene();
         resetSceneHandlers(scene);
         pauseGame();
-        logger.info("Setting dialogue handle...");
+        logger.debug("Setting dialogue handle...");
         Scene dialogueScene = dialogue.openDialogue();
         stage.setScene(dialogueScene);
         //add other onKeyReleased handlers
@@ -846,7 +853,7 @@ public class GameLogic {
                 resumeGame();
             }
         });
-        logger.info("Dialogue handle set");
+        logger.debug("Dialogue handle set");
     }
 
     /**
@@ -979,14 +986,14 @@ public class GameLogic {
      * @param nextWagon next wagon to be generated
      */
     private void generateLeftWagon(Wagon nextWagon) {
-        logger.info("Generating left wagon...");
+        logger.debug("Generating left wagon...");
         setPursuers(rightWagonPursuers);
 
         nextWagon.generateNextWagon(wagon, true);
         train.addWagon(nextWagon);
 
         if (wagon.getId() == Constants.TRAIN_WAGONS - 3 && !Events.isGrandmotherSpawned()) {
-            logger.info("Generating grandmother in wagon " + nextWagon.getId() + "...");
+            logger.debug("Generating grandmother in wagon " + nextWagon.getId() + "...");
 
             String wagonType = "CARGO";
             Wagon nextNextWagon = new Wagon(train.findMaxWagonId() + 1, wagonType);
@@ -1015,7 +1022,7 @@ public class GameLogic {
      * @param nextWagon next wagon to be generated
      */
     private void generateRightWagon(Wagon nextWagon) {
-        logger.info("Generating right wagon...");
+        logger.debug("Generating right wagon...");
         setPursuers(leftWagonPursuers);
 
         nextWagon.generateNextWagon(wagon, false);
@@ -1036,7 +1043,7 @@ public class GameLogic {
      * @param wagon wagon to spawn the grandmother in
      */
     private void spawnGrandmother(Wagon wagon) {
-        logger.info("Spawning grandmother in wagon " + wagon.getId() + "...");
+        logger.debug("Spawning grandmother in wagon " + wagon.getId() + "...");
         EntitiesCreator.createGrandmother(wagon);
         grandmother = wagon.getEntities().getLast();
         isometric.setEntities(wagon.getEntities());
@@ -1052,7 +1059,7 @@ public class GameLogic {
      */
     private void spawnConductor() {
         Wagon wagon = train.getWagonById(train.findMinWagonId());//get the oldest wagon
-        logger.info("Spawning conductor in wagon " + wagon.getId() + "...");
+        logger.debug("Spawning conductor in wagon " + wagon.getId() + "...");
         EntitiesCreator.createConductor(wagon);
         conductor = wagon.getEntities().getLast();
         isometric.setEntities(wagon.getEntities());
@@ -1064,7 +1071,7 @@ public class GameLogic {
     }
 
     private void setPursuers(List<Entity> wagonPursuers) {
-        logger.info("Looking for pursuers in the wagon");
+        logger.debug("Looking for pursuers in the wagon");
         wagonPursuers.clear();
         for (Entity entity : wagon.getEntities()) {
             if (entity.getBehaviour() == Constants.Behaviour.AGGRESSIVE && entity.getType() != Constants.EntityType.CONDUCTOR) {//conductor uses different logic
@@ -1076,7 +1083,7 @@ public class GameLogic {
                 }
             }
         }
-        logger.info("Pursuers: " + wagonPursuers.size());
+        logger.debug("Pursuers: " + wagonPursuers.size());
     }
 
     /**
@@ -1125,7 +1132,7 @@ public class GameLogic {
      * @param object door to be opened/closed
      */
     private void useLockableDoor(Object object) {
-        logger.info("Using lockable door...");
+        logger.debug("Using lockable door...");
         if (object.isSolid()) {
             object.setIsSolid(false);
             object.setTexturePath("textures/default/objects/interactive_objects/lockable_door/lockable_door_1_opened.png");
@@ -1207,7 +1214,7 @@ public class GameLogic {
         logger.info("Opening player inventory...");
 
         Scene scene = stage.getScene();
-        resetSceneHandlers(scene);
+        resetSceneHandlers(scene);//unnecessary
         pauseGame();
 
         Scene playerInventory = player.getPlayerInventory().openInventory();
@@ -1218,11 +1225,10 @@ public class GameLogic {
                 logger.info("Player inventory closed");
                 player.getPlayerInventory().closeInventory(stage);
                 stage.setScene(scene);
-                setPlayerHandle();
+                setPlayerHandle();//unnecessary
                 resumeGame();
             }
         });
-
         logger.info("Player inventory opened");
     }
 
@@ -1327,14 +1333,14 @@ public class GameLogic {
             logger.info("Trying to call the guard during the trap event, guard will not be called");
             return;
         }
-        logger.info("Calling the guard...");
+        logger.debug("Calling the guard...");
         Entity guard = EntitiesCreator.createGuard();
         guard.setBehaviour(Constants.Behaviour.BULLY);
         guard.setCurrentWagon(wagon);
         //add delay
         guard.setPositionX(wagon.getDoorLeftTarget().getIsoX() - 32);
         guard.setPositionY(wagon.getDoorLeftTarget().getIsoY() - 64);
-        wagon.getEntities().add(guard);
+        wagon.addEntity(guard);
         isometric.setEntities(wagon.getEntities());
         isometric.updateAll();
         guard.setStartIndex(guard.findOnWhatObject());
@@ -1589,7 +1595,7 @@ public class GameLogic {
                     pursuers.remove(pursuer);
                     pursuer.getCurrentWagon().getEntities().remove(pursuer);
                     pursuer.setCurrentWagon(wagon);
-                    wagon.getEntities().add(pursuer);
+                    wagon.addEntity(pursuer);
                     isometric.setEntities(wagon.getEntities());
                     isometric.updateAll();
                     continue;
@@ -1790,7 +1796,7 @@ public class GameLogic {
         Wagon nextWagon = train.getWagonById(wagonDoor.getTargetId());
         conductor.getCurrentWagon().getEntities().remove(conductor);
         conductor.setCurrentWagon(nextWagon);
-        nextWagon.getEntities().add(conductor);
+        nextWagon.addEntity(conductor);
         //update all hitboxes
         isometric.setEntities(conductor.getCurrentWagon().getEntities());
         isometric.updateAll();
@@ -1804,7 +1810,7 @@ public class GameLogic {
      * teleport to the next wagon if the player is in another wagon.
      */
     private void handleConductorStuck(Entity conductor) {
-        logger.info("Conductor " + conductor.getName() + " is stuck, changing strategy...");
+        logger.debug("Conductor " + conductor.getName() + " is stuck, changing strategy...");
         if (conductor.getCurrentWagon().getId() == player.getCurrentWagon().getId()) {
             int originalSpeedX = conductor.getSpeedX();
             int originalSpeedY = conductor.getSpeedY();
@@ -1851,6 +1857,9 @@ public class GameLogic {
      * @param y y coordinate
      * @param radius radius of the attack
      * @param seconds time for player to react
+     * <br>
+     * <br>
+     * Note: Even if game is paused, the boss can still attack the player. It will <b>not</b> be reimplemented.
      */
     private void bossAttack(double x, double y, int radius, int seconds) {
         if (!Events.isBossFight() || !boss.getCanAttack()) return;
@@ -1884,13 +1893,13 @@ public class GameLogic {
      * @param name name of the boss
      */
     private void spawnBoss(String name) {
-        logger.info("Spawning boss " + name + "...");
+        logger.debug("Spawning boss " + name + "...");
         Object trap = wagon.getTrap();
         boss = new Entity(name, "textures/default/entities/bosses/" + name + ".png", Constants.EntityType.BOSS, trap.getIsoX() - 48, trap.getIsoY() - 80);
         int[] bossStats = Constants.BOSS_STATS.get(name);
         EntitiesCreator.setAsBoss(boss, bossStats);
         boss.setCurrentWagon(wagon);
-        wagon.getEntities().add(boss);
+        wagon.addEntity(boss);
         isometric.setEntities(wagon.getEntities());
         isometric.updateAll();
         deathMessage = Constants.BOSS_DEATH_MESSAGES.get(name);

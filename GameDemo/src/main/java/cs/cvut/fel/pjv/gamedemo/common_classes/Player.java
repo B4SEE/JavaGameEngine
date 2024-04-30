@@ -110,7 +110,7 @@ public class Player extends Entity {
         if (shouldStarve) {
             if (hunger <= 0) {
                 setHealth(super.getHealth() - 1);
-                logger.info("Player starved, current health: " + super.getHealth());
+                logger.info("Player starving to death, current health: " + super.getHealth());
             } else  {
                 setHunger(hunger - 1);
             }
@@ -143,7 +143,7 @@ public class Player extends Entity {
             eat(food);
             playerInventory.setMainHandItem(null);
         } else if (playerInventory.getMainHandItem() instanceof MeleeWeapon meleeWeapon) {
-            logger.info("Player attacked with melee weapon");
+            logger.debug("Player attacked with melee weapon");
             super.setDamage(super.getDamage() + (meleeWeapon.getDamage()));
             super.setCooldown(meleeWeapon.getAttackSpeed());
             List<Entity> targets = super.getCurrentWagon().getEntities();
@@ -151,7 +151,7 @@ public class Player extends Entity {
             super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
             super.setCooldown(2);//entities will not judge player's attack with knife, because they "can't see" the knife.
         } else if (playerInventory.getMainHandItem() instanceof Firearm) {//hit (!shoot) with firearm
-            logger.info("Player attacked with firearm");
+            logger.debug("Player attacked with firearm");
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
         }
@@ -169,7 +169,7 @@ public class Player extends Entity {
     public void shoot(Firearm firearm, List<Entity> targets, int aimX, int aimY, long time, Shape obstacles) {
         logger.info("Player is trying to shoot");
         if (playerInventory.getAmmo() <= 0) {
-            logger.info("No ammo");
+            logger.info("Player has no ammo");
             return;
         }
         logger.info("Player has ammo");

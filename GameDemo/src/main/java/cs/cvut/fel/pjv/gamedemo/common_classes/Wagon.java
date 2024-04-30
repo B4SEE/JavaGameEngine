@@ -104,10 +104,6 @@ public class Wagon {
         return objectsArray;
     }
     @JsonIgnore
-    public int getInteractiveObjectsCount() {
-        return interactiveObjectsCount;
-    }
-    @JsonIgnore
     public Object[] getInteractiveObjects() {
         return interactiveObjects;
     }
@@ -138,33 +134,40 @@ public class Wagon {
         String unparsedSeed = MapLoader.load(path);
         seed = MapLoader.parseMap(unparsedSeed);
         initWagon();
+        logger.info("Wagon generated successfully");
     }
     @JsonIgnore
-    public void generateNextWagon(Wagon wagon, boolean leftWagon) {//wagon - current wagon; leftWagon - if next wagon will be on the left side of the current wagon
+    public void generateNextWagon(Wagon wagon, boolean leftWagon) {
         generateWagon();
         logger.info("Linking wagons...");
-        if (!leftWagon) {
-            this.doorLeft.setTargetId(wagon.getId());//set the targetId(wagon) of the door
-            this.doorLeft.setTeleport(wagon.getDoorRightTarget());//set the teleport object of the door (where player will be teleported in next wagon)
-            wagon.getDoorRight().setTargetId(this.id);
-            wagon.getDoorRight().setTeleport(this.doorLeftTarget);
-        } else {
-            this.doorRight.setTargetId(wagon.getId());
-            this.doorRight.setTeleport(wagon.getDoorLeftTarget());
-            wagon.getDoorLeft().setTargetId(this.id);
-            wagon.getDoorLeft().setTeleport(this.doorRightTarget);
-        }
+
+        Door thisDoor = leftWagon ? this.doorRight : this.doorLeft;
+        Door nextWagonDoor = leftWagon ? wagon.getDoorLeft() : wagon.getDoorRight();
+        Object nextWagonTarget = leftWagon ? wagon.getDoorLeftTarget() : wagon.getDoorRightTarget();
+        Object thisWagonTarget = leftWagon ? this.doorRightTarget : this.doorLeftTarget;
+
+        linkWagons(thisDoor, nextWagonDoor, nextWagonTarget, thisWagonTarget, wagon);
+
         logger.info("Wagons with ID " + id + " and wagon with ID " + wagon.getId() + " linked successfully");
+    }
+    @JsonIgnore
+    private void linkWagons(Door thisDoor, Door nextWagonDoor, Object nextWagonTarget, Object thisWagonTarget, Wagon nextWagon) {
+        thisDoor.setTargetId(nextWagon.getId());
+        thisDoor.setTeleport(nextWagonTarget);
+        nextWagonDoor.setTargetId(this.id);
+        nextWagonDoor.setTeleport(thisWagonTarget);
     }
 
     /**
      * Initialize the wagon; set the objects, interactive objects and entities.
      */
     @JsonIgnore
-    public void initWagon() {
-        logger.info("Initializing wagon: ID " + id + ", type " + type + "...");
+    private void initWagon() {
+        logger.debug("Initializing wagon: ID " + id + ", type " + type + "...");
         if (!Checker.checkMap(seed)) {
             logger.error("Map seed is invalid, trying to generate new wagon...");
+            type = RandomHandler.getRandomWagonType();
+            logger.info("New wagon type: " + type);
             generateWagon();
             return;
         }
@@ -172,7 +175,7 @@ public class Wagon {
         String[] rows = seed.split(Constants.MAP_ROW_SEPARATOR);
         objectsArray = new Object[rows.length][];
 
-        logger.info("Creating objects...");
+        logger.debug("Creating objects...");
         for (int i = 0; i < rows.length; i++) {
             String[] subRows = rows[i].split(Constants.MAP_COLUMN_SEPARATOR);
             objectsArray[i] = new Object[subRows.length];
@@ -193,7 +196,7 @@ public class Wagon {
                     String interactiveObjectName = Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID);
                     String interactiveObjectTexture = Constants.INTERACTIVE_OBJECTS.get(letterID);
 
-                    logger.info("Interactive object: " + interactiveObjectName + " at index " + i + ", " + j + "...");
+                    logger.debug("Interactive object: " + interactiveObjectName + " at index " + i + ", " + j + "...");
 
                     if (letterID.equals(Constants.CHEST_OBJECT)) {
 //                        texture = setRandomTexture(Constants.INTERACTIVE_OBJECTS.get(letterID));
@@ -226,18 +229,18 @@ public class Wagon {
                 objectsArray[i][j] = object;
             }
         }
-        logger.info("Objects created successfully");
+        logger.debug("Objects created successfully");
 
         countInteractiveObjects();
         initWagonDoors();
         initInteractiveObjects();
         initEntities();
 
-        logger.info("Wagon initialized successfully");
+        logger.debug("Wagon initialized successfully");
     }
-
+    @JsonIgnore
     private void initEntities() {
-        logger.info("Setting entities...");
+        logger.debug("Setting entities...");
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
                 if (object.getHeight() != 0) continue;
@@ -245,48 +248,43 @@ public class Wagon {
 
                 switch (letterID) {
                     case Constants.ENEMY_SPAWN -> {
-                        logger.info("Enemy spawn found");
-                        Method[] enemyCreators = Constants.WAGON_TYPE_ENEMIES.get(type);
-                        Method enemyCreator = enemyCreators[(int) (Math.random() * enemyCreators.length)];
-                        try {
-                            Entity enemy = (Entity) enemyCreator.invoke(EntitiesCreator.class);
-                            enemy.setCurrentWagon(this);
-                            entities.add(enemy);
-                            logger.info("Enemy " + enemy.getName() + " spawned");
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            logger.error("Error while creating enemy: " + e.getMessage());
-                        }
+                        logger.debug("Enemy spawn found");
+                        Entity enemy = EntitiesCreator.createRandomEnemy(type);
+                        if (enemy == null) return;
+                        enemy.setCurrentWagon(this);
+                        entities.add(enemy);
+                        logger.debug("Enemy " + enemy.getName() + " spawned");
                     }
                     case Constants.NPC_SPAWN -> {
-                        logger.info("NPC spawn found");
+                        logger.debug("NPC spawn found");
                         Entity npc = EntitiesCreator.createNPC(type);
                         entities.add(npc);
-                        logger.info("NPC " + npc.getName() + " spawned");
+                        logger.debug("NPC " + npc.getName() + " spawned");
                     }
                     case Constants.VENDOR_SPAWN -> {
-                        logger.info("Vendor spawn found");
+                        logger.debug("Vendor spawn found");
                         String[] names = Constants.WAGON_TYPE_NPC.get(type);
                         Vendor vendor = new Vendor("vendor_" + names[(int) (Math.random() * names.length)], "zombie" + "_front.png");
                         vendor.setCurrentWagon(this);
                         entities.add(vendor);
-                        logger.info("Vendor " + vendor.getName() + " spawned");
+                        logger.debug("Vendor " + vendor.getName() + " spawned");
                     }
                     case Constants.QUEST_SPAWN -> {
-                        logger.info("Quest spawn found");
+                        logger.debug("Quest spawn found");
                         List<QuestNPC> availableQuestNPCs = Events.getAvailableQuestNPCs();
                         if (availableQuestNPCs != null && !availableQuestNPCs.isEmpty()) {
-                            logger.info("Available quest NPCs found");
+                            logger.debug("Available quest NPCs found");
                             QuestNPC questNPC = availableQuestNPCs.remove((int) (Math.random() * availableQuestNPCs.size()));
                             questNPC.writeQuestItemToNecessaryToSpawnItems();
                             questNPC.setCurrentWagon(this);
                             entities.add(questNPC);
-                            logger.info("Quest NPC " + questNPC.getName() + " spawned");
+                            logger.debug("Quest NPC " + questNPC.getName() + " spawned");
                         }
                     }
                 }
             }
         }
-        logger.info("Entities set successfully");
+        logger.debug("Entities set successfully");
     }
 
     @JsonIgnore
@@ -298,16 +296,16 @@ public class Wagon {
     }
     @JsonIgnore
     private void initWagonDoors() {
-        logger.info("Setting wagon doors...");
+        logger.debug("Setting wagon doors...");
         for (Object[] objects : objectsArray) {
             //check only first and last object in the row
             if (Objects.equals(objects[0].getTwoLetterId(), Constants.WAGON_DOOR)) {
-                logger.info("Left door found...");
+                logger.debug("Left door found...");
                 doorLeft = (Door) objects[0];
                 doorLeftTarget = objects[1];
             }
             if (Objects.equals(objects[objects.length - 1].getTwoLetterId(), Constants.WAGON_DOOR)) {
-                logger.info("Right door found...");
+                logger.debug("Right door found...");
                 doorRight = (Door) objects[objects.length - 1];
                 doorRightTarget = objects[objects.length - 3];
             }
@@ -316,17 +314,17 @@ public class Wagon {
     }
     @JsonIgnore
     private void initInteractiveObjects() {
-        logger.info("Setting interactive objects...");
+        logger.debug("Setting interactive objects...");
         interactiveObjects = new Object[interactiveObjectsCount];
         int index = 0;
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
-                if (object.getId() == 2) {
+                if (object.getId() == Character.getNumericValue(Constants.INTERACTIVE_OBJECT)) {
                     interactiveObjects[index++] = object;
                 }
             }
         }
-        logger.info("Interactive objects set successfully");
+        logger.debug("Interactive objects set successfully");
     }
     @JsonIgnore
     public int[][] getMapForPathFinder(boolean doorIsWalkable) {
@@ -334,7 +332,6 @@ public class Wagon {
         for (int i = 0; i < objectsArray.length; i++) {
             for (int j = 0; j < objectsArray[i].length; j++) {
                 Object currentObject = objectsArray[i][j];
-                // use ternary operator to check if the object is walkable or not (1 - walkable, 0 - not walkable)
                 map[i][j] = (currentObject == null
                         || !currentObject.isSolid())
                         || (doorIsWalkable && currentObject.getTwoLetterId().equals(Constants.WAGON_DOOR))
@@ -353,8 +350,9 @@ public class Wagon {
         for (Object[] objects : objectsArray) {
             for (Object object : objects) {
                 if (object.getTwoLetterId().equals(Constants.TRAP)) {
-                    logger.info("Trap found at " + object.getIsoX() + ", " + object.getIsoY() + ", removing...");
+                    logger.debug("Trap found at " + object.getIsoX() + ", " + object.getIsoY() + ", removing...");
                     object.setTwoLetterId("TF");
+                    logger.info("Trap removed successfully");
                     return;
                 }
             }
@@ -377,7 +375,7 @@ public class Wagon {
             entity.setCurrentWagon(this);
         }
     }
-
+    @JsonIgnore
     public Entity getConductor() {
         for (Entity entity : entities) {
             if (entity.getType().equals(Constants.EntityType.CONDUCTOR) && Objects.equals(entity.getName(), Constants.CONDUCTOR)) {
@@ -386,6 +384,7 @@ public class Wagon {
         }
         return null;
     }
+    @JsonIgnore
     public Entity getGrandmother() {
         for (Entity entity : entities) {
             if (entity.getType().equals(Constants.EntityType.CONDUCTOR) && Objects.equals(entity.getName(), Constants.GRANDMOTHER)) {
@@ -393,5 +392,19 @@ public class Wagon {
             }
         }
         return null;
+    }
+    @JsonIgnore
+    public Object[] getAllFloorObjects() {
+        List<Object> floorObjects = new ArrayList<>();
+        int count = 0;
+        for (Object[] objects : objectsArray) {
+            for (Object object : objects) {
+                if (object.getHeight() == 0) {
+                    floorObjects.add(object);
+                    count++;
+                }
+            }
+        }
+        return floorObjects.toArray(new Object[count]);
     }
 }

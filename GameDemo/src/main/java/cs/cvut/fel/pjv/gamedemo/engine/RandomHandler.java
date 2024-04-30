@@ -43,7 +43,7 @@ public class RandomHandler {
             JsonNode items = rootNode.get("default_items");
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             item = new Item(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("value").asInt());
-            logger.info("Default item generated");
+            logger.debug("Default item generated: " + item.getName());
         } catch (Exception e) {
             logger.error("Error while reading default items: " + e);
         }
@@ -60,7 +60,7 @@ public class RandomHandler {
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             food = new Food(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("nourishment").asInt());
             food.setValue(randomItem.get("value").asInt());
-            logger.info("Food item generated");
+            logger.debug("Food item generated: " + food.getName());
         } catch (Exception e) {
             logger.error("Error while reading food items: " + e);
         }
@@ -76,7 +76,7 @@ public class RandomHandler {
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             melee = new MeleeWeapon(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("damage").asInt(), randomItem.get("attackSpeed").asInt());
             melee.setValue(randomItem.get("value").asInt());
-            logger.info("Melee item generated");
+            logger.debug("Melee item generated: " + melee.getName());
         } catch (Exception e) {
             logger.error("Error while reading melee items: " + e);
         }
@@ -93,7 +93,7 @@ public class RandomHandler {
             JsonNode randomItem = items.get((int) (Math.random() * items.size()));
             firearm = new Firearm(randomItem.get("name").asText(), randomItem.get("texturePath").asText(), randomItem.get("damage").asInt(), randomItem.get("shootingSpeed").asInt());
             firearm.setValue(randomItem.get("value").asInt());
-            logger.info("Firearm generated");
+            logger.debug("Firearm generated: " + firearm.getName());
         } catch (Exception e) {
             logger.error("Error while reading firearm items: " + e);
         }
@@ -107,20 +107,33 @@ public class RandomHandler {
             JsonNode rootNode = objectMapper.readTree(jsonData);
             JsonNode item = rootNode.get("quest_item_data");
             questItem = new Item(item.get("name").asText(), item.get("texturePath").asText(), item.get("value").asInt());
-            logger.info("Quest item generated");
+            logger.debug("Quest item generated: " + questItem.getName());
         } catch (Exception e) {
             logger.error("Error while reading quest item: " + e);
         }
         return questItem;
     }
     public static String getRandomWagonTypeLayout(String wagonType) {
+        if (wagonType == null) {
+            logger.error("Error while reading wagon type layout: wagon type is null");
+            return null;
+        }
         //list all files from wagons directory
         List<File> listOfFilesThatStartWith = getListOfFilesThatStartWith(wagonType, "maps/common");
         String randomWagon;
         //check custom maps folder
         listOfFilesThatStartWith.addAll(getListOfFilesThatStartWith(wagonType, "maps/custom"));
-        //get path
-        randomWagon = listOfFilesThatStartWith.get((int) (Math.random() * listOfFilesThatStartWith.size())).getPath();
+        try {
+            //get path
+            randomWagon = listOfFilesThatStartWith.get((int) (Math.random() * listOfFilesThatStartWith.size())).getPath();
+        } catch (Exception e) {
+            if (listOfFilesThatStartWith.isEmpty()) {
+                logger.error("Error while reading wagon type layout: wagon type layout not found");
+            } else {
+                logger.error("Error while reading wagon type layout: " + e);
+            }
+            return null;
+        }
         return randomWagon;
     }
     public static List<File> getListOfFilesThatStartWith(String start, String path) {
@@ -180,11 +193,11 @@ public class RandomHandler {
                 Item item = new Item(rootNode.get("name").asText(), rootNode.get("texturePath").asText(), rootNode.get("value").asInt());
                 //delete the file
                 if (file.delete()) {
-                    logger.info("Duplicate necessary to spawn item deleted");
+                    logger.debug("Duplicate necessary to spawn item deleted");
                 } else {
                     logger.error("Failed to delete the file");
                 }
-                logger.info("Necessary to spawn item generated");
+                logger.debug("Necessary to spawn item generated: " + item.getName());
                 return item;
             } catch (Exception e) {
                 logger.error("Error while reading necessary to spawn item: " + e);
@@ -202,7 +215,7 @@ public class RandomHandler {
             String name = names.get((int) (Math.random() * names.size())).getName();
             Item key = new Item("Key", "textures/default/items/misc/" + name, Constants.ItemType.KEY);
             key.setValue(value);
-            logger.info("Key generated");
+            logger.debug("Key generated");
             return key;
         }
         return null;
@@ -218,7 +231,7 @@ public class RandomHandler {
         return listOfFiles.get((int) (Math.random() * listOfFiles.size()));
     }
     public static void fillInventoryWithRandomItems(Inventory inventory) {
-        logger.info("Filling inventory with random items...");
+        logger.debug("Filling inventory with random items...");
         for (int k = 0; k < inventory.inventorySize; k++) {
             //generate random chance for each item
             int chance = (int) (Math.random() * 100);
@@ -251,6 +264,6 @@ public class RandomHandler {
                 inventory.addItem(null);
             }
         }
-        logger.info("Inventory filled with random items");
+        logger.debug("Inventory filled with random items");
     }
 }

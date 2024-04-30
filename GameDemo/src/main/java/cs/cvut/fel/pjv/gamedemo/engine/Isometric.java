@@ -123,12 +123,12 @@ public class Isometric {
      * @param stage the main stage
      */
     public void initialiseStage(Stage stage) {
-        logger.info("Initialising main stage...");
+        logger.debug("Initialising main stage...");
         grid = new Pane();
         mainStage = stage;
         Scene scene = new Scene(grid, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         mainStage.setScene(scene);
-        logger.info("Main stage initialised");
+        logger.debug("Main stage initialised");
     }
 
     /**
@@ -136,15 +136,19 @@ public class Isometric {
      * @param wagon the wagon
      */
     public void initialiseWagon(Wagon wagon) {
-        logger.info("Initialising wagon...");
+        logger.debug("Initialising wagon...");
         if (wagon == null) {
             logger.error("Wagon is not initialised");
+            return;
+        }
+        if (wagon.getSeed() == null) {
+            logger.error("Wagon seed is not initialised");
             return;
         }
         setMap(wagon.getSeed());
         setObjectsToDraw(wagon.getObjectsArray());
         setEntities(wagon.getEntities());
-        logger.info("Wagon initialised");
+        logger.debug("Wagon initialised");
     }
 
     /**
@@ -168,14 +172,14 @@ public class Isometric {
      * @param player the player
      */
     public void setPlayer(Player player) {
-        logger.info("Setting player...");
+        logger.debug("Setting player...");
         this.player = player;
         setEntityBoxes(this.player);
         this.player.setStartPositionX(player.getPositionX());
         this.player.setStartPositionY(player.getPositionY());
         updatePlayerDeltaX(0);
         updatePlayerDeltaY(0);
-        logger.info("Player set");
+        logger.debug("Player set");
     }
 
     /**
@@ -191,7 +195,7 @@ public class Isometric {
      * @param entities the entities
      */
     public void setEntities(List<Entity> entities) {
-        logger.info("Setting entities...");
+        logger.debug("Setting entities...");
         this.entities = entities;
         drawnEntities = new ArrayList<>();
         for (Entity entity : this.entities) {
@@ -199,7 +203,7 @@ public class Isometric {
             entity.setStartPositionX(entity.getPositionX());
             entity.setStartPositionY(entity.getPositionY());
         }
-        logger.info("Entities set");
+        logger.debug("Entities set");
     }
 
     /**
@@ -343,13 +347,13 @@ public class Isometric {
      * Update all the objects in the game.
      */
     public void updateAll() {
-        logger.info("Updating all objects...");
+        logger.debug("Updating all objects...");
         grid.getChildren().clear();
         placeFloor();
         placePolygons();
         mergeObjectHitboxes();
         placeWalls();
-        logger.info("All objects updated");
+        logger.debug("All objects updated");
     }
 
 //    /**
@@ -408,19 +412,19 @@ public class Isometric {
      * Draw the map and the player.
      */
     private void placeMap() {
-        logger.info("Drawing map...");
+        logger.debug("Drawing map...");
         placePolygons();
         placeFloor();
         mergeObjectHitboxes();
         placeWalls();
-        logger.info("Map drawn");
+        logger.debug("Map drawn");
     }
 
     /**
      * Place/draw the floor.
      */
     private void placeFloor() {
-        logger.info("Drawing floor...");
+        logger.debug("Drawing floor...");
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
 
@@ -434,7 +438,7 @@ public class Isometric {
                 }
             }
         }
-        logger.info("Floor drawn");
+        logger.debug("Floor drawn");
     }
 
     /**
@@ -460,7 +464,7 @@ public class Isometric {
      * Place/draw the walls.
      */
     private void placeWalls() {
-        logger.info("Drawing walls...");
+        logger.debug("Drawing walls...");
         boolean playerDrawn = false;
 
         for (int i = 0; i < objectsToDraw.length; i++) {
@@ -480,7 +484,7 @@ public class Isometric {
             }
         }
         drawEntitiesAbove(playerDrawn);
-        logger.info("Walls drawn");
+        logger.debug("Walls drawn");
     }
 
     /**
@@ -583,7 +587,7 @@ public class Isometric {
      * Place the polygons for object hitboxes.
      */
     private void placePolygons() {
-        logger.info("Setting object hitboxes...");
+        logger.debug("Setting object hitboxes...");
         for (int i = 0; i < objectsToDraw.length; i++) {
             for (int j = 0; j < objectsToDraw[i].length; j++) {
                 int x = Constants.TILE_WIDTH + j * Constants.TILE_WIDTH + deltaX * Constants.TILE_WIDTH;
@@ -592,14 +596,14 @@ public class Isometric {
                 objectsToDraw[i][j].setObjectHitbox(parallelogram);
             }
         }
-        logger.info("Object hitboxes set");
+        logger.debug("Object hitboxes set");
     }
 
     /**
      * Merge the object hitboxes to create one solid shape.
      */
     private void mergeObjectHitboxes() {
-        logger.info("Merging object hitboxes...");
+        logger.debug("Merging object hitboxes...");
         walls = Shape.union(objectsToDraw[0][0].getObjectHitbox(), objectsToDraw[0][1].getObjectHitbox());
         grid.getChildren().remove(objectsToDraw[0][0].getObjectHitbox());
         grid.getChildren().remove(objectsToDraw[0][1].getObjectHitbox());
@@ -628,7 +632,7 @@ public class Isometric {
         twoAndTallerWalls.setStyle("-fx-opacity: 0;");
         grid.getChildren().add(walls);
         grid.getChildren().add(twoAndTallerWalls);
-        logger.info("Object hitboxes merged");
+        logger.debug("Object hitboxes merged");
     }
 
     /**

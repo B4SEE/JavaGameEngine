@@ -235,7 +235,7 @@ public class Inventory {
                 Rectangle slot = (Rectangle) getSlot(x, y);
                 slot.setStyle("-fx-stroke: #ff0000; -fx-stroke-width: 10;");
                 selectedItem = itemsArray[index];
-                logger.info("Selected item: " + selectedItem.getName());
+                logger.debug("Selected item: " + selectedItem.getName());
                 if (vendor) {
                     Button buyButton = getBuyButton(index);
                     grid.getChildren().add(buyButton);
@@ -259,7 +259,7 @@ public class Inventory {
             if (index2 >= 0 && index2 < inventorySize && itemsArray[index2] != null) {
                 updateInventory();
                 grid.getChildren().removeIf(node -> node instanceof Button);
-                logger.info("Deselected item: " + selectedItem.getName());
+                logger.debug("Deselected item: " + selectedItem.getName());
                 selectedItem = null;
                 clearSceneHandlers();
                 setSceneBasicHandler();

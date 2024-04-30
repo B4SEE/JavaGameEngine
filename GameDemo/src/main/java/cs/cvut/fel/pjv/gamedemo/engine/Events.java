@@ -131,4 +131,20 @@ public class Events {
     public static void setShouldCallGuard(boolean shouldCallGuard) {
         Events.shouldCallGuard = shouldCallGuard;
     }
+    public static void resetAll() {
+        availableQuestNPCs = new java.util.ArrayList<>();
+        currentEvent = null;
+        canSpawnLockedDoor = false;
+        timeLoopCounter = 0;
+        nextEvent = null;
+        canSaveGame = true;
+        isBossFight = false;
+        conductorSpawned = false;
+        grandmotherSpawned = false;
+        playerKidnapped = false;
+        guardCalled = false;
+        playerKilledGuard = false;
+        canSpawnKey = true;
+        shouldCallGuard = false;
+    }
 }

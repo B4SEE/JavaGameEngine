@@ -55,7 +55,7 @@ public class Door extends Object {
         int height = entity.getHeight();
         entity.setPositionX((int) objectIsoX);
         entity.setPositionY((int) objectIsoY - height * 32);
-        logger.info("Entity " + entity.getName() + " teleported to wagon ID " + targetId + " to " + objectIsoX + ", " + objectIsoY);
+        logger.debug("Entity " + entity.getName() + " teleported to wagon ID " + targetId + " to " + objectIsoX + ", " + objectIsoY);
     }
     /**
      * Locks the door.
@@ -63,7 +63,12 @@ public class Door extends Object {
     @JsonIgnore
     public void lock() {
         isLocked = true;
-        logger.info("Door at " + getIsoX() + ", " + getIsoY() + " locked");
+        if (getIsoX() != 0 && getIsoY() != 0) {
+            logger.info("Wagon door at " + getIsoX() + ", " + getIsoY() + " locked");
+        }
+        else {
+            logger.info("Wagon door locked");
+        }
     }
     /**
      * Unlocks the door.
@@ -71,7 +76,12 @@ public class Door extends Object {
     @JsonIgnore
     public void unlock() {
         isLocked = false;
-        logger.info("Door at " + getIsoX() + ", " + getIsoY() + " unlocked");
+        if (getIsoX() != 0 && getIsoY() != 0) {
+            logger.info("Wagon door at " + getIsoX() + ", " + getIsoY() + " unlocked");
+        }
+        else {
+            logger.info("Wagon door unlocked");
+        }
     }
     @JsonIgnore
     public boolean isLocked() {

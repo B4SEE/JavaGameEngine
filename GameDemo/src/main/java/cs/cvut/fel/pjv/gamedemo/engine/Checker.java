@@ -222,7 +222,7 @@ public class Checker {
             entity.getPreviousPositions().removeFirst();
         }
         if (entity.getCounter() > Constants.MAX_COUNTER) {
-            logger.info("Entity " + entity.getName() + " is stuck at " + entity.getPositionX() +32 + ", " + entity.getPositionY() + 80);
+            logger.debug("Entity " + entity.getName() + " is stuck at " + entity.getPositionX() +32 + ", " + entity.getPositionY() + 80);
             return true;
         }
         return false;

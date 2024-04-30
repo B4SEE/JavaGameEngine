@@ -17,13 +17,17 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         // enable/disable logging
         boolean loggingEnabled = true;
+        // enable/disable debug mode
+        boolean debugMode = true;
 
         if (!loggingEnabled) {
             Logger.getRootLogger().removeAllAppenders();
             Logger.getRootLogger().addAppender(new NullAppender());
         }
+        if (debugMode) {
+            Logger.getRootLogger().setLevel(org.apache.log4j.Level.DEBUG);
+        }
 
-        logger.info("---------------------------------\n\n\n");
         logger.info("Starting application...");
         Atmospheric.resetAll();
         Game.setStage(stage);
