@@ -27,6 +27,8 @@ public class EventsData {
     private boolean canSpawnKey = true;
     @JsonProperty("shouldCallGuard")
     private boolean shouldCallGuard = false;
+    @JsonProperty("canSpawnTicket")
+    private boolean canSpawnTicket = false;
     public EventsData() {
     }
     @JsonIgnore
@@ -100,5 +102,13 @@ public class EventsData {
     @JsonSetter("shouldCallGuard")
     public void setShouldCallGuard(boolean shouldCallGuard) {
         this.shouldCallGuard = shouldCallGuard;
+    }
+    @JsonIgnore
+    public boolean isCanSpawnTicket() {
+        return canSpawnTicket;
+    }
+    @JsonSetter("canSpawnTicket")
+    public void setCanSpawnTicket(boolean canSpawnTicket) {
+        this.canSpawnTicket = canSpawnTicket;
     }
 }

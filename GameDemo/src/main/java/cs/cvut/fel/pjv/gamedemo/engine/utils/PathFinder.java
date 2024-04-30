@@ -1,4 +1,4 @@
-package cs.cvut.fel.pjv.gamedemo.engine;
+package cs.cvut.fel.pjv.gamedemo.engine.utils;
 
 import java.util.PriorityQueue;
 import java.util.Stack;

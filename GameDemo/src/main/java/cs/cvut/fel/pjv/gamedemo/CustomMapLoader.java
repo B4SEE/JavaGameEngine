@@ -1,8 +1,8 @@
 package cs.cvut.fel.pjv.gamedemo;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Constants;
-import cs.cvut.fel.pjv.gamedemo.engine.Checker;
-import cs.cvut.fel.pjv.gamedemo.engine.MapLoader;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.MapLoader;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

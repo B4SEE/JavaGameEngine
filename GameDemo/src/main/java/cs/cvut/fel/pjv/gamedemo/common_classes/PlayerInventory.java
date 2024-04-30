@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
  * It has additional slots for main hand, crafting table and result slot and shows player's money and ammo.
  */
 public class PlayerInventory extends Inventory {
+    //region Attributes
     @JsonIgnore
     private static final Logger logger = LogManager.getLogger(PlayerInventory.class);
     @JsonProperty("mainHandItem")
@@ -39,11 +41,16 @@ public class PlayerInventory extends Inventory {
     private final int[] secondCraftingSlotXY = new int[2];
     @JsonIgnore
     private final int[] resultSlotXY = new int[2];
+    //endregion
+
+    //region Constructors
     public PlayerInventory() {
         super(Constants.PLAYER_INVENTORY_SIZE);
         itemsArray = new Item[Constants.PLAYER_INVENTORY_SIZE];
     }
+    //endregion
 
+    //region Methods
     /**
      * Open inventory and set basic handler
      * @return scene
@@ -81,7 +88,7 @@ public class PlayerInventory extends Inventory {
         deleteButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         deleteButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + 75 + ((double) index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         deleteButton.setStyle("-fx-background-color: #a20808; -fx-text-fill: #ffffff; -fx-font-size: 20;");
-        EventHandler deleteButtonHandler = e -> {
+        EventHandler<ActionEvent> deleteButtonHandler = e -> {
             logger.info("Deleted item: " + getSelectedItem().getName());
             removeItem(getSelectedItem());
             clearButton();
@@ -103,7 +110,7 @@ public class PlayerInventory extends Inventory {
         putBackButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X + 60 - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - (x * (-1) - 1) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         putBackButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + ((double) y / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP) + (y - 1) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         putBackButton.setStyle("-fx-background-color: #383838; -fx-text-fill: #ffffff; -fx-font-size: 20;");
-        EventHandler putBackButtonHandler = e -> {
+        EventHandler<ActionEvent> putBackButtonHandler = e -> {
             if (mainHandItem == getSelectedItem()) {
                 if (addItem(mainHandItem)) {
                     logger.info("Put back item: " + getSelectedItem().getName());
@@ -150,7 +157,7 @@ public class PlayerInventory extends Inventory {
         putToCraftTableButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         putToCraftTableButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 - 75 + ((double) index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         putToCraftTableButton.setStyle("-fx-background-color: #563102; -fx-text-fill: #ffffff; -fx-font-size: 20;");
-        EventHandler putToCraftTableButtonHandler = e -> {
+        EventHandler<ActionEvent> putToCraftTableButtonHandler = e -> {
             if (firstCraftingItem == null) {
                 logger.info("Put item to craft table: " + getSelectedItem().getName());
                 firstCraftingItem = takeItem(getSelectedItemIndex());
@@ -182,7 +189,7 @@ public class PlayerInventory extends Inventory {
         mainHandSlotButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         mainHandSlotButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + ((double) index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         mainHandSlotButton.setStyle("-fx-background-color: #fada14; -fx-text-fill: #ffffff; -fx-font-size: 20;");
-        EventHandler equipButtonHandler = e -> {
+        EventHandler<ActionEvent> equipButtonHandler = e -> {
             if (mainHandItem == null) {
                 logger.info("Equipped item: " + getSelectedItem().getName());
                 mainHandItem = takeItem(getSelectedItemIndex());
@@ -366,7 +373,7 @@ public class PlayerInventory extends Inventory {
 
         if ((actualX - Constants.INVENTORY_LEFT_CORNER_X) < 0) {//cannot use without if, because it becomes less accurate
             x = (int) ((actualX - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP) - 0.7);//0.7 works better than Math.round
-        //x = Math.round((e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP));
+            //x = Math.round((e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         }
 
         return new int[]{x, y};
@@ -412,10 +419,10 @@ public class PlayerInventory extends Inventory {
                     logger.info("Selected item: " + mainHandItem.getName());
                 }
             } else if (x == resultSlotXY[0] && y == resultSlotXY[1]) {
-                    if (resultItem != null) {
-                        setNonInventorySelectionHandler(x, y, resultItem, "Take");
-                        logger.info("Selected item: " + resultItem.getName());
-                    }
+                if (resultItem != null) {
+                    setNonInventorySelectionHandler(x, y, resultItem, "Take");
+                    logger.info("Selected item: " + resultItem.getName());
+                }
             } else if (x == firstCraftingSlotXY[0] && y == firstCraftingSlotXY[1]) {
                 if (firstCraftingItem != null) {
                     setNonInventorySelectionHandler(x, y, firstCraftingItem, "Put back");
@@ -492,14 +499,30 @@ public class PlayerInventory extends Inventory {
         ammoLabel.setStyle("-fx-font-size: 20; -fx-text-fill: #ffffff;");
         grid.getChildren().add(ammoLabel);
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
+    @JsonIgnore
+    public int getMoney() {
+        return money;
+    }
+    @JsonIgnore
+    public int getAmmo() {
+        return ammo;
+    }
+    @JsonIgnore
+    public Item getMainHandItem() {
+        return mainHandItem;
+    }
+    //endregion
+
+    //region Setters
     @JsonIgnore
     public void setMoney(int money) {
         logger.info("Player's money set to: " + money);
         this.money = money;
-    }
-    @JsonIgnore
-    public int getMoney() {
-        return money;
     }
     @JsonIgnore
     public void setAmmo(int ammo) {
@@ -507,15 +530,10 @@ public class PlayerInventory extends Inventory {
         this.ammo = ammo;
     }
     @JsonIgnore
-    public int getAmmo() {
-        return ammo;
-    }
-    @JsonIgnore
     public void setMainHandItem(Item item) {
         mainHandItem = item;
     }
-    @JsonIgnore
-    public Item getMainHandItem() {
-        return mainHandItem;
-    }
+    //endregion
+
+    //endregion
 }

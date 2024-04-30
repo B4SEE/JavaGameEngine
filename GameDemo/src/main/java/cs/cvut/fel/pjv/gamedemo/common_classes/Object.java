@@ -15,6 +15,8 @@ import javafx.scene.shape.Polygon;
         @JsonSubTypes.Type(value = Door.class, name = "Door")
 })
 public class Object {
+
+    //region Attributes
     @JsonProperty("id")
     private final int id;
     @JsonProperty("name")
@@ -41,6 +43,9 @@ public class Object {
     private Inventory objectInventory;
     @JsonIgnore
     private Polygon objectHitbox;
+    //endregion
+
+    //region Constructors
     public Object(int id, String name, String texturePath, String twoLetterId, int height, int cartX, int cartY, boolean isSolid) {
         this.id = id;
         this.name = name;
@@ -57,6 +62,11 @@ public class Object {
         this.name = name;
         this.texturePath = texturePath;
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
     @JsonIgnore
     public int getId() {
         return id;
@@ -65,61 +75,30 @@ public class Object {
     public String getName() {
         return name;
     }
-    @JsonIgnore
-    public void setTexturePath(String texturePath) {
-        this.texturePath = texturePath;
-    }
+
     @JsonIgnore
     public String getTexturePath() {
         return texturePath;
     }
     @JsonIgnore
-    public void setTexture(ImageView texture) {
-        this.texture = texture;
-    }
-    @JsonIgnore
     public ImageView getTexture() {
         return texture;
-    }
-    @JsonSetter("twoLetterId")
-    public void setTwoLetterId(String twoLetterId) {
-        this.twoLetterId = twoLetterId;
     }
     @JsonIgnore
     public String getTwoLetterId() {
         return twoLetterId;
-    }
-    @JsonSetter("height")
-    public void setHeight(int height) {
-        this.height = height;
     }
     @JsonIgnore
     public int getHeight() {
         return height;
     }
     @JsonIgnore
-    public void setCartX(int cartX) {
-        this.cartX = cartX;
-    }
-    @JsonIgnore
     public int getCartX() {
         return cartX;
     }
     @JsonIgnore
-    public void setCartY(int cartY) {
-        this.cartY = cartY;
-    }
-    @JsonSetter("isoX")
-    public void setIsoX(double isoX) {
-        this.isoX = isoX;
-    }
-    @JsonIgnore
     public double getIsoX() {
         return isoX;
-    }
-    @JsonSetter("isoY")
-    public void setIsoY(double isoY) {
-        this.isoY = isoY;
     }
     @JsonIgnore
     public double getIsoY() {
@@ -129,28 +108,66 @@ public class Object {
     public int getCartY() {
         return cartY;
     }
-    @JsonSetter("isSolid")
-    public void setIsSolid(boolean isSolid) {
-        this.isSolid = isSolid;
-    }
     @JsonIgnore
     public boolean isSolid() {
         return isSolid;
-    }
-    @JsonSetter("objectInventory")
-    public void setObjectInventory(Inventory objectInventory) {
-        this.objectInventory = objectInventory;
     }
     @JsonIgnore
     public Inventory getObjectInventory() {
         return objectInventory;
     }
     @JsonIgnore
-    public void setObjectHitbox(Polygon objectHitbox) {
-        this.objectHitbox = objectHitbox;
-    }
-    @JsonIgnore
     public Polygon getObjectHitbox() {
         return objectHitbox;
     }
+    //endregion
+
+    //region Setters
+    @JsonIgnore
+    public void setTexturePath(String texturePath) {
+        this.texturePath = texturePath;
+    }
+    @JsonIgnore
+    public void setTexture(ImageView texture) {
+        this.texture = texture;
+    }
+    @JsonSetter("twoLetterId")
+    public void setTwoLetterId(String twoLetterId) {
+        this.twoLetterId = twoLetterId;
+    }
+    @JsonSetter("height")
+    public void setHeight(int height) {
+        this.height = height;
+    }
+    @JsonIgnore
+    public void setCartX(int cartX) {
+        this.cartX = cartX;
+    }
+    @JsonIgnore
+    public void setCartY(int cartY) {
+        this.cartY = cartY;
+    }
+    @JsonSetter("isoX")
+    public void setIsoX(double isoX) {
+        this.isoX = isoX;
+    }
+    @JsonSetter("isoY")
+    public void setIsoY(double isoY) {
+        this.isoY = isoY;
+    }
+    @JsonSetter("isSolid")
+    public void setIsSolid(boolean isSolid) {
+        this.isSolid = isSolid;
+    }
+    @JsonSetter("objectInventory")
+    public void setObjectInventory(Inventory objectInventory) {
+        this.objectInventory = objectInventory;
+    }
+    @JsonIgnore
+    public void setObjectHitbox(Polygon objectHitbox) {
+        this.objectHitbox = objectHitbox;
+    }
+    //endregion
+
+    //endregion
 }

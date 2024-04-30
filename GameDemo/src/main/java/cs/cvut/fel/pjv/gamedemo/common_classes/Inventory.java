@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import cs.cvut.fel.pjv.gamedemo.engine.Isometric;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -28,6 +28,8 @@ import java.util.stream.Stream;
  * @see PlayerInventory
  */
 public class Inventory {
+
+    //region Attributes
     @JsonIgnore
     private static final Logger logger = LogManager.getLogger(Inventory.class);
     @JsonProperty("inventorySize")
@@ -41,27 +43,24 @@ public class Inventory {
     @JsonIgnore
     protected Pane grid = new Pane();
     @JsonIgnore
-    private Label inventoryLabel = new Label();
+    private final Label inventoryLabel = new Label();
     @JsonProperty
     private boolean vendor;
     @JsonIgnore
     private Item selectedItem;
     @JsonIgnore
-    private List<Item> takenItems = new ArrayList<>();
+    private final List<Item> takenItems = new ArrayList<>();
+    //endregion
+
+    //region Constructors
     @JsonCreator
     public Inventory(@JsonProperty("size") int size) {
         inventorySize = size;
         itemsArray = new Item[size];
     }
-    @JsonIgnore
-    public boolean isVendor() {
-        return vendor;
-    }
-    @JsonSetter("vendor")
-    public void setVendor(boolean vendor) {
-        this.vendor = vendor;
-    }
+    //endregion
 
+    //region Methods
     /**
      * Open inventory and set basic handler
      * @return scene
@@ -160,20 +159,12 @@ public class Inventory {
         }
         return null;
     }
-    @JsonSetter("itemsArray")
-    public void setItemsArray(Item[] items) {
-        itemsArray = items;
-    }
-    @JsonIgnore
-    public Item[] getItemsArray() {
-        return itemsArray;
-    }
     /**
      * Set basic handler for inventory: show item name on hover, select item on click.
      */
     @JsonIgnore
     private void setSceneBasicHandler() {
-         scene.setOnMouseMoved(e -> {
+        scene.setOnMouseMoved(e -> {
             grid.getChildren().remove(itemNameLabel);
 
             int x = (int) (e.getX() - Constants.INVENTORY_LEFT_CORNER_X) / (Constants.SLOT_SIZE + Constants.SLOT_GAP);
@@ -197,6 +188,12 @@ public class Inventory {
             setSceneSelectHandler();
         });
     }
+
+    /**
+     * Get info string for item
+     * @param item item
+     * @return info string
+     */
     protected String getInfoString(Item item) {
         String separator = " | ";
         String value = ((item.getValue() != 0 && vendor) ? item.getValue() + " coins" : (vendor) ? "Free" : "");
@@ -352,7 +349,7 @@ public class Inventory {
         takeButton.setLayoutX(Constants.INVENTORY_LEFT_CORNER_X - (Constants.SLOT_SIZE + Constants.SLOT_GAP) - takeButtonGap * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         takeButton.setLayoutY(Constants.INVENTORY_LEFT_CORNER_Y + ((double) Constants.SLOT_SIZE / 2) - 25 + ((double) index / Constants.INVENTORY_MAX_WIDTH) * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
         takeButton.setStyle("-fx-background-color: #484848; -fx-text-fill: #ffffff; -fx-font-size: 20;");
-        EventHandler takeButtonHandler = e -> {
+        EventHandler<ActionEvent> takeButtonHandler = e -> {
             addTakenItem(takeItem(getSelectedItemIndex()));
             clearButton();
         };
@@ -384,31 +381,8 @@ public class Inventory {
         updateInventory();
     }
     @JsonIgnore
-    protected int getSelectedItemIndex() {
-        for (int i = 0; i < inventorySize; i++) {
-            if (itemsArray[i] != null) {
-                if (itemsArray[i] == selectedItem) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
-    @JsonIgnore
-    protected Item getSelectedItem() {
-        return selectedItem;
-    }
-    @JsonIgnore
-    protected void setSelectedItem(Item selectedItem) {
-        this.selectedItem = selectedItem;
-    }
-    @JsonIgnore
     public void addTakenItem(Item takenItem) {
         this.takenItems.add(takenItem);
-    }
-    @JsonIgnore
-    public List<Item> getTakenItems() {
-        return takenItems;
     }
     @JsonIgnore
     public void removeTakenItem(Item takenItem) {
@@ -425,8 +399,58 @@ public class Inventory {
         rectangle.setArcHeight(10);
         rectangle.setArcWidth(10);
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
+    @JsonIgnore
+    public boolean isVendor() {
+        return vendor;
+    }
+    @JsonIgnore
+    public Item[] getItemsArray() {
+        return itemsArray;
+    }
+    @JsonIgnore
+    protected int getSelectedItemIndex() {
+        for (int i = 0; i < inventorySize; i++) {
+            if (itemsArray[i] != null) {
+                if (itemsArray[i] == selectedItem) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+    @JsonIgnore
+    protected Item getSelectedItem() {
+        return selectedItem;
+    }
+    @JsonIgnore
+    public List<Item> getTakenItems() {
+        return takenItems;
+    }
+    //endregion
+
+    //region Setters
+    @JsonSetter("vendor")
+    public void setVendor(boolean vendor) {
+        this.vendor = vendor;
+    }
+    @JsonSetter("itemsArray")
+    public void setItemsArray(Item[] items) {
+        itemsArray = items;
+    }
+    @JsonIgnore
+    protected void setSelectedItem(Item selectedItem) {
+        this.selectedItem = selectedItem;
+    }
     @JsonIgnore
     public void setInventoryLabel(String text) {
         inventoryLabel.setText(text);
     }
+    //endregion
+
+    //endregion
 }

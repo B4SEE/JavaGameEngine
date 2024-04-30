@@ -1,6 +1,6 @@
 package cs.cvut.fel.pjv.gamedemo;
 
-import cs.cvut.fel.pjv.gamedemo.engine.Atmospheric;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Atmospheric;
 import cs.cvut.fel.pjv.gamedemo.engine.Game;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -15,9 +15,10 @@ public class Main extends Application {
     private static final Logger logger = LogManager.getLogger(Main.class);
     @Override
     public void start(Stage stage) throws IOException {
-        // enable/disable logging
+
+        // Enable/disable logging
         boolean loggingEnabled = true;
-        // enable/disable debug mode
+        // Enable/disable debug mode
         boolean debugMode = true;
 
         if (!loggingEnabled) {

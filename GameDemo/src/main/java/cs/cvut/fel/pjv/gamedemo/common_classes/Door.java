@@ -8,6 +8,8 @@ import org.apache.log4j.Logger;
  * Object child class representing a door, which functions as a teleport to another wagon.
  */
 public class Door extends Object {
+
+    //region Attributes
     @JsonIgnore
     private static final Logger logger = LogManager.getLogger(Door.class);
     @JsonProperty("targetId")
@@ -16,6 +18,9 @@ public class Door extends Object {
     private Object teleport;
     @JsonProperty("isLocked")
     private boolean isLocked;
+    //endregion
+
+    //region Constructors
     @JsonCreator
     public Door(@JsonProperty("id") int id, @JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("targetId") int targetId, @JsonProperty("teleport") Object teleport, @JsonProperty("isLocked") boolean isLocked) {
         super(id, name, texturePath);
@@ -26,23 +31,9 @@ public class Door extends Object {
         this.teleport = teleport;
         this.isLocked = isLocked;
     }
-    @JsonIgnore
-    public int getTargetId() {
-        return targetId;
-    }
-    @JsonSetter("targetId")
-    public void setTargetId(int targetId) {
-        this.targetId = targetId;
-    }
-    @JsonIgnore
-    public Object getTeleport() {
-        return teleport;
-    }
-    @JsonSetter("teleport")
-    public void setTeleport(Object teleport) {
-        this.teleport = teleport;
-    }
+    //endregion
 
+    //region Methods
     /**
      * Teleports the entity to the position of the teleport object.
      * @param entity - entity to be teleported
@@ -83,12 +74,39 @@ public class Door extends Object {
             logger.info("Wagon door unlocked");
         }
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
+    @JsonIgnore
+    public int getTargetId() {
+        return targetId;
+    }
+    @JsonIgnore
+    public Object getTeleport() {
+        return teleport;
+    }
     @JsonIgnore
     public boolean isLocked() {
         return isLocked;
+    }
+    //endregion
+
+    //region Setters
+    @JsonSetter("targetId")
+    public void setTargetId(int targetId) {
+        this.targetId = targetId;
+    }
+    @JsonSetter("teleport")
+    public void setTeleport(Object teleport) {
+        this.teleport = teleport;
     }
     @JsonSetter("isLocked")
     public void setIsLocked(boolean isLocked) {
         this.isLocked = isLocked;
     }
+    //endregion
+
+    //endregion
 }

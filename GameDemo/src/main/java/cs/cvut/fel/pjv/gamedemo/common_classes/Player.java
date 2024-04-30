@@ -1,8 +1,8 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.*;
-import cs.cvut.fel.pjv.gamedemo.engine.Atmospheric;
-import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Atmospheric;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.EntitiesCreator;
 import javafx.scene.shape.Shape;
 import org.apache.log4j.LogManager;
@@ -15,11 +15,13 @@ import java.util.Objects;
  * Represents a player in the game.
  */
 public class Player extends Entity {
+
+    //region Attributes
     @JsonIgnore
     private static final Logger logger = LogManager.getLogger(Player.class);
     @JsonProperty("hunger")
     private int hunger;
-    @JsonIgnore//inventory will be saved in separate file
+    @JsonIgnore
     private PlayerInventory playerInventory;
     @JsonIgnore
     private boolean shouldStarve = false;
@@ -29,6 +31,9 @@ public class Player extends Entity {
     private long whenHealed;
     @JsonIgnore
     private long whenStarved;
+    //endregion
+
+    //region Constructors
     @JsonCreator
     public Player(@JsonProperty("positionX") int positionX, @JsonProperty("positionY") int positionY) {
         super("PLAYER", Constants.PLAYER_TEXTURE_PATH);
@@ -38,31 +43,9 @@ public class Player extends Entity {
         this.hunger = Constants.PLAYER_MAX_HUNGER;
         this.playerInventory = new PlayerInventory();
     }
-    @JsonSetter("hunger")
-    public void setHunger(int hunger) {
-        this.hunger = hunger;
-    }
-    @JsonIgnore
-    public int getHunger() {
-        return hunger;
-    }
-    @JsonIgnore
-    public void setHandItem(Item handItem) {
-        this.playerInventory.setMainHandItem(handItem);
-    }
-    @JsonIgnore
-    public Item getHandItem() {
-        return playerInventory.getMainHandItem();
-    }
-    @JsonIgnore
-    public void setPlayerInventory(PlayerInventory playerInventory) {
-        this.playerInventory = playerInventory;
-    }
-    @JsonIgnore
-    public PlayerInventory getPlayerInventory() {
-        return playerInventory;
-    }
+    //endregion
 
+    //region Methods
     /**
      * Method to heal the player; the player heals 1 health point every healCooldown seconds if his hunger/saturation is greater than his health
      * @param time current time
@@ -149,8 +132,8 @@ public class Player extends Entity {
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
             super.setDamage(Constants.PLAYER_BASIC_DAMAGE);
-            super.setCooldown(2);//entities will not judge player's attack with knife, because they "can't see" the knife.
-        } else if (playerInventory.getMainHandItem() instanceof Firearm) {//hit (!shoot) with firearm
+            super.setCooldown(2);// Entities will not judge player's attack with knife
+        } else if (playerInventory.getMainHandItem() instanceof Firearm) {// Hit (!shoot) with firearm
             logger.debug("Player attacked with firearm");
             List<Entity> targets = super.getCurrentWagon().getEntities();
             tryAttack(this, targets, time);
@@ -190,4 +173,35 @@ public class Player extends Entity {
         }
         logger.info("Player missed");
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
+    @JsonIgnore
+    public int getHunger() {
+        return hunger;
+    }
+    @JsonIgnore
+    public Item getHandItem() {
+        return playerInventory.getMainHandItem();
+    }
+    @JsonIgnore
+    public PlayerInventory getPlayerInventory() {
+        return playerInventory;
+    }
+    //endregion
+
+    //region Setters
+    @JsonSetter("hunger")
+    public void setHunger(int hunger) {
+        this.hunger = hunger;
+    }
+    @JsonIgnore
+    public void setPlayerInventory(PlayerInventory playerInventory) {
+        this.playerInventory = playerInventory;
+    }
+    //endregion
+
+    //endregion
 }

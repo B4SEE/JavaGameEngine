@@ -1,7 +1,7 @@
 package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
-import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.RandomHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 

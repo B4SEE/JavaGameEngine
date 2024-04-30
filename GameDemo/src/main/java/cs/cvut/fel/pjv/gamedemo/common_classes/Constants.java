@@ -8,13 +8,15 @@ import java.util.Map;
  * Provide a single source of truth for all constants used in the game.
  */
 public class Constants {
-    //Basic
+
+    //region Basic
     public static final int WINDOW_WIDTH = 1600;
     public static final int WINDOW_HEIGHT = 800;
     public static final int TILE_WIDTH = 32;
     public static final int TILE_HEIGHT = 32;
+    //endregion
 
-    //Map
+    //region Map
     public static final String MAP_COLUMN_SEPARATOR = "_";
     public static final String MAP_ROW_SEPARATOR = "-";
     public static final Character FLOOR = '0';
@@ -23,8 +25,9 @@ public class Constants {
     public static final Character RANDOM = '3';
     public static final Character[] ALLOWED_CODES = {FLOOR, WALL, INTERACTIVE_OBJECT};
     public static final Character[] ALLOWED_HEIGHTS = {'0', '1', '2', '3'};
+    //endregion
 
-    //Objects
+    //region Objects
     public static final String WAGON_DOOR = "WD";
     public static final String LOCKABLE_DOOR = "LD";
     public static final String CHEST_OBJECT = "CO";
@@ -71,8 +74,9 @@ public class Constants {
             Map.entry(LOCKABLE_DOOR, "lockable_door"),
             Map.entry(CHEST_OBJECT, "chest_object")
     );
+    //endregion
 
-    //Traps
+    //region Traps
     public static final int TIME_TO_ESCAPE_TRAP = 5;
     public static final int MAX_TIME_LOOP_COUNTER = 10;
     public static final int TIME_TO_ESCAPE_SILENCE = 15;
@@ -87,12 +91,14 @@ public class Constants {
         SILENCE_EVENT,
         TIME_LOOP_EVENT
     }
+    //endregion
 
-    //Movement
+    //region Movement
     public static final int SLIP_X = 5;
     public static final int SLIP_Y = 5;
+    //endregion
 
-    //Entity
+    //region Entity
     public static final int ENTITY_BASIC_MAX_HEALTH = 100;
     public static final int ENTITY_BASIC_SPEED_X = 3;
     public static final int ENTITY_BASIC_SPEED_Y = 3;
@@ -123,8 +129,9 @@ public class Constants {
     public static final String BULLY = "bully";
     public static final String ROBOT = "robot";
     public static final String GENTLEMAN = "gentleman";
+    //endregion
 
-    //Player
+    //region Player
     public static final String PLAYER_TEXTURE_PATH = "textures/default/entities/player/player_front.png";
     public static final int PLAYER_START_POS_X = 350;
     public static final int PLAYER_START_POS_Y = 200;
@@ -134,11 +141,12 @@ public class Constants {
     public static final int PLAYER_HITBOX = 1;
     public static final int PLAYER_ATTACK_RANGE = 1;
     public static final int PLAYER_COOLDOWN = 2;
-    public static final int PLAYER_MAX_HEALTH = 100;//100
+    public static final int PLAYER_MAX_HEALTH = 100;
     public static final int PLAYER_MAX_HUNGER = 100;
     public static final int PLAYER_INVENTORY_SIZE = 20;
+    //endregion
 
-    //Enemy
+    //region Enemy
     public static final int ENEMY_BASIC_MAX_HEALTH_MIN = 70;
     public static final int ENEMY_BASIC_MAX_HEALTH_MAX = 230;
     public static final int ENEMY_BASIC_HEIGHT = 2;
@@ -150,8 +158,9 @@ public class Constants {
     public static final int ENEMY_BASIC_ATTACK_RANGE = 1;
     public static final int ENEMY_BASIC_DAMAGE = 5;
     public static final int ENEMY_BASIC_COOLDOWN = 2;
+    //endregion
 
-    //Boss
+    //region Boss
     public static final int BOSS_BASIC_HEIGHT = 3;
     public static final int BOSS_BASIC_SPEED_X = 0;
     public static final int BOSS_BASIC_SPEED_Y = 0;
@@ -167,11 +176,14 @@ public class Constants {
             Map.entry(BEHEMOTH, BEHEMOTH_DEATH_MESSAGE),
             Map.entry(BARTENDER, BARTENDER_DEATH_MESSAGE)
     );
+    //endregion
 
-    //Inventory & Items
+    //region Inventory & Items
     public static final int INVENTORY_MAX_WIDTH = 10;
     public static final int MIN_KEY_VALUE = 1;
     public static final int MAX_KEY_VALUE = 10;
+    public static final int MIN_TICKET_VALUE = 500;
+    public static final int MAX_TICKET_VALUE = 1000;
     public static final int INVENTORY_LEFT_CORNER_X = 300;
     public static final int INVENTORY_LEFT_CORNER_Y = 100;
     public static final int SLOT_SIZE = 64;
@@ -182,10 +194,12 @@ public class Constants {
         FIREARM,
         DEFAULT,
         VALID_TICKET,
+        INVALID_TICKET,
         KEY
     }
+    //endregion
 
-    //Train
+    //region Train
     public static final int TRAIN_WAGONS = 10;
     public static final int NULL_WAGON_ID = -1;
     public static final String DEFAULT_WAGON_TYPE = "DEFAULT";
@@ -221,7 +235,9 @@ public class Constants {
             Map.entry(CARGO_WAGON_TYPE, BEHEMOTH),
             Map.entry(RESTAURANT_WAGON_TYPE, BARTENDER)
     );
+    //endregion
 
-    //Chances
+    //region Chances
     public static final int LOCKED_DOOR_SPAWN_CHANCE = 15;
+    //endregion
 }

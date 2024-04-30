@@ -13,10 +13,17 @@ import java.util.Optional;
  * Represents a craft of two items, responsible for crafting logic.
  */
 public class Craft {
+
+    //region Attributes
     private static final Logger logger = LogManager.getLogger(Craft.class);
+    //endregion
+
+    //region Constructors
     public Craft() {
     }
+    //endregion
 
+    //region Methods
     /**
      * Returns a new item if the combination of two items is in @../craft/craft.json; does not depend on the order of the items.
      * @param firstItem first item to craft
@@ -97,4 +104,5 @@ public class Craft {
             default -> new Item(name, texturePath, type);
         };
     }
+    //endregion
 }

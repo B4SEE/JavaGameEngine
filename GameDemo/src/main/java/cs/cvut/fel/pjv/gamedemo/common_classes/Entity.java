@@ -1,9 +1,9 @@
 package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.*;
-import cs.cvut.fel.pjv.gamedemo.engine.Checker;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
-import cs.cvut.fel.pjv.gamedemo.engine.PathFinder;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.PathFinder;
 import javafx.geometry.Point2D;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Shape;
@@ -27,6 +27,8 @@ import java.util.Objects;
         @JsonSubTypes.Type(value = QuestNPC.class, name = "QuestNPC")
 })
 public class Entity {
+
+    //region Attributes
     @JsonIgnore
     private static final Logger logger = LogManager.getLogger(Entity.class);
     @JsonProperty("name")
@@ -40,7 +42,7 @@ public class Entity {
     @JsonProperty("behaviour")
     private Constants.Behaviour behaviour;
     @JsonProperty("intelligence")
-    private int intelligence = 0;//0 - 2; 0 - can't find path, 1 - can find path, 2 - can find path and go through doors
+    private int intelligence = 0;
     @JsonProperty("negativeThreshold")
     private int negativeThreshold = 2;
     @JsonProperty("negativeCount")
@@ -52,7 +54,7 @@ public class Entity {
     @JsonIgnore
     private int[] startIndex;
     @JsonIgnore
-    private final List<Point2D> previousPositions = new ArrayList<>();//remove final if not working
+    private final List<Point2D> previousPositions = new ArrayList<>();
     @JsonIgnore
     private int counter = 0;
     @JsonIgnore
@@ -93,13 +95,13 @@ public class Entity {
     private long whenStartedPursuing = 0;
     @JsonIgnore
     private ImageView entityView;
-    @JsonIgnore//to prevent infinite loop
+    @JsonIgnore
     private Wagon currentWagon;
     @JsonIgnore
     private Thread soundThread;
-//    @JsonIgnore
-//    private Thread animationThread;
+    //endregion
 
+    //region Constructors
     @JsonCreator
     public Entity(@JsonProperty("name") String name, @JsonProperty("texturePath") String texturePath, @JsonProperty("type") Constants.EntityType type, @JsonProperty("positionX") double positionX, @JsonProperty("positionY") double positionY) {
         this.name = name;
@@ -128,261 +130,9 @@ public class Entity {
         this.damage = damage;
         this.currentWagon = currentWagon;
     }
-    @JsonIgnore
-    public void setNegativeThreshold(int negativeThreshold) {
-        this.negativeThreshold = negativeThreshold;
-    }
-    @JsonIgnore
-    public int getNegativeThreshold() {
-        return negativeThreshold;
-    }
-    @JsonIgnore
-    public void setNegativeCount(int negativeCount) {
-        logger.info("Entity " + this.getName() + " negative count: " + negativeCount + "/" + negativeThreshold);
-        this.negativeCount = negativeCount;
-    }
-    @JsonIgnore
-    public int getNegativeCount() {
-        return negativeCount;
-    }
-    @JsonIgnore
-    public String getName() {
-        return name;
-    }
-    @JsonIgnore
-    public void setTexturePath(String texturePath) {
-        this.texturePath = texturePath;
-    }
-    @JsonIgnore
-    public String getTexturePath() {
-        return texturePath;
-    }
-    @JsonIgnore
-    public void setDialoguePath(String dialoguePath) {
-        this.dialoguePath = dialoguePath;
-    }
-    @JsonIgnore
-    public String getDialoguePath() {
-        return dialoguePath;
-    }
-    @JsonIgnore
-    public void setType(Constants.EntityType type) {
-        this.type = type;
-    }
-    @JsonIgnore
-    public Constants.EntityType getType() {
-        return type;
-    }
-    @JsonIgnore
-    public void setBehaviour(Constants.Behaviour behaviour) {
-        this.behaviour = behaviour;
-    }
-    @JsonIgnore
-    public Constants.Behaviour getBehaviour() {
-        return behaviour;
-    }
-    @JsonIgnore
-    public void setIntelligence(int intelligence) {
-        this.intelligence = intelligence;
-    }
-    @JsonIgnore
-    public int getIntelligence() {
-        return intelligence;
-    }
-    @JsonIgnore
-    public void setStartPositionX(double startPositionX) {
-        this.startPositionX = startPositionX;
-    }
-    @JsonIgnore
-    public double getStartPositionX() {
-        return startPositionX;
-    }
-    @JsonIgnore
-    public void setStartPositionY(double startPositionY) {
-        this.startPositionY = startPositionY;
-    }
-    @JsonIgnore
-    public double getStartPositionY() {
-        return startPositionY;
-    }
-    @JsonIgnore
-    public void setStartIndex(int[] startIndex) {
-        this.startIndex = startIndex;
-    }
-    @JsonIgnore
-    public int[] getStartIndex() {
-        return startIndex;
-    }
-    @JsonIgnore
-    public void setPositionX(double positionX) {
-        this.positionX = positionX;
-    }
-    @JsonIgnore
-    public double getPositionX() {
-        return positionX;
-    }
-    @JsonIgnore
-    public void setPositionY(double positionY) {
-        this.positionY = positionY;
-    }
-    @JsonIgnore
-    public double getPositionY() {
-        return positionY;
-    }
-    @JsonIgnore
-    public void setHeight(int height) {
-        this.height = height;
-    }
-    @JsonIgnore
-    public int getHeight() {
-        return height;
-    }
-    @JsonIgnore
-    public void setSpeedX(int speed_x) {
-        this.speed_x = speed_x;
-    }
-    @JsonIgnore
-    public int getSpeedX() {
-        return speed_x;
-    }
-    @JsonIgnore
-    public void setSpeedY(int speed_y) {
-        this.speed_y = speed_y;
-    }
-    @JsonIgnore
-    public int getSpeedY() {
-        return speed_y;
-    }
-    @JsonSetter("hitBoxSize")
-    public void setHitBoxSize(int hitBoxSize) {
-        this.hitBoxSize = hitBoxSize;
-    }
-    @JsonIgnore
-    public int getHitBoxSize() {
-        return hitBoxSize;
-    }
-    @JsonIgnore
-    public void setHitbox(Shape hitbox) {
-        this.hitbox = hitbox;
-    }
-    @JsonIgnore
-    public Shape getHitbox() {
-        return hitbox;
-    }
-    @JsonIgnore
-    public void setTrackPoint(Shape trackPoint) {
-        this.trackPoint = trackPoint;
-    }
-    @JsonIgnore
-    public Shape getTrackPoint() {
-        return trackPoint;
-    }
-    @JsonIgnore
-    public void setAttackRange(Shape attackRange) {
-        this.attackRange = attackRange;
-    }
-    @JsonIgnore
-    public Shape getAttackRange() {
-        return attackRange;
-    }
-    @JsonIgnore
-    public void setAttackRangeSize(int attackRangeSize) {
-        this.attackRangeSize = attackRangeSize;
-    }
-    @JsonIgnore
-    public int getAttackRangeSize() {
-        return attackRangeSize;
-    }
-    @JsonSetter("health")
-    public void setHealth(int health) {
-        this.health = health;
-    }
-    @JsonIgnore
-    public int getHealth() {
-        return health;
-    }
-    @JsonIgnore
-    public void setMaxHealth(int maxHealth) {
-        this.maxHealth = maxHealth;
-    }
-    @JsonIgnore
-    public int getMaxHealth() {
-        return maxHealth;
-    }
-    @JsonSetter("damage")
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
-    @JsonIgnore
-    public int getDamage() {
-        return damage;
-    }
-    @JsonIgnore
-    public void setCooldown(int cooldown) {
-        this.cooldown = cooldown;
-    }
-    @JsonIgnore
-    public int getCooldown() {
-        return cooldown;
-    }
-    @JsonIgnore
-    public void setCanAttack(boolean canAttack) {
-        this.canAttack = canAttack;
-    }
-    @JsonIgnore
-    public boolean getCanAttack() {
-        return canAttack;
-    }
-    @JsonIgnore
-    public void setWhenAttacked(long whenAttacked) {
-        this.whenAttacked = whenAttacked;
-    }
-    @JsonIgnore
-    public long getWhenAttacked() {
-        return whenAttacked;
-    }
-    @JsonIgnore
-    public void setWhenStartedPursuing(long whenStartedPursuing) {
-        this.whenStartedPursuing = whenStartedPursuing;
-    }
-    @JsonIgnore
-    public long getWhenStartedPursuing() {
-        return whenStartedPursuing;
-    }
-    @JsonIgnore
-    public void setEntityView(ImageView entityView) {
-        this.entityView = entityView;
-    }
-    @JsonIgnore
-    public ImageView getEntityView() {
-        return entityView;
-    }
-    @JsonIgnore
-    public void setCurrentWagon(Wagon currentWagon) {
-        this.currentWagon = currentWagon;
-    }
-    @JsonIgnore
-    public Wagon getCurrentWagon() {
-        return currentWagon;
-    }
-    @JsonIgnore
-    public void setSoundThread(Thread soundThread) {
-        this.soundThread = soundThread;
-    }
-    @JsonIgnore
-    public Thread getSoundThread() {
-        return soundThread;
-    }
-//    @JsonIgnore
-//    public void setAnimationThread(Thread animationThread) {
-//        this.animationThread = animationThread;
-//    }
-//    @JsonIgnore
-//    public Thread getAnimationThread() {
-//        return animationThread;
-//    }
+    //endregion
 
-
+    //region Methods
     /**
      * Decreases the health of the entity by the specified amount.
      * @param damage the amount of damage
@@ -498,17 +248,272 @@ public class Entity {
         }
         return lastKnownPosition;
     }
+    //endregion
+
+    //region Getters & Setters
+
+    //region Getters
     @JsonIgnore
     public List<Point2D> getPreviousPositions() {
         return previousPositions;
     }
     @JsonIgnore
+    public int getCounter() {
+        return counter;
+    }
+    @JsonIgnore
+    public int getNegativeThreshold() {
+        return negativeThreshold;
+    }
+    @JsonIgnore
+    public int getNegativeCount() {
+        return negativeCount;
+    }
+    @JsonIgnore
+    public String getName() {
+        return name;
+    }
+    @JsonIgnore
+    public String getTexturePath() {
+        return texturePath;
+    }
+    @JsonIgnore
+    public String getDialoguePath() {
+        return dialoguePath;
+    }
+    @JsonIgnore
+    public Constants.EntityType getType() {
+        return type;
+    }
+    @JsonIgnore
+    public Constants.Behaviour getBehaviour() {
+        return behaviour;
+    }
+    @JsonIgnore
+    public void setIntelligence(int intelligence) {
+        this.intelligence = intelligence;
+    }
+    @JsonIgnore
+    public int getIntelligence() {
+        return intelligence;
+    }
+    @JsonIgnore
+    public double getStartPositionX() {
+        return startPositionX;
+    }
+    @JsonIgnore
+    public void setStartPositionY(double startPositionY) {
+        this.startPositionY = startPositionY;
+    }
+    @JsonIgnore
+    public double getStartPositionY() {
+        return startPositionY;
+    }
+    @JsonIgnore
+    public int[] getStartIndex() {
+        return startIndex;
+    }
+    @JsonIgnore
+    public double getPositionX() {
+        return positionX;
+    }
+    @JsonIgnore
+    public double getPositionY() {
+        return positionY;
+    }
+    @JsonIgnore
+    public int getHeight() {
+        return height;
+    }
+    @JsonIgnore
+    public int getSpeedX() {
+        return speed_x;
+    }
+    @JsonIgnore
+    public int getSpeedY() {
+        return speed_y;
+    }
+    @JsonIgnore
+    public int getHitBoxSize() {
+        return hitBoxSize;
+    }
+    @JsonIgnore
+    public Shape getHitbox() {
+        return hitbox;
+    }
+    @JsonIgnore
+    public Shape getTrackPoint() {
+        return trackPoint;
+    }
+    @JsonIgnore
+    public Shape getAttackRange() {
+        return attackRange;
+    }
+    @JsonIgnore
+    public int getAttackRangeSize() {
+        return attackRangeSize;
+    }
+    @JsonIgnore
+    public int getHealth() {
+        return health;
+    }
+    @JsonIgnore
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+    @JsonIgnore
+    public int getDamage() {
+        return damage;
+    }
+    @JsonIgnore
+    public int getCooldown() {
+        return cooldown;
+    }
+    @JsonIgnore
+    public boolean getCanAttack() {
+        return canAttack;
+    }
+    @JsonIgnore
+    public long getWhenAttacked() {
+        return whenAttacked;
+    }
+    @JsonIgnore
+    public long getWhenStartedPursuing() {
+        return whenStartedPursuing;
+    }
+    @JsonIgnore
+    public ImageView getEntityView() {
+        return entityView;
+    }
+    @JsonIgnore
+    public Wagon getCurrentWagon() {
+        return currentWagon;
+    }
+    @JsonIgnore
+    public Thread getSoundThread() {
+        return soundThread;
+    }
+    //endregion
+
+    //region Setters
+    @JsonIgnore
     public void setCounter(int counter) {
         this.counter = counter;
     }
     @JsonIgnore
-    public int getCounter() {
-        return counter;
+    public void setNegativeThreshold(int negativeThreshold) {
+        this.negativeThreshold = negativeThreshold;
     }
+    @JsonIgnore
+    public void setNegativeCount(int negativeCount) {
+        logger.info("Entity " + this.getName() + " negative count: " + negativeCount + "/" + negativeThreshold);
+        this.negativeCount = negativeCount;
+    }
+    @JsonIgnore
+    public void setTexturePath(String texturePath) {
+        this.texturePath = texturePath;
+    }
+    @JsonIgnore
+    public void setDialoguePath(String dialoguePath) {
+        this.dialoguePath = dialoguePath;
+    }
+    @JsonIgnore
+    public void setType(Constants.EntityType type) {
+        this.type = type;
+    }
+    @JsonIgnore
+    public void setBehaviour(Constants.Behaviour behaviour) {
+        this.behaviour = behaviour;
+    }
+    @JsonIgnore
+    public void setStartPositionX(double startPositionX) {
+        this.startPositionX = startPositionX;
+    }
+    @JsonIgnore
+    public void setStartIndex(int[] startIndex) {
+        this.startIndex = startIndex;
+    }
+    @JsonIgnore
+    public void setPositionX(double positionX) {
+        this.positionX = positionX;
+    }
+    @JsonIgnore
+    public void setHeight(int height) {
+        this.height = height;
+    }
+    @JsonIgnore
+    public void setPositionY(double positionY) {
+        this.positionY = positionY;
+    }
+    @JsonIgnore
+    public void setSpeedX(int speed_x) {
+        this.speed_x = speed_x;
+    }
+    @JsonIgnore
+    public void setSpeedY(int speed_y) {
+        this.speed_y = speed_y;
+    }
+    @JsonSetter("hitBoxSize")
+    public void setHitBoxSize(int hitBoxSize) {
+        this.hitBoxSize = hitBoxSize;
+    }
+    @JsonIgnore
+    public void setHitbox(Shape hitbox) {
+        this.hitbox = hitbox;
+    }
+    @JsonIgnore
+    public void setTrackPoint(Shape trackPoint) {
+        this.trackPoint = trackPoint;
+    }
+    @JsonIgnore
+    public void setAttackRange(Shape attackRange) {
+        this.attackRange = attackRange;
+    }
+    @JsonIgnore
+    public void setAttackRangeSize(int attackRangeSize) {
+        this.attackRangeSize = attackRangeSize;
+    }
+    @JsonSetter("health")
+    public void setHealth(int health) {
+        this.health = health;
+    }
+    @JsonIgnore
+    public void setMaxHealth(int maxHealth) {
+        this.maxHealth = maxHealth;
+    }
+    @JsonSetter("damage")
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+    @JsonIgnore
+    public void setCooldown(int cooldown) {
+        this.cooldown = cooldown;
+    }
+    @JsonIgnore
+    public void setCanAttack(boolean canAttack) {
+        this.canAttack = canAttack;
+    }
+    @JsonIgnore
+    public void setWhenAttacked(long whenAttacked) {
+        this.whenAttacked = whenAttacked;
+    }
+    @JsonIgnore
+    public void setWhenStartedPursuing(long whenStartedPursuing) {
+        this.whenStartedPursuing = whenStartedPursuing;
+    }
+    @JsonIgnore
+    public void setEntityView(ImageView entityView) {
+        this.entityView = entityView;
+    }
+    @JsonIgnore
+    public void setCurrentWagon(Wagon currentWagon) {
+        this.currentWagon = currentWagon;
+    }
+    @JsonIgnore
+    public void setSoundThread(Thread soundThread) {
+        this.soundThread = soundThread;
+    }
+    //endregion
 
+    //endregion
 }

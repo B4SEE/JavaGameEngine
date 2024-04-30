@@ -23,6 +23,7 @@ public class Events {
     private static boolean playerKilledGuard = false;
     private static boolean canSpawnKey = true;
     private static boolean shouldCallGuard = false;
+    private static boolean canSpawnTicket = false;
     public Events(){
     }
     public static List<QuestNPC> getAvailableQuestNPCs() {
@@ -131,6 +132,12 @@ public class Events {
     public static void setShouldCallGuard(boolean shouldCallGuard) {
         Events.shouldCallGuard = shouldCallGuard;
     }
+    public static boolean canSpawnTicket() {
+        return canSpawnTicket;
+    }
+    public static void setCanSpawnTicket(boolean canSpawnTicket) {
+        Events.canSpawnTicket = canSpawnTicket;
+    }
     public static void resetAll() {
         availableQuestNPCs = new java.util.ArrayList<>();
         currentEvent = null;
@@ -146,5 +153,6 @@ public class Events {
         playerKilledGuard = false;
         canSpawnKey = true;
         shouldCallGuard = false;
+        canSpawnTicket = false;
     }
 }

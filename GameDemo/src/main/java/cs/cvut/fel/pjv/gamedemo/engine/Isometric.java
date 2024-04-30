@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.engine;
 
 import cs.cvut.fel.pjv.gamedemo.common_classes.Object;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.Checker;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;

@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
+import cs.cvut.fel.pjv.gamedemo.engine.gamelogic.GameLogicMain;
+import cs.cvut.fel.pjv.gamedemo.engine.gamelogic.GameManagement;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.RandomHandler;
 import javafx.stage.Stage;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -21,7 +24,7 @@ public class GameSaver {
     private static final Logger logger = LogManager.getLogger(GameSaver.class);
     @JsonIgnore
     private Stage stage;
-    @JsonIgnore//player will be saved in player.json
+    @JsonIgnore// Player will be saved in player.json
     private Player player;
     @JsonIgnore
     private Wagon currentWagon;
@@ -135,15 +138,14 @@ public class GameSaver {
         eventsData.setPlayerKilledGuard(Events.isPlayerKilledGuard());
         eventsData.setCanSpawnKey(Events.canSpawnKey());
         eventsData.setShouldCallGuard(Events.shouldCallGuard());
+        eventsData.setCanSpawnTicket(Events.canSpawnTicket());
         return eventsData;
     }
 
     @JsonIgnore
     public void loadGame() {
         logger.info("Loading game...");
-        //find last save
         List<File> files = RandomHandler.getListOfDirectoriesThatStartWith("save_", "saves/");
-        //return if there are no saves
         if (files.isEmpty()) return;
 
         File lastSave = files.stream()
@@ -185,23 +187,28 @@ public class GameSaver {
             player.setPlayerInventory(objectMapper.readValue(new File(lastSave.getPath() + "/player_inventory.json"), PlayerInventory.class));
             logger.debug("Player inventory loaded");
             player.setCurrentWagon(currentWagon);
+            logger.debug("Player current wagon set");
 
-            //load events
-            EventsData eventsData = objectMapper.readValue(new File(lastSave.getPath() + "/events.json"), EventsData.class);
-            Events.setAvailableQuestNPCs(eventsData.getAvailableQuestNPCs());
-            Events.setCurrentEvent(eventsData.getCurrentEvent());
-            Events.setCanSpawnLockedDoor(eventsData.isCanSpawnLockedDoor());
-            Events.setTimeLoopCounter(eventsData.getTimeLoopCounter());
-            Events.setNextEvent(eventsData.getNextEvent());
-            Events.setPlayerKidnapped(eventsData.isPlayerKidnapped());
-            Events.setPlayerKilledGuard(eventsData.isPlayerKilledGuard());
-            Events.setCanSpawnKey(eventsData.isCanSpawnKey());
-            Events.setShouldCallGuard(eventsData.isShouldCallGuard());
-            logger.debug("Events loaded");
+            loadEvents(objectMapper.readValue(new File(lastSave.getPath() + "/events.json"), EventsData.class));
             logger.info("Game loaded");
         } catch (IOException e) {
             logger.error("Failed to load game");
         }
+    }
+    @JsonIgnore
+    private void loadEvents(EventsData eventsData) {
+        logger.debug("Loading events...");
+        Events.setAvailableQuestNPCs(eventsData.getAvailableQuestNPCs());
+        Events.setCurrentEvent(eventsData.getCurrentEvent());
+        Events.setCanSpawnLockedDoor(eventsData.isCanSpawnLockedDoor());
+        Events.setTimeLoopCounter(eventsData.getTimeLoopCounter());
+        Events.setNextEvent(eventsData.getNextEvent());
+        Events.setPlayerKidnapped(eventsData.isPlayerKidnapped());
+        Events.setPlayerKilledGuard(eventsData.isPlayerKilledGuard());
+        Events.setCanSpawnKey(eventsData.isCanSpawnKey());
+        Events.setShouldCallGuard(eventsData.isShouldCallGuard());
+        Events.setCanSpawnTicket(eventsData.isCanSpawnTicket());
+        logger.debug("Events loaded");
     }
     @JsonIgnore
     public void startGame() {
@@ -216,9 +223,9 @@ public class GameSaver {
             createWagon();
             createTrain();
         }
-        GameLogic gameLogic = new GameLogic(stage, train);
-        gameLogic.loadGame(player, currentWagon);
-        gameLogic.start();
+        GameLogicMain gameLogic = new GameLogicMain(stage, train);
+        GameManagement.loadGame(player, currentWagon);
+        GameManagement.start();
     }
     @JsonIgnore
     public void prepareEvents() {//only for new game

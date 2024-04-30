@@ -1,4 +1,4 @@
-package cs.cvut.fel.pjv.gamedemo.engine;
+package cs.cvut.fel.pjv.gamedemo.engine.utils;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -88,7 +88,11 @@ public class Atmospheric {
         if (volume < 0.00 || volume > 1.00)
             return;
         if (backgroundMusic != null) {
-            backgroundMusic.setVolume(volume);
+            try {
+                backgroundMusic.setVolume(volume);
+            } catch (Exception e) {
+                logger.error("Error while setting volume");
+            }
         }
     }
     public static void resetVolume() {

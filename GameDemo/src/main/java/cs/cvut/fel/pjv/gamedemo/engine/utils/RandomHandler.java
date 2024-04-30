@@ -1,8 +1,9 @@
-package cs.cvut.fel.pjv.gamedemo.engine;
+package cs.cvut.fel.pjv.gamedemo.engine.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cs.cvut.fel.pjv.gamedemo.common_classes.*;
+import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -24,7 +25,6 @@ public class RandomHandler {
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isFile()) {
-                    //check if file name starts with start
                     if (file.getName().startsWith(start)) {
                         listOfFilesThatStartWith.add(file);
                     }
@@ -118,13 +118,10 @@ public class RandomHandler {
             logger.error("Error while reading wagon type layout: wagon type is null");
             return null;
         }
-        //list all files from wagons directory
         List<File> listOfFilesThatStartWith = getListOfFilesThatStartWith(wagonType, "maps/common");
         String randomWagon;
-        //check custom maps folder
         listOfFilesThatStartWith.addAll(getListOfFilesThatStartWith(wagonType, "maps/custom"));
         try {
-            //get path
             randomWagon = listOfFilesThatStartWith.get((int) (Math.random() * listOfFilesThatStartWith.size())).getPath();
         } catch (Exception e) {
             if (listOfFilesThatStartWith.isEmpty()) {
@@ -154,14 +151,12 @@ public class RandomHandler {
         return listOfFilesThatStartWith;
     }
     public static List<File> getListOfDirectoriesThatStartWith(String start, String path) {
-        //list all files from path directory
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
         List<File> listOfFilesThatStartWith = new java.util.ArrayList<>();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isDirectory()) {
-                    //check if file name starts with start
                     if (file.getName().startsWith(start)) {
                         listOfFilesThatStartWith.add(file);
                     }
@@ -171,7 +166,6 @@ public class RandomHandler {
         return listOfFilesThatStartWith;
     }
     public static List<File> getAllFilesFromDirectory(String path) {
-        //list all files from path directory
         File folder = new File(path);
         File[] files = folder.listFiles();
         List<File> listOfFiles = new java.util.ArrayList<>();
@@ -181,6 +175,9 @@ public class RandomHandler {
                     listOfFiles.add(file);
                 }
             }
+        }
+        if (listOfFiles.isEmpty()) {
+            logger.error("Error while reading files from directory: no files found in directory " + path);
         }
         return listOfFiles;
     }
@@ -220,6 +217,24 @@ public class RandomHandler {
         }
         return null;
     }
+    public static String getRandomTexturePath(String path) {// Cannot see files in the directory
+        List<File> listOfFiles = getAllFilesFromDirectory(path);
+        System.out.println(path + " " + listOfFiles.size());
+        return listOfFiles.get((int) (Math.random() * listOfFiles.size())).getPath();
+    }
+    public static Item getRandomTicket() {
+        if (Events.canSpawnTicket()) {
+            int value = Math.max(Constants.MIN_TICKET_VALUE, (int) (Math.random() * Constants.MAX_TICKET_VALUE));
+            List<File> names = getListOfFilesThatStartWith("ticket", "textures/default/items/misc");
+            String name = names.get((int) (Math.random() * names.size())).getName();
+            //generate random ticket type (valid/invalid, 80% chance for invalid ticket)
+            Item ticket = new Item("Ticket", "textures/default/items/misc/" + name, Math.random() < 0.8 ? Constants.ItemType.INVALID_TICKET : Constants.ItemType.VALID_TICKET);
+            ticket.setValue(value);
+            logger.debug("Ticket generated");
+            return ticket;
+        }
+        return null;
+    }
     public static File getRandomMusicFile(String path) {
         File folder = new File("game_resources/sounds/" + path);
         List<File> listOfFiles = new java.util.ArrayList<>();
@@ -233,11 +248,9 @@ public class RandomHandler {
     public static void fillInventoryWithRandomItems(Inventory inventory) {
         logger.debug("Filling inventory with random items...");
         for (int k = 0; k < inventory.inventorySize; k++) {
-            //generate random chance for each item
             int chance = (int) (Math.random() * 100);
             int generate = (int) (Math.random() * 100);
             if (chance > generate) {
-                //get random number for item type: 1 - default, 2 - melee, 3 - firearm, 4 - food, 5 - necessary to spawn item, 6 - key
                 int itemType = (int) (Math.random() * 5 + 1);
                 switch (itemType) {
                     case 1:
@@ -258,6 +271,9 @@ public class RandomHandler {
                     case 6:
                         inventory.addItem(getRandomKey());
                         Events.setCanSpawnLockedDoor(true);
+                        break;
+                    case 7:
+                        inventory.addItem(getRandomTicket());
                         break;
                 }
             } else {
