@@ -14,6 +14,10 @@ public class Constants {
     public static final int WINDOW_HEIGHT = 800;
     public static final int TILE_WIDTH = 32;
     public static final int TILE_HEIGHT = 32;
+    public static final String DEFAULT_ERA = "default";
+    public static final String CYBERPUNK_ERA = "cyberpunk";
+    public static final String RETRO_ERA = "retro";
+    public static final String[] ERAS = {DEFAULT_ERA, CYBERPUNK_ERA, RETRO_ERA};
     //endregion
 
     //region Map

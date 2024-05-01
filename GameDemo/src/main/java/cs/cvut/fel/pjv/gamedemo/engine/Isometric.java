@@ -449,7 +449,12 @@ public class Isometric {
      * @param y the y position
      */
     private void initObject(Object object, int x, int y) {
-        Image objectTexture = new Image(object.getTexturePath());
+        Image objectTexture = new Image("0.png");
+        try {
+            objectTexture = new Image(object.getTexturePath());
+        } catch (IllegalArgumentException e) {
+            logger.error("Object texture not found: " + object.getTexturePath());
+        }
 
         object.setCartX((int) (x + 2 * Constants.TILE_WIDTH - objectTexture.getHeight()));
         object.setCartY((int) (y + Constants.TILE_HEIGHT - objectTexture.getHeight()));

@@ -24,6 +24,7 @@ public class Events {
     private static boolean canSpawnKey = true;
     private static boolean shouldCallGuard = false;
     private static boolean canSpawnTicket = false;
+    private static String era = Constants.DEFAULT_ERA;
     public Events(){
     }
     public static List<QuestNPC> getAvailableQuestNPCs() {
@@ -138,6 +139,12 @@ public class Events {
     public static void setCanSpawnTicket(boolean canSpawnTicket) {
         Events.canSpawnTicket = canSpawnTicket;
     }
+    public static String getEra() {
+        return era;
+    }
+    public static void setEra(String era) {
+        Events.era = era;
+    }
     public static void resetAll() {
         availableQuestNPCs = new java.util.ArrayList<>();
         currentEvent = null;
@@ -154,5 +161,6 @@ public class Events {
         canSpawnKey = true;
         shouldCallGuard = false;
         canSpawnTicket = false;
+        era = Constants.DEFAULT_ERA;
     }
 }

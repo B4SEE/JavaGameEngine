@@ -130,8 +130,6 @@ public class Wagon {
                 char secondChar = subRows[j].charAt(1);
                 String letterID = subRows[j].substring(2, 4);
                 String name = Constants.OBJECT_NAMES.get(letterID);
-                // Select random texture for object
-//                String texture = RandomHandler.getRandomTexturePath(Constants.OBJECT_IDS.get(letterID));
                 String texture = Constants.OBJECT_IDS.get(letterID);
 
                 if (firstChar == Constants.FLOOR) {
@@ -141,8 +139,6 @@ public class Wagon {
                 }
                 if (firstChar == Constants.INTERACTIVE_OBJECT) {
                     String interactiveObjectName = Constants.INTERACTIVE_OBJECTS_NAMES.get(letterID);
-                    // Select random texture for interactive object
-//                    String interactiveObjectTexture = RandomHandler.getRandomTexturePath(Constants.INTERACTIVE_OBJECTS.get(letterID));
                     String interactiveObjectTexture = Constants.INTERACTIVE_OBJECTS.get(letterID);
 
                     logger.debug("Interactive object: " + interactiveObjectName + " at index " + i + ", " + j + "...");

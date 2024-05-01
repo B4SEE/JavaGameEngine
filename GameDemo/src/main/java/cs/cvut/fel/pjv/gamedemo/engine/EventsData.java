@@ -29,6 +29,8 @@ public class EventsData {
     private boolean shouldCallGuard = false;
     @JsonProperty("canSpawnTicket")
     private boolean canSpawnTicket = false;
+    @JsonProperty("era")
+    private String era = Constants.DEFAULT_ERA;
     public EventsData() {
     }
     @JsonIgnore
@@ -110,5 +112,14 @@ public class EventsData {
     @JsonSetter("canSpawnTicket")
     public void setCanSpawnTicket(boolean canSpawnTicket) {
         this.canSpawnTicket = canSpawnTicket;
+    }
+
+    @JsonIgnore
+    public String getEra() {
+        return era;
+    }
+    @JsonSetter("era")
+    public void setEra(String era) {
+        this.era = era;
     }
 }

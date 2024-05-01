@@ -287,7 +287,7 @@ public class EntitiesLogic {
      * Note: There is a small (very small) chance for the conductor to become neutral again if the player is <b>not</b> in the same wagon.
      */
     public static void handleConductor() {
-        if (!gameData.getConductor().getCurrentWagon().getDoorLeft().isLocked()) gameData.getConductor().getCurrentWagon().getDoorLeft().lock();
+        if (!gameData.getConductor().getCurrentWagon().getDoorRight().isLocked()) gameData.getConductor().getCurrentWagon().getDoorRight().lock();
         if (Checker.checkIfEntityStuck(gameData.getConductor())) handleConductorStuck(gameData.getConductor());
 
         if (gameData.getConductor().getBehaviour() == Constants.Behaviour.NEUTRAL) {

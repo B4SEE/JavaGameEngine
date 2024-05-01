@@ -2,6 +2,7 @@ package cs.cvut.fel.pjv.gamedemo.common_classes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -275,7 +276,7 @@ public class PlayerInventory extends Inventory {
         if (secondCraftingItem != null) {
             drawItemPreview(craftSlot2, secondCraftingItem);
         }
-        ImageView imageView = new ImageView(new Image("textures/default/gui/arrow.png"));
+        ImageView imageView = new ImageView(new Image("textures/" + Events.getEra() + "/gui/arrow.png"));
         imageView.setFitHeight(Constants.SLOT_SIZE);
         imageView.setFitWidth(Constants.SLOT_SIZE);
         imageView.setX(x + 2 * (Constants.SLOT_SIZE + Constants.SLOT_GAP));

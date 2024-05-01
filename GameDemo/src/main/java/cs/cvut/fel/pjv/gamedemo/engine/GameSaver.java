@@ -139,6 +139,7 @@ public class GameSaver {
         eventsData.setCanSpawnKey(Events.canSpawnKey());
         eventsData.setShouldCallGuard(Events.shouldCallGuard());
         eventsData.setCanSpawnTicket(Events.canSpawnTicket());
+        eventsData.setEra(Events.getEra());
         return eventsData;
     }
 
@@ -208,6 +209,7 @@ public class GameSaver {
         Events.setCanSpawnKey(eventsData.isCanSpawnKey());
         Events.setShouldCallGuard(eventsData.isShouldCallGuard());
         Events.setCanSpawnTicket(eventsData.isCanSpawnTicket());
+        Events.setEra(eventsData.getEra());
         logger.debug("Events loaded");
     }
     @JsonIgnore

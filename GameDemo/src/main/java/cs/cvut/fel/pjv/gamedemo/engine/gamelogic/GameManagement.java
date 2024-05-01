@@ -38,6 +38,11 @@ public class GameManagement {
                     Atmospheric.updateBackgroundMusic();
                 }
 
+                if (everyNSecondsDo(500)) {
+                    String randomEra = Constants.ERAS[(int) (Math.random() * Constants.ERAS.length)];
+                    Events.setEra(randomEra);
+                }
+
                 if (everyNSecondsDo(5)) {
                     UpdateLogic.updateEntitiesPrevPos();
                     checkAndSetTrap();
