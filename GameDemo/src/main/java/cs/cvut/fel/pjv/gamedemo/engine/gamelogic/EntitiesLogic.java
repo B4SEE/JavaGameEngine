@@ -126,7 +126,7 @@ public class EntitiesLogic {
         Events.setConductorSpawned(true);
         Thread conductorSpawn = new Thread(() -> {
             try {
-                Thread.sleep(3000);// 3 seconds before the conductor spawns
+                Thread.sleep(100 * Constants.CONDUCTOR_SPAWN_DELAY);
             } catch (InterruptedException e) {
                 logger.error("Conductor spawn interrupted", e);
             }
@@ -145,7 +145,7 @@ public class EntitiesLogic {
         Thread guardCall = new Thread(() -> {
             try {
                 logger.debug("Trying to call the guard...");
-                Thread.sleep(5000);
+                Thread.sleep(100 * Constants.GUARD_CALL_DELAY);
             } catch (InterruptedException e) {
                 logger.error("Guard call interrupted", e);
             }
@@ -163,7 +163,7 @@ public class EntitiesLogic {
      * @param entity entity to handle
      */
     public static void handleResponse(Entity entity) {
-        if (Math.random() < 0.5) {
+        if (Math.random() * 100 > Constants.CHANCE_TO_CALL_GUARD) {
             entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
         } else {
             Events.setShouldCallGuard(true);

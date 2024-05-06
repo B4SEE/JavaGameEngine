@@ -8,8 +8,15 @@ import java.util.Map;
  * Provide a single source of truth for all constants used in the game.
  */
 public class Constants {
+    //region Texture paths
+
+    public static final String ENEMY_TEXTURE_PATH = "textures/default/entities/enemies/";
+
+    //endregion
 
     //region Basic
+    public static final int DELTA_X = 10;
+    public static final int DELTA_Y = 0;
     public static final int WINDOW_WIDTH = 1600;
     public static final int WINDOW_HEIGHT = 800;
     public static final int TILE_WIDTH = 32;
@@ -45,9 +52,12 @@ public class Constants {
             Map.entry("BW", "0.png"),
             Map.entry("SW", "textures/default/objects/normal_objects/walls/1h_wall.png"),
             Map.entry("HW", "textures/default/objects/normal_objects/walls/block_wagon_wall.png"),
-            Map.entry("WW", "textures/default/objects/normal_objects/walls/3h_block.png"),
+            Map.entry("WB", "textures/default/objects/normal_objects/walls/wall_3h_blue.png"),
+            Map.entry("WG", "textures/default/objects/normal_objects/walls/wall_3h_green.png"),
+            Map.entry("WR", "textures/default/objects/normal_objects/walls/wall_3h_brown.png"),
             Map.entry("SS", "textures/default/objects/normal_objects/decorations/seat_1.png"),
             Map.entry("CA", "textures/default/objects/normal_objects/floor/carpet_1.png"),
+            Map.entry("TA", "textures/default/objects/normal_objects/decorations/table.png"),
             Map.entry(ENEMY_SPAWN, "textures/default/objects/normal_objects/floor/tile_floor.png"),
             Map.entry(NPC_SPAWN, "textures/default/objects/normal_objects/floor/tile_floor.png"),
             Map.entry(VENDOR_SPAWN, "textures/default/objects/normal_objects/floor/tile_floor.png"),
@@ -59,9 +69,12 @@ public class Constants {
             Map.entry("BW", "blank_wall_3"),
             Map.entry("SW", "1h_wall"),
             Map.entry("HW", "wagon_wall_2"),
-            Map.entry("WW", "wagon_wall_3"),
+            Map.entry("WB", "wagon_wall_3"),
+            Map.entry("WG", "wagon_wall_3"),
+            Map.entry("WR", "wagon_wall_3"),
             Map.entry("SS", "seat"),
             Map.entry("CA", "carpet_1"),
+            Map.entry("TA", "table"),
             Map.entry(ENEMY_SPAWN, "enemy_spawn"),
             Map.entry(NPC_SPAWN, "npc_spawn"),
             Map.entry(VENDOR_SPAWN, "vendor_spawn"),
@@ -103,9 +116,13 @@ public class Constants {
     //endregion
 
     //region Entity
+    public static final int CONDUCTOR_SPAWN_DELAY = 30; // In seconds
+    public static final int GUARD_CALL_DELAY = 5; // In seconds
     public static final int ENTITY_BASIC_MAX_HEALTH = 100;
     public static final int ENTITY_BASIC_SPEED_X = 3;
     public static final int ENTITY_BASIC_SPEED_Y = 3;
+    public static final int ENTITY_BASIC_HEIGHT = 2;
+    public static final int ENTITY_BASIC_WIDTH = 1;
     public static final int MAX_PREV_POS_LIST_SIZE = 10;
     public static final int MAX_COUNTER = 20;
     public enum EntityType {
@@ -153,7 +170,6 @@ public class Constants {
     //region Enemy
     public static final int ENEMY_BASIC_MAX_HEALTH_MIN = 70;
     public static final int ENEMY_BASIC_MAX_HEALTH_MAX = 230;
-    public static final int ENEMY_BASIC_HEIGHT = 2;
     public static final int ENEMY_BASIC_SPEED_X_MAX = PLAYER_BASIC_SPEED_X - 1;
     public static final int ENEMY_BASIC_SPEED_X_MIN = ENTITY_BASIC_SPEED_X;
     public static final int ENEMY_BASIC_SPEED_Y_MAX = PLAYER_BASIC_SPEED_Y - 1;
@@ -211,9 +227,8 @@ public class Constants {
     public static final String RESTAURANT_WAGON_TYPE = "RESTAURANT";
     public static final String SLEEPER_WAGON_TYPE = "SLEEPER";
     public static final String CARGO_WAGON_TYPE = "CARGO";
-
-    //    public static final String[] WAGON_TYPES = {CARGO_WAGON_TYPE, RESTAURANT_WAGON_TYPE, SLEEPER_WAGON_TYPE, COMPARTMENT_WAGON_TYPE, DEFAULT_WAGON_TYPE};
-    public static final String[] WAGON_TYPES = {DEFAULT_WAGON_TYPE};
+//    public static final String[] WAGON_TYPES = {CARGO_WAGON_TYPE, RESTAURANT_WAGON_TYPE, SLEEPER_WAGON_TYPE, COMPARTMENT_WAGON_TYPE, DEFAULT_WAGON_TYPE};
+public static final String[] WAGON_TYPES = {RESTAURANT_WAGON_TYPE, COMPARTMENT_WAGON_TYPE};
     public static final Map <String, Method[]> WAGON_TYPE_ENEMIES;
     static {
         try {
@@ -243,5 +258,6 @@ public class Constants {
 
     //region Chances
     public static final int LOCKED_DOOR_SPAWN_CHANCE = 15;
+    public static final int CHANCE_TO_CALL_GUARD = 50;
     //endregion
 }

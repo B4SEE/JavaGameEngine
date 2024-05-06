@@ -76,6 +76,10 @@ public class TrapLogic {
         Events.setBossFight(true);
         Events.setCurrentEvent(Constants.Event.TRAP_EVENT);//to lock the doors
         String bossName = Constants.WAGON_TYPES_BOSSES.get(gameData.getWagon().getType());
+        if (bossName == null) {
+            logger.error("Invalid boss name - no boss for this wagon");
+            return;
+        }
         EntitiesLogic.spawnBoss(bossName);
     }
 

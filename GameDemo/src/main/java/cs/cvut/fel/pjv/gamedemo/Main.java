@@ -9,8 +9,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.varia.NullAppender;
 
 import java.io.IOException;
-
-
 public class Main extends Application {
     private static final Logger logger = LogManager.getLogger(Main.class);
     @Override

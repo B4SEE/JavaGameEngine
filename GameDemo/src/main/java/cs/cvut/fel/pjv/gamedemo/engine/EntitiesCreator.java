@@ -19,7 +19,6 @@ public class EntitiesCreator {
         logger.debug("Setting entity " + entity.getName() + " as default enemy...");
         entity.setType(Constants.EntityType.ENEMY);
         entity.setBehaviour(Constants.Behaviour.AGGRESSIVE);
-        entity.setHeight(Constants.ENEMY_BASIC_HEIGHT);
         entity.setSpeedX((int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_X_MAX - Constants.ENEMY_BASIC_SPEED_X_MIN) + Constants.ENEMY_BASIC_SPEED_X_MIN));
         entity.setSpeedY((int) (Math.random() * (Constants.ENEMY_BASIC_SPEED_Y_MAX - Constants.ENEMY_BASIC_SPEED_Y_MIN) + Constants.ENEMY_BASIC_SPEED_Y_MIN));
         int maxHealth = (int) (Math.random() * (Constants.ENEMY_BASIC_MAX_HEALTH_MAX - Constants.ENEMY_BASIC_MAX_HEALTH_MIN) + Constants.ENEMY_BASIC_MAX_HEALTH_MIN);
@@ -39,7 +38,7 @@ public class EntitiesCreator {
      */
     public static Entity createZombie() {
         logger.debug("Creating zombie...");
-        Entity zombie = new Entity(Constants.ZOMBIE, "zombie_front.png");
+        Entity zombie = new Entity(Constants.ZOMBIE, Constants.ENEMY_TEXTURE_PATH + "zombie_front.png");
         setAsDefaultEnemy(zombie);
         zombie.setIntelligence(0);
         logger.debug("Zombie created");
@@ -52,7 +51,7 @@ public class EntitiesCreator {
      */
     public static Entity createRobot() {
         logger.debug("Creating robot...");
-        Entity robot = new Entity(Constants.ROBOT, "zombie_front.png");
+        Entity robot = new Entity(Constants.ROBOT, Constants.ENEMY_TEXTURE_PATH + "robot_front.png");
         setAsDefaultEnemy(robot);
         robot.setIntelligence(2);
         logger.debug("Robot created");
@@ -65,7 +64,7 @@ public class EntitiesCreator {
      */
     public static Entity createGentleman() {
         logger.debug("Creating gentleman...");
-        Entity gentleman = new Entity(Constants.GENTLEMAN, "zombie_front.png");
+        Entity gentleman = new Entity(Constants.GENTLEMAN, Constants.ENEMY_TEXTURE_PATH + "gentleman_front.png");
         setAsDefaultEnemy(gentleman);
         gentleman.setIntelligence(1);
         logger.debug("Gentleman created");
@@ -127,7 +126,7 @@ public class EntitiesCreator {
      */
     public static Entity createBully() {
         logger.debug("Creating bully...");
-        Entity bully = new Entity(Constants.BULLY, "zombie_front.png");
+        Entity bully = new Entity(Constants.BULLY, Constants.ENEMY_TEXTURE_PATH + "zombie_front.png");
         setAsDefaultEnemy(bully);
         bully.setBehaviour(Constants.Behaviour.BULLY);
         bully.setIntelligence(1);
@@ -170,7 +169,7 @@ public class EntitiesCreator {
      */
     public static Entity createGuard() {
         logger.debug("Creating guard...");
-        Entity guard = new Entity("guard", "zombie_front.png");
+        Entity guard = new Entity("guard", Constants.ENEMY_TEXTURE_PATH + "guard_front.png");
         EntitiesCreator.setAsGuard(guard);
         logger.debug("Guard created");
         return guard;
@@ -213,7 +212,7 @@ public class EntitiesCreator {
      */
     public static void createConductor(Wagon wagon) {
         logger.debug("Creating conductor...");
-        Entity conductor = new Entity(Constants.CONDUCTOR, "zombie_front.png");
+        Entity conductor = new Entity(Constants.CONDUCTOR, Constants.ENEMY_TEXTURE_PATH + "conductor_front.png");
         EntitiesCreator.setAsDefaultNPC(conductor);
         conductor.setType(Constants.EntityType.CONDUCTOR);
         initConductor(wagon, conductor);

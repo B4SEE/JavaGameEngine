@@ -6,6 +6,7 @@ import cs.cvut.fel.pjv.gamedemo.engine.utils.Atmospheric;
 import cs.cvut.fel.pjv.gamedemo.engine.utils.Checker;
 import cs.cvut.fel.pjv.gamedemo.engine.Events;
 import cs.cvut.fel.pjv.gamedemo.engine.Isometric;
+import cs.cvut.fel.pjv.gamedemo.engine.utils.RandomHandler;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -136,8 +137,7 @@ public class WagonLogic {
      * @param door door to be opened
      */
     private static void generateNextWagonAndOpenDoor(Door door) {
-//        String wagonType = RandomHandler.getRandomWagonType();
-        String wagonType = "CARGO";
+        String wagonType = RandomHandler.getRandomWagonType();
         Wagon nextWagon = new Wagon(gameData.getTrain().findMaxWagonId() + 1, wagonType);
 
         if (door == gameData.getWagon().getDoorLeft()) {
@@ -145,6 +145,8 @@ public class WagonLogic {
         } else if (door == gameData.getWagon().getDoorRight()) {
             generateRightWagon(nextWagon);
         }
+
+        setEntitiesPositions(nextWagon);
     }
 
     /**
@@ -161,7 +163,7 @@ public class WagonLogic {
         if (gameData.getWagon().getId() == Constants.TRAIN_WAGONS - 3 && !Events.isGrandmotherSpawned()) {
             logger.debug("Generating grandmother in wagon " + nextWagon.getId() + "...");
 
-            String wagonType = "CARGO";
+            String wagonType = RandomHandler.getRandomWagonType();
             Wagon nextNextWagon = new Wagon(gameData.getTrain().findMaxWagonId() + 1, wagonType);
             nextNextWagon.generateNextWagon(nextWagon, true);
             gameData.getTrain().addWagon(nextNextWagon);
@@ -177,6 +179,7 @@ public class WagonLogic {
         gameData.getIsometric().updateAll();
         nextWagon.setObstacles(gameData.getIsometric().getWalls());
         nextWagon.getDoorRight().unlock();// Player already unlocked the door (locked door can spawn when generating the wagon)
+
         gameData.getWagon().getDoorLeft().teleport(gameData.getPlayer());
         gameData.setWagon(nextWagon);
         gameData.getPlayer().setCurrentWagon(gameData.getWagon());
@@ -201,6 +204,30 @@ public class WagonLogic {
         gameData.getWagon().getDoorRight().teleport(gameData.getPlayer());
         gameData.setWagon(nextWagon);
         gameData.getPlayer().setCurrentWagon(gameData.getWagon());
+    }
+
+    public static void setEntitiesPositions(Wagon wagon) {
+        logger.debug("Setting entities positions...");
+        if (!wagon.getEntities().isEmpty()) {
+            if (wagon.getEntities().getFirst().getPositionX() == 0) {
+                int counter = 0;
+                for (cs.cvut.fel.pjv.gamedemo.common_classes.Object[] objects : wagon.getObjectsArray()) {
+                    for (Object object : objects) {
+                        if (object != null) {
+                            if (object.getHeight() == 0) {
+                                String letterId = object.getTwoLetterId();
+                                if (letterId.equals(Constants.ENEMY_SPAWN) || letterId.equals(Constants.VENDOR_SPAWN) || letterId.equals(Constants.NPC_SPAWN) || letterId.equals(Constants.QUEST_SPAWN)) {
+                                    wagon.getEntities().get(counter).setPositionX(object.getIsoX() - 32);
+                                    wagon.getEntities().get(counter).setPositionY(object.getIsoY() - 80);
+                                    logger.debug("Entity position set: " + wagon.getEntities().get(counter).getName() + " in wagon " + wagon.getId() + " at " + wagon.getEntities().get(counter).getPositionX() + ", " + wagon.getEntities().get(counter).getPositionY());
+                                    counter++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     //endregion
 

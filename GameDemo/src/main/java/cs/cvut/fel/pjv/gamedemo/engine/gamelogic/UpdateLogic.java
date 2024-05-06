@@ -26,7 +26,7 @@ public class UpdateLogic {
         updateEntities();
         updatePlayer();
         if (!gameData.getPlayer().isAlive()) {
-            gameData.getIsometric().setHandleToNull();
+            GameLogicHandlers.resetSceneHandlers(gameData.getStage().getScene());
             GameManagement.stopGame();
         }
     }

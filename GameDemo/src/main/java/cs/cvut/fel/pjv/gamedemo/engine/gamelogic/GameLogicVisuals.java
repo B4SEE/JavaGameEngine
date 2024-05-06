@@ -132,7 +132,7 @@ public class GameLogicVisuals {
      * Show the main menu.
      */
     public static void mainMenu() {
-        gameData.getIsometric().clearAll();
+        gameData.getIsometric().resetAll();
         Scene mainMenuScene = Game.showMainMenuScene();
         gameData.getStage().setScene(mainMenuScene);
     }

@@ -26,6 +26,7 @@ public class Checker {
      * @return - true if map is valid, false if not
      */
     public static boolean checkMap(String map) {
+        logger.debug("Checking map...");
         String[] lines = map.split("\n");
         //if map is only one line long, check if it uses separator for rows
         if (lines.length == 1) {
@@ -48,16 +49,19 @@ public class Checker {
      * @return - true if lines are the same length, false otherwise
      */
     private static boolean checkLinesLength(String[] lines) {
-        //check if all map lines are the same length
+        logger.debug("Checking lines length...");
         int lineLength = lines[0].length();
         if (lineLength < 4) {
+            logger.error("Line " + lines[0] + " is less than 4 characters long");
             return false;
         }
         for (String line : lines) {
             if (line.length() != lineLength) {
+                logger.error("Line " + line + " is not the same length as the first line");
                 return false;
             }
         }
+        logger.debug("Lines are the same length");
         return true;
     }
 
@@ -67,11 +71,12 @@ public class Checker {
      * @return - true if map codes are valid, false otherwise
      */
     private static boolean checkMapCodes(String[] lines) {
-        //check if all map codes have the same number of characters (4)
+        logger.debug("Checking map codes...");
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
             for (String code : subRows) {
                 if (code.length() != 4) {
+                    logger.error("Code " + code + " is not 4 characters long");
                     return false;
                 }
             }
@@ -85,29 +90,35 @@ public class Checker {
      * @return - true if the code is in the dictionary, false otherwise
      */
     private static boolean checkIfCodeIsInDictionary(String[] lines) {
-        //check if all map codes are valid (are in Constant dictionaries)
+        logger.debug("Checking if codes are in dictionary...");
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
             for (String subRow : subRows) {
                 if (!List.of(Constants.ALLOWED_CODES).contains(subRow.charAt(0))) {
+                    logger.error("Code " + subRow.charAt(0) + " in " + subRow + " is not in the dictionary");
                     return false;
                 }
                 if (!List.of(Constants.ALLOWED_HEIGHTS).contains(subRow.charAt(1))) {
                     if (subRow.charAt(0) != Constants.INTERACTIVE_OBJECT) {
+                        logger.error("Height " + subRow.charAt(1) + " in " + subRow + " is not in the dictionary");
                         return false;
                     }
                 }
                 if (!Character.isLetter(subRow.charAt(2))) {
+                    logger.error("Character " + subRow.charAt(2) + " in " + subRow + " is not a letter");
                     return false;
                 }
                 if (!Character.isLetter(subRow.charAt(3))) {
+                    logger.error("Character " + subRow.charAt(3) + " in " + subRow + " is not a letter");
                     return false;
                 }
                 if (!Constants.OBJECT_IDS.containsKey(subRow.substring(2, 4)) && !Constants.INTERACTIVE_OBJECTS.containsKey(subRow.substring(2, 4))) {
+                    logger.error("Object with ID " + subRow.substring(2, 4) + " in " + subRow + " is not in the dictionary");
                     return false;
                 }
             }
         }
+        logger.debug("Codes are in the dictionary");
         return true;
     }
 
@@ -117,6 +128,7 @@ public class Checker {
      * @return - true if there are two doors, false otherwise
      */
     private static boolean checkHowManyDoors(String[] lines) {
+        logger.debug("Checking how many doors are in the map...");
         int doors = 0;
         for (String row : lines) {
             String[] subRows = row.split(Constants.MAP_COLUMN_SEPARATOR);
@@ -363,7 +375,7 @@ public class Checker {
      * @return true if the x position of the object is within the player's range, false otherwise
      */
     public static boolean checkX(Entity entity, double[] objectIsoXY) {
-        return (objectIsoXY[0] > entity.getPositionX() - Constants.TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * Constants.TILE_WIDTH);
+        return (objectIsoXY[0] > entity.getPositionX() - Constants.TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 5 * Constants.TILE_WIDTH);
     }
 
     /**
@@ -374,5 +386,31 @@ public class Checker {
      */
     public static boolean checkY(Entity entity, double[] objectIsoXY, Image objectTexture) {
         return (entity.getPositionY() + (double) Constants.TILE_HEIGHT / 2 + entity.getHeight() * Constants.TILE_HEIGHT < (objectIsoXY[1] - Constants.TILE_HEIGHT + objectTexture.getHeight()));
+    }
+
+    /**
+     * Move the entity to the specified position.
+     * @param entity the entity
+     * @param deltaX the delta x
+     * @param deltaY the delta y
+     * @param obstacles the obstacles
+     * @return true if the entity can move to the specified position, false otherwise
+     * <br>
+     * <br>
+     * Note: the entity's hitbox is translated to the specified position and checked for collision with the walls
+     * If the entity's hitbox collides with the walls, the entity's position is not updated
+     * Used for player and entity movement and slipping when colliding with walls
+     */
+    public static boolean tryToMove(Entity entity, double deltaX, double deltaY, Shape obstacles) {
+        entity.getHitbox().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
+        entity.getHitbox().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
+
+        entity.getTrackPoint().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
+        entity.getTrackPoint().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
+
+        entity.getAttackRange().translateXProperty().set(entity.getPositionX() - entity.getStartPositionX() + deltaX);
+        entity.getAttackRange().translateYProperty().set(entity.getPositionY() - entity.getStartPositionY() + deltaY);
+
+        return !Checker.checkCollision(entity.getHitbox(), obstacles);
     }
 }

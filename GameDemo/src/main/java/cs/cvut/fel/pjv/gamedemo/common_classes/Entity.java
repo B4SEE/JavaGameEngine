@@ -64,7 +64,9 @@ public class Entity {
     @JsonProperty("positionY")
     private double positionY;
     @JsonProperty("height")
-    private int height;
+    private int height = Constants.ENTITY_BASIC_HEIGHT;
+    @JsonProperty
+    private int width = Constants.ENTITY_BASIC_WIDTH;
     @JsonProperty("speed_x")
     private int speed_x;
     @JsonProperty("speed_y")
@@ -326,6 +328,10 @@ public class Entity {
         return height;
     }
     @JsonIgnore
+    public int getWidth() {
+        return width;
+    }
+    @JsonIgnore
     public int getSpeedX() {
         return speed_x;
     }
@@ -440,6 +446,10 @@ public class Entity {
     @JsonIgnore
     public void setHeight(int height) {
         this.height = height;
+    }
+    @JsonIgnore
+    public void setWidth(int width) {
+        this.width = width;
     }
     @JsonIgnore
     public void setPositionY(double positionY) {
