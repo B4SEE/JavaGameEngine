@@ -9,7 +9,9 @@ Welcome to the "Infinity Express - Destination Abyss"
 
 ---
 
-## Status: In Development :construction:
+## Status: **Finished, with ongoing development** :heavy_check_mark: :construction:
+### Last update: 07/05/2024
+> Note: While the main project is finished, some features are still under development and will be added in future updates.
 
 &nbsp;
 
