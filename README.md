@@ -139,6 +139,6 @@ To run the project, follow these steps:
 
 ### **Author** - Eleonora Virych
 
-📧 Email: [virycele@fel.cvut.cz](mailto:virycele@fel.cvut.cz)
+📧 Email: [virichelia@gmail.com](mailto:virichelia@gmail.com)
 
 </details>
