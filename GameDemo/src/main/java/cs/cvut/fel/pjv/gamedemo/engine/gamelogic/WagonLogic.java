@@ -183,6 +183,9 @@ public class WagonLogic {
         gameData.getWagon().getDoorLeft().teleport(gameData.getPlayer());
         gameData.setWagon(nextWagon);
         gameData.getPlayer().setCurrentWagon(gameData.getWagon());
+        // Update all
+        gameData.getIsometric().setEntities(gameData.getWagon().getEntities());
+        gameData.getIsometric().updateAll();
     }
 
     /**
@@ -204,6 +207,9 @@ public class WagonLogic {
         gameData.getWagon().getDoorRight().teleport(gameData.getPlayer());
         gameData.setWagon(nextWagon);
         gameData.getPlayer().setCurrentWagon(gameData.getWagon());
+        // Update all
+        gameData.getIsometric().setEntities(gameData.getWagon().getEntities());
+        gameData.getIsometric().updateAll();
     }
 
     public static void setEntitiesPositions(Wagon wagon) {
