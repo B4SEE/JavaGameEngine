@@ -375,7 +375,7 @@ public class Checker {
      * @return true if the x position of the object is within the player's range, false otherwise
      */
     public static boolean checkX(Entity entity, double[] objectIsoXY) {
-        return (objectIsoXY[0] > entity.getPositionX() - Constants.TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 5 * Constants.TILE_WIDTH);
+        return (objectIsoXY[0] > entity.getPositionX() - Constants.TILE_WIDTH && objectIsoXY[0] < entity.getPositionX() + 3 * Constants.TILE_WIDTH);
     }
 
     /**

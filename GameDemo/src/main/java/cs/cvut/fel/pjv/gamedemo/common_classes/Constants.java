@@ -11,6 +11,7 @@ public class Constants {
     //region Texture paths
 
     public static final String ENEMY_TEXTURE_PATH = "textures/default/entities/enemies/";
+    public static final String NPC_TEXTURE_PATH = "textures/default/entities/npcs/";
 
     //endregion
 
@@ -53,8 +54,11 @@ public class Constants {
             Map.entry("SW", "textures/default/objects/normal_objects/walls/1h_wall.png"),
             Map.entry("HW", "textures/default/objects/normal_objects/walls/block_wagon_wall.png"),
             Map.entry("WB", "textures/default/objects/normal_objects/walls/wall_3h_blue.png"),
+            Map.entry("BB", "textures/default/objects/normal_objects/walls/wall_3h_half_blue.png"),
             Map.entry("WG", "textures/default/objects/normal_objects/walls/wall_3h_green.png"),
+            Map.entry("BG", "textures/default/objects/normal_objects/walls/wall_3h_half_green.png"),
             Map.entry("WR", "textures/default/objects/normal_objects/walls/wall_3h_brown.png"),
+            Map.entry("BR", "textures/default/objects/normal_objects/walls/wall_3h_half_brown.png"),
             Map.entry("SS", "textures/default/objects/normal_objects/decorations/seat_1.png"),
             Map.entry("CA", "textures/default/objects/normal_objects/floor/carpet_1.png"),
             Map.entry("TA", "textures/default/objects/normal_objects/decorations/table.png"),
@@ -70,8 +74,11 @@ public class Constants {
             Map.entry("SW", "1h_wall"),
             Map.entry("HW", "wagon_wall_2"),
             Map.entry("WB", "wagon_wall_3"),
+            Map.entry("BB", "wagon_wall_3_half"),
             Map.entry("WG", "wagon_wall_3"),
+            Map.entry("BG", "wagon_wall_3_half"),
             Map.entry("WR", "wagon_wall_3"),
+            Map.entry("BR", "wagon_wall_3_half"),
             Map.entry("SS", "seat"),
             Map.entry("CA", "carpet_1"),
             Map.entry("TA", "table"),
@@ -83,7 +90,7 @@ public class Constants {
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS = Map.ofEntries(
             Map.entry(WAGON_DOOR, "textures/default/objects/interactive_objects/wagon_door/wagon_door_1.png"),
-            Map.entry(LOCKABLE_DOOR, "textures/default/objects/interactive_objects/lockable_door/lockable_door_1_closed.png"),
+            Map.entry(LOCKABLE_DOOR, "textures/default/objects/interactive_objects/lockable_door/lockable_door_transparent_1_closed.png"),
             Map.entry(CHEST_OBJECT, "textures/default/objects/interactive_objects/chest_object/chest_object_1.png")
     );
     public static final Map <String, String> INTERACTIVE_OBJECTS_NAMES = Map.ofEntries(
@@ -118,6 +125,8 @@ public class Constants {
     //region Entity
     public static final int CONDUCTOR_SPAWN_DELAY = 30; // In seconds
     public static final int GUARD_CALL_DELAY = 5; // In seconds
+    public static final int ENTITY_BASIC_HITBOX_SIZE = 1;
+    public static final int ENTITY_BASIC_ATTACK_RANGE_SIZE = 1;
     public static final int ENTITY_BASIC_MAX_HEALTH = 100;
     public static final int ENTITY_BASIC_SPEED_X = 3;
     public static final int ENTITY_BASIC_SPEED_Y = 3;
@@ -125,6 +134,14 @@ public class Constants {
     public static final int ENTITY_BASIC_WIDTH = 1;
     public static final int MAX_PREV_POS_LIST_SIZE = 10;
     public static final int MAX_COUNTER = 20;
+    public static final int ENTITY_BASIC_MAX_NEGATIVE_THRESHOLD = 5;
+    public static final int ENTITY_BASIC_DEFAULT_NEGATIVE_THRESHOLD = 3;
+    public static final int ENTITY_BASIC_MIN_NEGATIVE_THRESHOLD = 1;
+    public enum Intelligence {
+        DEFAULT,
+        MEDIUM,
+        HIGH
+    }
     public enum EntityType {
         PLAYER,
         ENEMY,
@@ -174,10 +191,9 @@ public class Constants {
     public static final int ENEMY_BASIC_SPEED_X_MIN = ENTITY_BASIC_SPEED_X;
     public static final int ENEMY_BASIC_SPEED_Y_MAX = PLAYER_BASIC_SPEED_Y - 1;
     public static final int ENEMY_BASIC_SPEED_Y_MIN = ENTITY_BASIC_SPEED_Y;
-    public static final int ENEMY_BASIC_HITBOX = 1;
-    public static final int ENEMY_BASIC_ATTACK_RANGE = 1;
     public static final int ENEMY_BASIC_DAMAGE = 5;
     public static final int ENEMY_BASIC_COOLDOWN = 2;
+    public static final int BULLY_BASIC_KIDNAP_COOLDOWN = 4;
     //endregion
 
     //region Boss
@@ -227,8 +243,7 @@ public class Constants {
     public static final String RESTAURANT_WAGON_TYPE = "RESTAURANT";
     public static final String SLEEPER_WAGON_TYPE = "SLEEPER";
     public static final String CARGO_WAGON_TYPE = "CARGO";
-//    public static final String[] WAGON_TYPES = {CARGO_WAGON_TYPE, RESTAURANT_WAGON_TYPE, SLEEPER_WAGON_TYPE, COMPARTMENT_WAGON_TYPE, DEFAULT_WAGON_TYPE};
-public static final String[] WAGON_TYPES = {RESTAURANT_WAGON_TYPE, COMPARTMENT_WAGON_TYPE};
+    public static final String[] WAGON_TYPES = {CARGO_WAGON_TYPE, RESTAURANT_WAGON_TYPE, SLEEPER_WAGON_TYPE, COMPARTMENT_WAGON_TYPE, DEFAULT_WAGON_TYPE};
     public static final Map <String, Method[]> WAGON_TYPE_ENEMIES;
     static {
         try {

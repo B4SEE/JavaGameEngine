@@ -42,9 +42,9 @@ public class Entity {
     @JsonProperty("behaviour")
     private Constants.Behaviour behaviour;
     @JsonProperty("intelligence")
-    private int intelligence = 0;
+    private Constants.Intelligence intelligence = Constants.Intelligence.DEFAULT;
     @JsonProperty("negativeThreshold")
-    private int negativeThreshold = 2;
+    private int negativeThreshold = Constants.ENTITY_BASIC_DEFAULT_NEGATIVE_THRESHOLD;
     @JsonProperty("negativeCount")
     private int negativeCount = 0;
     @JsonProperty("startPositionX")
@@ -72,7 +72,7 @@ public class Entity {
     @JsonProperty("speed_y")
     private int speed_y;
     @JsonProperty("hitBoxSize")
-    private int hitBoxSize;
+    private int hitBoxSize = Constants.ENTITY_BASIC_HITBOX_SIZE;
     @JsonIgnore
     private Shape hitbox;
     @JsonIgnore
@@ -80,7 +80,7 @@ public class Entity {
     @JsonIgnore
     private Shape attackRange;
     @JsonProperty("attackRangeSize")
-    private int attackRangeSize;
+    private int attackRangeSize = Constants.ENTITY_BASIC_ATTACK_RANGE_SIZE;
     @JsonProperty("health")
     private int health;
     @JsonProperty("maxHealth")
@@ -292,20 +292,12 @@ public class Entity {
         return behaviour;
     }
     @JsonIgnore
-    public void setIntelligence(int intelligence) {
-        this.intelligence = intelligence;
-    }
-    @JsonIgnore
-    public int getIntelligence() {
+    public Constants.Intelligence getIntelligence() {
         return intelligence;
     }
     @JsonIgnore
     public double getStartPositionX() {
         return startPositionX;
-    }
-    @JsonIgnore
-    public void setStartPositionY(double startPositionY) {
-        this.startPositionY = startPositionY;
     }
     @JsonIgnore
     public double getStartPositionY() {
@@ -402,6 +394,14 @@ public class Entity {
     //endregion
 
     //region Setters
+    @JsonIgnore
+    public void setIntelligence(Constants.Intelligence intelligence) {
+        this.intelligence = intelligence;
+    }
+    @JsonIgnore
+    public void setStartPositionY(double startPositionY) {
+        this.startPositionY = startPositionY;
+    }
     @JsonIgnore
     public void setCounter(int counter) {
         this.counter = counter;

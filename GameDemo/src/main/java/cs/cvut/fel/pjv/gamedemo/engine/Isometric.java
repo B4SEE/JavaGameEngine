@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+
 //consider bitmap
 
 /**
@@ -285,7 +286,7 @@ public class Isometric {
         entity.setEntityView(new ImageView(entity.getTexturePath()));
         grid.getChildren().add(entity.getHitbox());
         grid.getChildren().add(entity.getAttackRange());
-        entity.getEntityView().setX(entity.getPositionX() - (entity.getWidth() - Constants.ENTITY_BASIC_WIDTH) * Constants.TILE_WIDTH);
+        entity.getEntityView().setX(entity.getPositionX() - (entity.getWidth() - Constants.ENTITY_BASIC_WIDTH) * ((double) Constants.TILE_WIDTH / 2));
         entity.getEntityView().setY(entity.getPositionY() - (entity.getHeight() - Constants.ENTITY_BASIC_HEIGHT) * Constants.TILE_HEIGHT);
         grid.getChildren().add(entity.getEntityView());
         drawBars(entity);
@@ -721,7 +722,6 @@ public class Isometric {
                 if (object.getHeight() >= 2 && object.isSolid()) {
                     object.getObjectHitbox().scaleXProperty().set(1);
                     object.getObjectHitbox().scaleYProperty().set(1);
-//                    object.getObjectHitbox().setTranslateY(-Constants.TILE_HEIGHT * object.getHeight());
                     twoAndTallerWalls = Shape.union(twoAndTallerWalls, object.getObjectHitbox());
                     object.getObjectHitbox().scaleXProperty().set(0.8);
                     object.getObjectHitbox().scaleYProperty().set(0.8);
@@ -744,7 +744,7 @@ public class Isometric {
      */
     private Circle getEntityHitBox(int cartX, int cartY, int height, int width, int hitBoxSize) {
         Circle circle = new Circle();
-        int circleCenterX = cartX + width * Constants.TILE_WIDTH;
+        int circleCenterX = cartX + Constants.TILE_WIDTH;
         int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
@@ -763,7 +763,7 @@ public class Isometric {
      */
     private Circle getEntityTrackPoint(int cartX, int cartY, int height, int width) {
         Circle circle = new Circle();
-        int circleCenterX = cartX + width * Constants.TILE_WIDTH;
+        int circleCenterX = cartX + Constants.TILE_WIDTH;
         int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
@@ -782,7 +782,7 @@ public class Isometric {
      */
     private Circle getEntityAttackRange(int cartX, int cartY, int height, int width, int attackRange) {
         Circle circle = new Circle();
-        int circleCenterX = cartX + width * Constants.TILE_WIDTH;
+        int circleCenterX = cartX + Constants.TILE_WIDTH;
         int circleCenterY = cartY + Constants.TILE_HEIGHT / 2 + height * Constants.TILE_HEIGHT;
         circle.setCenterX(circleCenterX);
         circle.setCenterY(circleCenterY);
@@ -874,21 +874,4 @@ public class Isometric {
         return playerDeltaY;
     }
     //endregion
-
-    //    /**
-//     * Move the grid by the specified delta x and delta y.
-//     * If there is a collision with the player hitbox and the walls, the delta x and delta y are adjusted.
-//     * @param deltaX the delta x
-//     * @param deltaY the delta y
-//     */
-//    public void moveGrid(int deltaX, int deltaY) {
-//        if (Checker.checkCollision(player.getHitbox(), walls)) {
-//            this.deltaX -= deltaX;
-//            this.deltaY -= deltaY;
-//            return;
-//        }
-//        this.deltaX += deltaX;
-//        this.deltaY += deltaY;
-//        updateAll();
-//    }
 }

@@ -169,6 +169,15 @@ public class EntitiesLogic {
             Events.setShouldCallGuard(true);
         }
     }
+
+    public static void placePlayerInWagon(Wagon wagon) {
+        logger.debug("Placing player in wagon " + wagon.getId() + "...");
+        Object[] freeSpace = gameData.getWagon().getAllFloorObjects();
+        Object freeSpaceObject = freeSpace[(int) (Math.random() * freeSpace.length)];
+        gameData.getPlayer().setPositionX(freeSpaceObject.getIsoX() - 32);
+        gameData.getPlayer().setPositionY(freeSpaceObject.getIsoY() - 80);
+        logger.debug("Player placed in wagon " + wagon.getId() + " at " + gameData.getPlayer().getPositionX() + ", " + gameData.getPlayer().getPositionY());
+    }
     //endregion
 
     //region Player methods
@@ -260,7 +269,7 @@ public class EntitiesLogic {
         wagonPursuers.clear();
         for (Entity entity : gameData.getWagon().getEntities()) {
             if (entity.getBehaviour() == Constants.Behaviour.AGGRESSIVE && entity.getType() != Constants.EntityType.CONDUCTOR) {//conductor uses different logic
-                if (entity.getIntelligence() == 2) {
+                if (entity.getIntelligence() == Constants.Intelligence.HIGH) {
                     if (Checker.checkIfEntityRemember(entity, gameData.getPlayer(), gameData.getIsometric().getTwoAndTallerWalls(), gameData.getTime())) {
                         logger.info("Entity " + entity.getName() + " remembered the player and will pursue him");
                         wagonPursuers.add(entity);

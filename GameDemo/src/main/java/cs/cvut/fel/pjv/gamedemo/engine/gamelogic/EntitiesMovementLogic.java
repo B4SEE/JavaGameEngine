@@ -40,11 +40,10 @@ public class EntitiesMovementLogic {
         for (Entity entity : entities) {
             if (entity != null && entity.isAlive() && !Objects.equals(entity.getBehaviour(), Constants.Behaviour.NEUTRAL) && !Events.isPlayerKidnapped()) {
                 if (Checker.checkIfEntityRemember(entity, gameData.getPlayer(), gameData.getIsometric().getTwoAndTallerWalls(), gameData.getTime())) {
-                    // Move the entity with appropriate intelligence
                     switch (entity.getIntelligence()) {
-                        case 0 -> intelligenceZeroPursue(entity, gameData.getPlayer());
-                        case 1 -> intelligenceOnePursue(entity, gameData.getPlayer());
-                        case 2 -> intelligenceTwoPursue(entity, gameData.getPlayer());
+                        case Constants.Intelligence.DEFAULT -> intelligenceZeroPursue(entity, gameData.getPlayer());
+                        case Constants.Intelligence.MEDIUM -> intelligenceOnePursue(entity, gameData.getPlayer());
+                        case Constants.Intelligence.HIGH -> intelligenceTwoPursue(entity, gameData.getPlayer());
                         default -> { return; }
                     }
                     if (Checker.checkIfEntityStuck(entity)) {
@@ -124,10 +123,8 @@ public class EntitiesMovementLogic {
                     continue;
                 }
                 if (Checker.checkCollision(pursuer.getAttackRange(), wagonDoor.getObjectHitbox())) {
-                    // Teleport the pursuer to the next wagon
                     logger.info("Teleporting pursuer to the next wagon...");
                     wagonDoor.teleport(pursuer);
-                    // Remove the pursuer from original list and current wagon
                     pursuers.remove(pursuer);
                     pursuer.getCurrentWagon().getEntities().remove(pursuer);
                     pursuer.setCurrentWagon(gameData.getWagon());
@@ -155,12 +152,12 @@ public class EntitiesMovementLogic {
                 if (wagonDoor.getTargetId() == -1) {
                     EntitiesLogic.generateNextWagonByConductor(conductor);
                 }
-                //conductor will not move to the next wagon until checks player's ticket
+                // Conductor will not move to the next wagon until checks player's ticket
                 if (conductor == gameData.getConductor()) {
                     if (conductor.getCurrentWagon() != gameData.getPlayer().getCurrentWagon()) {//for the conductor
                         EntitiesLogic.openExistingWagonDoorByConductor(conductor);
                     }
-                } else {//for the grandmother
+                } else {
                     EntitiesLogic.openExistingWagonDoorByConductor(conductor);
                 }
             }

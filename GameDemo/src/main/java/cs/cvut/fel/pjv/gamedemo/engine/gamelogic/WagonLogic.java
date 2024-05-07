@@ -28,11 +28,11 @@ public class WagonLogic {
         logger.debug("Using lockable door...");
         if (object.isSolid()) {
             object.setIsSolid(false);
-            object.setTexturePath("textures/default/objects/interactive_objects/lockable_door/lockable_door_1_opened.png");
+            object.setTexturePath(object.getTexturePath().replace("closed", "opened"));
             logger.info("Door opened");
         } else {
             object.setIsSolid(true);
-            object.setTexturePath("textures/default/objects/interactive_objects/lockable_door/lockable_door_1_closed.png");
+            object.setTexturePath(object.getTexturePath().replace("opened", "closed"));
             logger.info("Door closed");
         }
         gameData.getIsometric().updateAll();
