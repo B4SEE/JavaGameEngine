@@ -148,7 +148,9 @@ public class GameManagement {
         isometric.initialiseWagon(wagon);
 
         WagonLogic.setEntitiesPositions(wagon);
-        EntitiesLogic.placePlayerInWagon(wagon);
+        if (gameData.getPlayer().getPositionX() == 0 && gameData.getPlayer().getPositionY() == 0) {
+            EntitiesLogic.placePlayerInWagon(wagon);
+        }
 
         isometric.setEntities(wagon.getEntities());
         isometric.updateAll();
