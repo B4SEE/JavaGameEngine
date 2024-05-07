@@ -13,6 +13,8 @@ public class Main extends Application {
     private static final Logger logger = LogManager.getLogger(Main.class);
     @Override
     public void start(Stage stage) throws IOException {
+        // Exit if window is closed
+        stage.setOnCloseRequest(e -> System.exit(0));
 
         // Enable/disable logging
         boolean loggingEnabled = true;
