@@ -76,6 +76,15 @@ public class GameSaver {
         String date = currentDate.toString().replaceAll("\\s", "_");
         //remove unnecessary characters
         date = date.replaceAll(":", "_");
+        //check if saves folder exists
+        File savesFolder = new File("saves");
+        if (!savesFolder.exists()) {
+            if (savesFolder.mkdir()) {
+                logger.debug("Folder saves created");
+            } else {
+                logger.error("Failed to create folder saves");
+            }
+        }
         String path = "saves/save_" + date;
         //create folder
         File folder = new File(path);
