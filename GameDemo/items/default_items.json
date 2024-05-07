@@ -2,22 +2,22 @@
   "default_items": [
     {
       "name": "Lighter",
-      "texturePath": "orange.png",
+      "texturePath": "textures/default/items/default/lighter.png",
       "value": 10.00
     },
     {
       "name": "Toolbox",
-      "texturePath": "orange.png",
+      "texturePath": "textures/default/items/default/toolbox.png",
       "value": 30.00
     },
     {
       "name": "Razor blade",
-      "texturePath": "orange.png",
+      "texturePath": "textures/default/items/default/razor_blade.png",
       "value": 3.00
     },
     {
       "name": "Some garbage",
-      "texturePath": "orange.png",
+      "texturePath": "textures/default/items/default/garbage.png",
       "value": 0.00
     }
   ]

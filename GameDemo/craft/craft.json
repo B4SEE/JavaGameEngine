@@ -11,11 +11,6 @@
       "result": "improved_metal_baseball_bat"
     },
     {
-      "item1": "old_gun",
-      "item2": "toolbox",
-      "result": "repaired_old_gun"
-    },
-    {
       "item1": "canned_food",
       "item2": "lighter",
       "result": "cooked_canned_food"

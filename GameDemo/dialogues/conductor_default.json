@@ -2,14 +2,36 @@
   "dialogues": [
     {
       "id": "dialogue1",
-      "text": "ticket",
+      "text": "...ticket...",
       "options": [
         {
-          "text": "sure",
+          "text": "Sure.",
           "action": "check ticket"
         },
         {
-          "text": "i don't have it",
+          "text": "I don't have it",
+          "nextDialogue": "dialogue2",
+          "action": "negative"
+        }
+      ]
+    },
+    {
+      "id": "dialogue2",
+      "text": "...ticket...",
+      "options": [
+        {
+          "text": "Please, I don't have it",
+            "nextDialogue": "dialogue3",
+          "action": "negative"
+        }
+      ]
+    },
+    {
+      "id": "dialogue3",
+      "text": "...ticket...",
+      "options": [
+        {
+          "text": "I don't have it",
           "action": "negative"
         }
       ]

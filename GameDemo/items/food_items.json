@@ -2,26 +2,26 @@
   "food_items": [
     {
       "name": "Orange",
-      "texturePath": "orange.png",
+      "texturePath": "textures/default/items/food/orange.png",
       "value": 10.00,
       "nourishment": 5.00
     },
     {
       "name": "Apple",
-      "texturePath": "orange.png",
-      "value": 15.00,
+      "texturePath": "textures/default/items/food/apple.png",
+      "value": 10.00,
       "nourishment": 5.00
     },
     {
       "name": "Chocolate Bar",
-      "texturePath": "orange.png",
-      "value": 12.00,
-      "nourishment": 8.00
+      "texturePath": "textures/default/items/food/chocolate_bar.png",
+      "value": 20.00,
+      "nourishment": 10.00
     },
     {
       "name": "Canned food",
-      "texturePath": "orange.png",
-      "value": 20.00,
+      "texturePath": "textures/default/items/food/canned_food.png",
+      "value": 30.00,
       "nourishment": 15.00
     }
   ]

@@ -4,9 +4,9 @@
       "improved_wooden_baseball_bat": [
         {
           "name": "Improved wooden baseball bat",
-          "texturePath": "orange.png",
+          "texturePath": "textures/default/items/weapons/melee/improved_wooden_baseball_bat.png",
           "itemType": "melee_weapon",
-          "damage": 10,
+          "damage": 30,
           "attackSpeed": 1.5
         }
       ]
@@ -15,21 +15,10 @@
       "improved_metal_baseball_bat": [
         {
           "name": "Improved metal baseball bat",
-          "texturePath": "orange.png",
+          "texturePath": "textures/default/items/weapons/melee/improved_metal_baseball_bat.png",
           "itemType": "melee_weapon",
-          "damage": 20,
+          "damage": 40,
           "attackSpeed": 1.5
-        }
-      ]
-    },
-    {
-      "repaired_old_gun": [
-        {
-          "name": "Repaired old gun",
-          "texturePath": "orange.png",
-          "itemType": "firearm",
-          "damage": 20,
-          "shootingSpeed": 1.5
         }
       ]
     },
@@ -37,9 +26,9 @@
       "cooked_canned_food": [
         {
           "name": "Cooked canned food",
-          "texturePath": "orange.png",
+          "texturePath": "textures/default/items/food/canned_food_opened.png",
           "itemType": "food",
-          "nourishment": 25
+          "nourishment": 30
         }
       ]
     },
@@ -47,7 +36,7 @@
       "improvised_knife": [
         {
           "name": "Improvised knife",
-          "texturePath": "orange.png",
+          "texturePath": "textures/default/items/weapons/melee/improvised_knife.png",
           "itemType": "melee_weapon",
           "damage": 5,
           "attackSpeed": 1.5

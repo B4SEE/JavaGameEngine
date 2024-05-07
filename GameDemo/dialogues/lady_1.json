@@ -2,7 +2,7 @@
   "dialogues": [
     {
       "id": "dialogue1",
-      "text": "Hi there! What would you like to do?",
+      "text": "Hi there!",
       "options": [
         {
           "text": "Where am I?",

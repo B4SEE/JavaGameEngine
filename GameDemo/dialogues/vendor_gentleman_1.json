@@ -2,15 +2,15 @@
   "dialogues": [
     {
       "id": "dialogue1",
-      "text": "Hi",
+      "text": "Do you need help?",
       "options": [
         {
-          "text": "I need help.",
+          "text": "Yes.",
           "nextDialogue": "dialogue3"
         },
         {
-          "text": "Go away.",
-          "action": "negative"
+          "text": "No.",
+          "nextDialogue": "dialogue2"
         }
       ]
     },

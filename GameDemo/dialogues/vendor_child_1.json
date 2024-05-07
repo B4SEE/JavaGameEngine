@@ -2,41 +2,72 @@
   "dialogues": [
     {
       "id": "dialogue1",
-      "text": "Hi there!",
+      "text": "I am not allowed to speak to strangers.",
       "options": [
         {
-          "text": "Do you sell any products?",
-            "nextDialogue": "dialogue2"
+          "text": "Sure.",
+          "nextDialogue": "dialogue2"
         },
         {
-          "text": "Nothing, thanks.",
-            "nextDialogue": "dialogue3"
+          "text": "Please, I need help.",
+          "nextDialogue": "dialogue3"
         }
-        ]
+      ]
     },
     {
       "id": "dialogue2",
-      "text": "Yes, we sell a variety of products. Let me show you what we have.",
-      "options": [
-        {
-          "text": "Thank you.",
-            "action": "trade"
-        },
-        {
-          "text": "I've changed my mind.",
-            "nextDialogue": "dialogue4"
-        }
-        ]
+      "text": "Goodbye.",
+      "options": []
     },
     {
       "id": "dialogue3",
-      "text": "Alright, have a great day!",
-      "options": []
+      "text": "What do you need?",
+      "options": [
+        {
+          "text": "Do you have something to eat?",
+          "nextDialogue": "dialogue4"
+        },
+        {
+          "text": "I need to find a key.",
+          "nextDialogue": "dialogue4"
+        },
+        {
+          "text": "I need to find a weapon.",
+          "nextDialogue": "dialogue4"
+        },
+        {
+          "text": "I need to escape.",
+            "nextDialogue": "dialogue5"
+        }
+      ]
     },
     {
       "id": "dialogue4",
-      "text": "Bye!",
-      "options": []
+      "text": "Let me see what I have.",
+      "options": [
+        {
+          "text": "Yes, please.",
+          "action": "trade"
+        },
+        {
+          "text": "No, thank you.",
+          "nextDialogue": "dialogue2"
+        }
+      ]
+    },
+    {
+      "id": "dialogue5",
+      "text": "I am afraid I cannot help you with that.",
+      "options": [
+        {
+          "text": "Sure.",
+          "nextDialogue": "dialogue2"
+        },
+        {
+          "text": "Maybe you can help me with something else?",
+          "nextDialogue": "dialogue3"
+        }
+      ]
     }
-    ]
+  ]
 }
