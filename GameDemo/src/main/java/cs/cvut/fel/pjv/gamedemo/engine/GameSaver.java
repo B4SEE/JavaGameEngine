@@ -74,9 +74,8 @@ public class GameSaver {
         logger.info("Saving game...");
         Date currentDate = new Date();
         String date = currentDate.toString().replaceAll("\\s", "_");
-        //remove unnecessary characters
         date = date.replaceAll(":", "_");
-        //check if saves folder exists
+
         File savesFolder = new File("saves");
         if (!savesFolder.exists()) {
             if (savesFolder.mkdir()) {
@@ -85,8 +84,17 @@ public class GameSaver {
                 logger.error("Failed to create folder saves");
             }
         }
+
+        List<File> files = RandomHandler.getListOfDirectoriesThatStartWith("save_", "saves/");
+        for (File file : files) {
+            if (file.delete()) {
+                logger.debug("File " + file.getName() + " deleted");
+            } else {
+                logger.error("Failed to delete file " + file.getName());
+            }
+        }
+
         String path = "saves/save_" + date;
-        //create folder
         File folder = new File(path);
         if (!folder.exists()) {
             if (folder.mkdir()) {
@@ -95,7 +103,7 @@ public class GameSaver {
                 logger.error("Failed to create folder " + path);
             }
         }
-        //save game
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/game.json");
@@ -105,7 +113,6 @@ public class GameSaver {
             logger.error("Failed to save game");
         }
 
-        //save player
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/player.json");
@@ -114,7 +121,7 @@ public class GameSaver {
         } catch (IOException e) {
             logger.error("Failed to save player");
         }
-        //save player inventory
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/player_inventory.json");
@@ -123,7 +130,7 @@ public class GameSaver {
         } catch (IOException e) {
             logger.error("Failed to save player inventory");
         }
-        //save Events: availableQuestNPCs, currentEvent, canSpawnLockedDoor, timeLoopCounter, nextEvent
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             FileWriter file = new FileWriter(path + "/events.json");
