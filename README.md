@@ -107,9 +107,20 @@ For information about the game mechanics, storyline, technical specifications an
 
 ## 🚀 How to run
 
-! Project is not runnable yet. !
+❗ **Read before running the project!** ❗
 
-the instructions will be added later.
+- Not all features that are described in the wiki are implemented yet.
+- Not implemented features are marked with a `!` in the wiki.
+- Not implemented features will be added later.
+
+---
+
+To run the project, follow these steps:
+
+1. Download the game.rar from the repository.
+2. Unzip the downloaded file.
+3. Open .jar file
+4. Enjoy the game!
 
 &nbsp;
 
