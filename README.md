@@ -52,24 +52,33 @@ The game engine is crafted with flexibility in mind, offering easy modifiability
 **CP1 - Project Vision (until week 3 - 10/03, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
+&nbsp;
+  
 On the GitLab project Wiki or as instructed by the instructor, upload a document, max. 1x A4, describing the term paper to BRUTE
 the chosen topic, expected features and vision of the project
 from the document it should be possible to imagine what the work will look like.
+  
 </details>
 
 **CP2 - Object design (by week 8 - 12 April, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
+&nbsp;
+  
 Documentation on the project Wiki from the user's perspective (e.g. manual)
 on the Project Wiki, added documentation from the programmer's perspective (descriptions of classes, application states, technologies used, libraries, etc.); possible division of labor
 source files in the project repository - skeletons of the main classes and interfaces, so that the proposed architecture is visible
+  
 </details>
 
 **CP3 - Final presentation (by week 14 - 24 May, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
+&nbsp;
+
 Presentation of the whole work and the architecture of the application to the teacher.
 Completed documentation from the user's perspective.
+
 </details>
 
 &nbsp;
@@ -109,6 +118,9 @@ For information about the game mechanics, storyline, technical specifications an
 
 ## 🚀 How to run
 
+<details><summary>Click to expand</summary>
+&nbsp;
+
 ❗ **Read before running the project!** ❗
 
 - Not all features that are described in the wiki are implemented yet.
@@ -124,6 +136,8 @@ To run the project, follow these steps:
 2. Unzip the downloaded file.
 3. Open .jar file
 4. Enjoy the game!
+   
+</details>
 
 &nbsp;
 
