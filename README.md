@@ -63,7 +63,7 @@ on the Project Wiki, added documentation from the programmer's perspective (desc
 source files in the project repository - skeletons of the main classes and interfaces, so that the proposed architecture is visible
 </details>
 
-**CP3 - Final presentation (by week 14 - 24 May, 23:59)** :construction:
+**CP3 - Final presentation (by week 14 - 24 May, 23:59)** :heavy_check_mark:
 
 <details><summary>Click to expand</summary>
 Presentation of the whole work and the architecture of the application to the teacher.
@@ -72,7 +72,7 @@ Completed documentation from the user's perspective.
 
 &nbsp;
 
-## 📋 Requirements for project
+## 📋 Requirements/Necessary features for project
 
 <details><summary>Click to expand</summary>
 
@@ -112,12 +112,13 @@ For information about the game mechanics, storyline, technical specifications an
 - Not all features that are described in the wiki are implemented yet.
 - Not implemented features are marked with a `!` in the wiki.
 - Not implemented features will be added later.
+- **Place the .jar file in a folder with English name, otherwise the game will not run.**
 
 ---
 
 To run the project, follow these steps:
 
-1. Download the game.rar from the repository.
+1. Download the [game.rar](archive/07_05_2024/game.rar) from the repository.
 2. Unzip the downloaded file.
 3. Open .jar file
 4. Enjoy the game!
