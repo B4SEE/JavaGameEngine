@@ -247,9 +247,6 @@ public class GameSaver {
     public void createPlayer() {
         logger.debug("Creating new player...");
         this.player = new Player(Constants.PLAYER_START_POS_X, Constants.PLAYER_START_POS_Y);
-        player.getPlayerInventory().setAmmo(50);
-        player.getPlayerInventory().setMoney(100);
-        player.getPlayerInventory().addItem(new Item("ticket", "orange.png", Constants.ItemType.VALID_TICKET));
         logger.info("New player created");
     }
     @JsonIgnore
