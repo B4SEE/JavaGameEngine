@@ -20,7 +20,7 @@ Welcome to the "Infinity Express - Destination Abyss"
 - [Features](./README.md#gear-features)
 - [Development checkpoints](./README.md#-development-checkpoints)
 - [Requirements for project](./README.md#-requirementsnecessary-features-for-project)
-- [Wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home)
+- [Wiki](https://github.com/B4SEE/PJV/wiki)
 - [How to run](./README.md#-how-to-run)
 - [Contact](./README.md#-contact)
 
@@ -112,7 +112,7 @@ Completed documentation from the user's perspective.
 
 ## :information_source: Wiki
 
-For information about the game mechanics, storyline, technical specifications and development process, please refer to [wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home).
+For information about the game mechanics, storyline, technical specifications and development process, please refer to [wiki](https://github.com/B4SEE/PJV/wiki).
 
 &nbsp;
 
