@@ -276,7 +276,7 @@ public class PlayerInventory extends Inventory {
         if (secondCraftingItem != null) {
             drawItemPreview(craftSlot2, secondCraftingItem);
         }
-        ImageView imageView = new ImageView(new Image("textures/" + Events.getEra() + "/gui/arrow.png"));
+        ImageView imageView = new ImageView(new Image("textures/default/gui/arrow.png"));
         imageView.setFitHeight(Constants.SLOT_SIZE);
         imageView.setFitWidth(Constants.SLOT_SIZE);
         imageView.setX(x + 2 * (Constants.SLOT_SIZE + Constants.SLOT_GAP));
