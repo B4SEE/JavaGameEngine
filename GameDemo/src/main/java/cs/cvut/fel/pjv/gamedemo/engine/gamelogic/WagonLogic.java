@@ -234,6 +234,8 @@ public class WagonLogic {
                 }
             }
         }
+        gameData.getIsometric().setEntities(wagon.getEntities());
+        gameData.getIsometric().updateAll();
     }
     //endregion
 
