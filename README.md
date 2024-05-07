@@ -19,7 +19,7 @@ Welcome to the "Infinity Express - Destination Abyss"
 - [About](./README.md#-about)
 - [Features](./README.md#gear-features)
 - [Development checkpoints](./README.md#-development-checkpoints)
-- [Requirements for project](./README.md#-requirements-for-project)
+- [Requirements for project](./README.md#-requirementsnecessary-features-for-project)
 - [Wiki](https://gitlab.fel.cvut.cz/B232_B0B36PJV/virycele/-/wikis/home)
 - [How to run](./README.md#-how-to-run)
 - [Contact](./README.md#-contact)
