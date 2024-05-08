@@ -1,7 +1,9 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
+.GameDemo/target/
+!.GameDemo/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+./GameDemo/.idea/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
